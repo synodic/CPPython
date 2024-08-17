@@ -46,6 +46,12 @@ git = "cppython_git.plugin:GitSCM"
 [project.entry-points."cppython.generator"]
 cmake = "cppython_cmake.plugin:CMakeGenerator"
 
+[project.entry-points.pdm]
+cppython = "cppython_pdm.plugin:CPPythonPlugin"
+
+[project.entry-points."cppython.provider"]
+vcpkg = "cppython_vcpkg.plugin:VcpkgProvider"
+
 [tool.pdm.options]
 update = ["--update-all"]
 
