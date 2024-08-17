@@ -27,7 +27,6 @@ paths = ["LICENSE.md"]
 homepage = "https://github.com/Synodic-Software/CPPython"
 repository = "https://github.com/Synodic-Software/CPPython"
 
-# # Plugin registration
 # [project.entry-points."cppython.scm"]
 # mock = "pytest_cppython.mock.scm:MockSCM"
 
@@ -43,6 +42,9 @@ repository = "https://github.com/Synodic-Software/CPPython"
 # Plugin registration
 [project.entry-points."cppython.scm"]
 git = "cppython_git.plugin:GitSCM"
+
+[project.entry-points."cppython.generator"]
+cmake = "cppython_cmake.plugin:CMakeGenerator"
 
 [tool.pdm.options]
 update = ["--update-all"]
