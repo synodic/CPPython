@@ -20,12 +20,15 @@ dependencies = [
   "packaging>=24.1",
 ]
 
-[project.license-files]
-paths = ["LICENSE.md"]
-
 [project.urls]
 homepage = "https://github.com/Synodic-Software/CPPython"
 repository = "https://github.com/Synodic-Software/CPPython"
+
+[project.optional-dependencies]
+#all = [
+# "cppython[cmake]",
+#]
+#cmake = []
 
 # [project.entry-points."cppython.scm"]
 # mock = "pytest_cppython.mock.scm:MockSCM"

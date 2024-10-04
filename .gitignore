@@ -24,3 +24,4 @@ __pypackages__/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+/.mypy_cache
