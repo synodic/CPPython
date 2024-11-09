@@ -3,9 +3,10 @@
 from enum import Enum, auto
 from pathlib import Path
 
-from cppython_core.schema import CPPythonModel, SyncData
 from pydantic import Field
 from pydantic.types import FilePath
+
+from cppython.core.schema import CPPythonModel, SyncData
 
 
 class VariableType(Enum):

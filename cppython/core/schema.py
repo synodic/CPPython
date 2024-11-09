@@ -6,8 +6,9 @@ from typing import Any, NewType, Protocol
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 from pydantic.types import DirectoryPath, FilePath
-from synodic_utilities.plugin import Plugin as SynodicPlugin
-from synodic_utilities.utility import TypeName
+
+from cppython.utility.plugin import Plugin as SynodicPlugin
+from cppython.utility.utility import TypeName
 
 
 class CPPythonModel(BaseModel):

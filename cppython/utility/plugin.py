@@ -2,7 +2,7 @@
 
 from typing import Protocol
 
-from synodic_utilities.utility import TypeGroup, TypeID, TypeName, canonicalize_name
+from cppython.utility.utility import TypeGroup, TypeID, TypeName, canonicalize_name
 
 
 class Plugin(Protocol):
