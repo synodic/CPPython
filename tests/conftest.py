@@ -5,7 +5,7 @@ from typing import cast
 
 import pytest
 
-from cppython_cmake.schema import CMakeConfiguration
+from cppython.plugins.cmake.schema import CMakeConfiguration
 
 
 def _cmake_data_list() -> list[CMakeConfiguration]:
