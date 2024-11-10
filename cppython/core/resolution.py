@@ -4,14 +4,12 @@ from pathlib import Path
 from typing import Any, cast
 
 from pydantic import BaseModel, DirectoryPath, ValidationError
-from synodic_utilities.utility import TypeName
 
-from cppython_core.exceptions import ConfigError, ConfigException
-from cppython_core.plugin_schema.generator import Generator, GeneratorPluginGroupData
-from cppython_core.plugin_schema.provider import Provider, ProviderPluginGroupData
-from cppython_core.plugin_schema.scm import SCM, SCMPluginGroupData
-from cppython_core.schema import (
-    CoreData,
+from cppython.core.exceptions import ConfigError, ConfigException
+from cppython.core.plugin_schema.generator import Generator, GeneratorPluginGroupData
+from cppython.core.plugin_schema.provider import Provider, ProviderPluginGroupData
+from cppython.core.plugin_schema.scm import SCM, SCMPluginGroupData
+from cppython.core.schema import (
     CPPythonData,
     CPPythonGlobalConfiguration,
     CPPythonLocalConfiguration,
@@ -23,6 +21,7 @@ from cppython_core.schema import (
     ProjectConfiguration,
     ProjectData,
 )
+from cppython.utility.utility import TypeName
 
 
 def resolve_project_configuration(project_configuration: ProjectConfiguration) -> ProjectData:

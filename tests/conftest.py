@@ -19,7 +19,7 @@ def _cmake_data_list() -> list[CMakeConfiguration]:
     # Default
     variants.append(CMakeConfiguration(configuration_name="default"))
 
-    variants.append(CMakeConfiguration(preset_file=Path("inner/CMakePresets.json"), configuration_name="default"))
+    # variants.append(CMakeConfiguration(preset_file=Path("inner/CMakePresets.json"), configuration_name="default"))
 
     return variants
 

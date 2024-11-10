@@ -4,13 +4,12 @@ from pathlib import Path
 
 import pytest
 from pydantic import Field
-from synodic_utilities.utility import TypeName
 
-from cppython_core.exceptions import ConfigException
-from cppython_core.plugin_schema.generator import Generator
-from cppython_core.plugin_schema.provider import Provider
-from cppython_core.plugin_schema.scm import SCM
-from cppython_core.resolution import (
+from cppython.core.exceptions import ConfigException
+from cppython.core.plugin_schema.generator import Generator
+from cppython.core.plugin_schema.provider import Provider
+from cppython.core.plugin_schema.scm import SCM
+from cppython.core.resolution import (
     PluginCPPythonData,
     resolve_cppython,
     resolve_cppython_plugin,
@@ -21,8 +20,7 @@ from cppython_core.resolution import (
     resolve_provider,
     resolve_scm,
 )
-from cppython_core.schema import (
-    CoreData,
+from cppython.core.schema import (
     CPPythonGlobalConfiguration,
     CPPythonLocalConfiguration,
     CPPythonModel,
@@ -30,6 +28,7 @@ from cppython_core.schema import (
     ProjectConfiguration,
     ProjectData,
 )
+from cppython.utility.utility import TypeName
 
 
 class TestResolve:
