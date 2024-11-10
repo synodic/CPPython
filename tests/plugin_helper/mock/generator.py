@@ -2,13 +2,14 @@
 
 from typing import Any
 
-from cppython_core.plugin_schema.generator import (
+from pydantic import DirectoryPath
+
+from cppython.core.plugin_schema.generator import (
     Generator,
     GeneratorPluginGroupData,
     SupportedGeneratorFeatures,
 )
-from cppython_core.schema import CorePluginData, CPPythonModel, Information, SyncData
-from pydantic import DirectoryPath
+from cppython.core.schema import CorePluginData, CPPythonModel, Information, SyncData
 
 
 class MockSyncData(SyncData):

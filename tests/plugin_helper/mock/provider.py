@@ -2,16 +2,16 @@
 
 from typing import Any
 
-from cppython_core.plugin_schema.generator import SyncConsumer
-from cppython_core.plugin_schema.provider import (
+from pydantic import DirectoryPath
+from pytest_cppython.mock.generator import MockSyncData
+
+from cppython.core.plugin_schema.generator import SyncConsumer
+from cppython.core.plugin_schema.provider import (
     Provider,
     ProviderPluginGroupData,
     SupportedProviderFeatures,
 )
-from cppython_core.schema import CorePluginData, CPPythonModel, Information, SyncData
-from pydantic import DirectoryPath
-
-from pytest_cppython.mock.generator import MockSyncData
+from cppython.core.schema import CorePluginData, CPPythonModel, Information, SyncData
 
 
 class MockProviderData(CPPythonModel):

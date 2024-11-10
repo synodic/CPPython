@@ -5,17 +5,24 @@ from pathlib import Path
 from typing import cast
 
 import pytest
-from cppython_core.plugin_schema.generator import Generator
-from cppython_core.plugin_schema.provider import Provider
-from cppython_core.plugin_schema.scm import SCM
-from cppython_core.resolution import (
+from pytest_cppython.variants import (
+    cppython_global_variants,
+    cppython_local_variants,
+    pep621_variants,
+    project_variants,
+)
+
+from cppython.core.plugin_schema.generator import Generator
+from cppython.core.plugin_schema.provider import Provider
+from cppython.core.plugin_schema.scm import SCM
+from cppython.core.resolution import (
     PluginBuildData,
     PluginCPPythonData,
     resolve_cppython,
     resolve_pep621,
     resolve_project_configuration,
 )
-from cppython_core.schema import (
+from cppython.core.schema import (
     CoreData,
     CPPythonData,
     CPPythonGlobalConfiguration,
@@ -26,13 +33,6 @@ from cppython_core.schema import (
     ProjectData,
     PyProject,
     ToolData,
-)
-
-from pytest_cppython.variants import (
-    cppython_global_variants,
-    cppython_local_variants,
-    pep621_variants,
-    project_variants,
 )
 
 

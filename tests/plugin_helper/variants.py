@@ -3,19 +3,19 @@
 from collections.abc import Sequence
 from pathlib import Path
 
-from cppython_core.plugin_schema.generator import Generator
-from cppython_core.plugin_schema.provider import Provider
-from cppython_core.plugin_schema.scm import SCM
-from cppython_core.schema import (
+from pytest_cppython.mock.generator import MockGenerator
+from pytest_cppython.mock.provider import MockProvider
+from pytest_cppython.mock.scm import MockSCM
+
+from cppython.core.plugin_schema.generator import Generator
+from cppython.core.plugin_schema.provider import Provider
+from cppython.core.plugin_schema.scm import SCM
+from cppython.core.schema import (
     CPPythonGlobalConfiguration,
     CPPythonLocalConfiguration,
     PEP621Configuration,
     ProjectConfiguration,
 )
-
-from pytest_cppython.mock.generator import MockGenerator
-from pytest_cppython.mock.provider import MockProvider
-from pytest_cppython.mock.scm import MockSCM
 
 
 def _pep621_configuration_list() -> list[PEP621Configuration]:

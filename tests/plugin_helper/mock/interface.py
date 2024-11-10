@@ -1,6 +1,6 @@
 """Mock interface definitions"""
 
-from cppython_core.schema import Interface
+from cppython.core.schema import Interface
 
 
 class MockInterface(Interface):

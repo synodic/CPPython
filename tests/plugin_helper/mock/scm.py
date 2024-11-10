@@ -1,12 +1,13 @@
 """Mock SCM definitions"""
 
-from cppython_core.plugin_schema.scm import (
+from pydantic import DirectoryPath
+
+from cppython.core.plugin_schema.scm import (
     SCM,
     SCMPluginGroupData,
     SupportedSCMFeatures,
 )
-from cppython_core.schema import Information
-from pydantic import DirectoryPath
+from cppython.core.schema import Information
 
 
 class MockSCM(SCM):

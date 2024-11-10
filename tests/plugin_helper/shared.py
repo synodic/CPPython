@@ -5,16 +5,21 @@ from pathlib import Path
 from typing import Any, LiteralString, cast
 
 import pytest
-from cppython_core.plugin_schema.generator import Generator, GeneratorPluginGroupData
-from cppython_core.plugin_schema.provider import Provider, ProviderPluginGroupData
-from cppython_core.plugin_schema.scm import SCM, SCMPluginGroupData
-from cppython_core.resolution import (
+from pytest_cppython.variants import generator_variants, provider_variants, scm_variants
+from pytest_synodic.plugin import BaseTests as SynodicBaseTests
+from pytest_synodic.plugin import IntegrationTests as SynodicBaseIntegrationTests
+from pytest_synodic.plugin import UnitTests as SynodicBaseUnitTests
+
+from cppython.core.plugin_schema.generator import Generator, GeneratorPluginGroupData
+from cppython.core.plugin_schema.provider import Provider, ProviderPluginGroupData
+from cppython.core.plugin_schema.scm import SCM, SCMPluginGroupData
+from cppython.core.resolution import (
     resolve_cppython_plugin,
     resolve_generator,
     resolve_provider,
     resolve_scm,
 )
-from cppython_core.schema import (
+from cppython.core.schema import (
     CorePluginData,
     CPPythonData,
     CPPythonPluginData,
@@ -26,11 +31,6 @@ from cppython_core.schema import (
     ProjectConfiguration,
     ProjectData,
 )
-from pytest_synodic.plugin import BaseTests as SynodicBaseTests
-from pytest_synodic.plugin import IntegrationTests as SynodicBaseIntegrationTests
-from pytest_synodic.plugin import UnitTests as SynodicBaseUnitTests
-
-from pytest_cppython.variants import generator_variants, provider_variants, scm_variants
 
 
 class BaseTests[T: Plugin](SynodicBaseTests[T], metaclass=ABCMeta):

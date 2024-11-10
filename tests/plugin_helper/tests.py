@@ -5,11 +5,6 @@ from abc import ABCMeta
 from pathlib import Path
 
 import pytest
-from cppython_core.plugin_schema.generator import Generator
-from cppython_core.plugin_schema.provider import Provider
-from cppython_core.plugin_schema.scm import SCM
-from synodic_utilities.utility import canonicalize_type
-
 from pytest_cppython.shared import (
     DataPluginIntegrationTests,
     DataPluginUnitTests,
@@ -19,6 +14,11 @@ from pytest_cppython.shared import (
     ProviderTests,
     SCMTests,
 )
+
+from cppython.core.plugin_schema.generator import Generator
+from cppython.core.plugin_schema.provider import Provider
+from cppython.core.plugin_schema.scm import SCM
+from cppython.utility.utility import canonicalize_type
 
 
 class ProviderIntegrationTests[T: Provider](DataPluginIntegrationTests[T], ProviderTests[T], metaclass=ABCMeta):
