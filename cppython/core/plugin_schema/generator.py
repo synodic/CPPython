@@ -5,7 +5,7 @@ from typing import Any, Protocol, runtime_checkable
 
 from pydantic.types import DirectoryPath
 
-from cppython_core.schema import (
+from cppython.core.schema import (
     CorePluginData,
     DataPlugin,
     DataPluginGroupData,

@@ -1,12 +1,12 @@
 """A click CLI for CPPython interfacing"""
 
+import tomllib
 from logging import getLogger
 from pathlib import Path
 
 import click
-import tomlkit
-from cppython_core.schema import Interface, ProjectConfiguration
 
+from cppython.core.schema import Interface, ProjectConfiguration
 from cppython.project import Project
 
 
@@ -60,8 +60,8 @@ class Configuration:
             The constructed Project
         """
 
-        path: Path = self.configuration.pyproject_file
-        pyproject_data = tomlkit.loads(path.read_text(encoding="utf-8"))
+        path = self.configuration.pyproject_file
+        pyproject_data = tomllib.loads(path.read_text(encoding="utf-8"))
 
         return Project(self.configuration, self.interface, pyproject_data)
 

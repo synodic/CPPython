@@ -5,8 +5,8 @@ from typing import Any, Protocol, runtime_checkable
 
 from pydantic.types import DirectoryPath
 
-from cppython_core.plugin_schema.generator import SyncConsumer
-from cppython_core.schema import (
+from cppython.core.plugin_schema.generator import SyncConsumer
+from cppython.core.schema import (
     CorePluginData,
     DataPlugin,
     DataPluginGroupData,

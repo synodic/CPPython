@@ -1,18 +1,18 @@
 """Tests the Project type"""
 
+import tomllib
 from pathlib import Path
 
-import tomlkit
-from cppython_core.schema import (
+from pytest import FixtureRequest
+from pytest_cppython.mock.interface import MockInterface
+
+from cppython.core.schema import (
     CPPythonLocalConfiguration,
     PEP621Configuration,
     ProjectConfiguration,
     PyProject,
     ToolData,
 )
-from pytest import FixtureRequest
-from pytest_cppython.mock.interface import MockInterface
-
 from cppython.project import Project
 
 pep621 = PEP621Configuration(name="test-project", version="0.1.0")
@@ -33,7 +33,7 @@ class TestProject:
         project_configuration = ProjectConfiguration(pyproject_file=file, version=None)
         interface = MockInterface()
 
-        pyproject_data = tomlkit.loads(file.read_text(encoding="utf-8"))
+        pyproject_data = tomllib.loads(file.read_text(encoding="utf-8"))
         project = Project(project_configuration, interface, pyproject_data)
 
         # Doesn't have the cppython table

@@ -5,7 +5,7 @@ from typing import Protocol, runtime_checkable
 
 from pydantic import DirectoryPath, Field
 
-from cppython_core.schema import Plugin, PluginGroupData, SupportedFeatures
+from cppython.core.schema import Plugin, PluginGroupData, SupportedFeatures
 
 
 class SCMPluginGroupData(PluginGroupData):
