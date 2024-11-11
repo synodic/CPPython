@@ -3,14 +3,14 @@
 import logging
 
 import pytest_cppython
-from cppython_core.schema import (
+
+from cppython.builder import Builder, Resolver
+from cppython.core.schema import (
     CPPythonLocalConfiguration,
     PEP621Configuration,
     ProjectConfiguration,
     ProjectData,
 )
-
-from cppython.builder import Builder, Resolver
 
 
 class TestBuilder:

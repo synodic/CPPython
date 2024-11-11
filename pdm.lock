@@ -5,7 +5,7 @@
 groups = ["default", "lint", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:7c33d018e2ff2c1b85140b7abe20c16469a1305f8e600bd4a13f9d2c1bfe83a6"
+content_hash = "sha256:3661d05d084c8aa76e902720779eed7e7880998a1d1396181aa5636e2dd1a8c6"
 
 [[metadata.targets]]
 requires_python = ">=3.13"
@@ -67,7 +67,7 @@ name = "click"
 version = "8.1.7"
 requires_python = ">=3.7"
 summary = "Composable command line interface toolkit"
-groups = ["default", "lint", "test"]
+groups = ["default", "lint"]
 dependencies = [
     "colorama; platform_system == \"Windows\"",
     "importlib-metadata; python_version < \"3.8\"",
@@ -394,20 +394,6 @@ dependencies = [
 files = [
     {file = "pytest-8.3.3-py3-none-any.whl", hash = "sha256:a6853c7375b2663155079443d2e45de913a911a11d669df02a50814944db57b2"},
     {file = "pytest-8.3.3.tar.gz", hash = "sha256:70b98107bd648308a7952b06e6ca9a50bc660be218d53c257cc1fc94fda10181"},
-]
-
-[[package]]
-name = "pytest-click"
-version = "1.1.0"
-summary = "Pytest plugin for Click"
-groups = ["test"]
-dependencies = [
-    "click>=6.0",
-    "pytest>=5.0",
-]
-files = [
-    {file = "pytest_click-1.1.0-py3-none-any.whl", hash = "sha256:eade4742c2f02c345e78a32534a43e8db04acf98d415090539dacc880b7cd0e9"},
-    {file = "pytest_click-1.1.0.tar.gz", hash = "sha256:fdd9f6721f877dda021e7c5dc73e70aecd37e5ed23ec6820f8a7b3fd7b4f8d30"},
 ]
 
 [[package]]

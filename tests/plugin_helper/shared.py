@@ -5,10 +5,6 @@ from pathlib import Path
 from typing import Any, LiteralString, cast
 
 import pytest
-from pytest_cppython.variants import generator_variants, provider_variants, scm_variants
-from pytest_synodic.plugin import BaseTests as SynodicBaseTests
-from pytest_synodic.plugin import IntegrationTests as SynodicBaseIntegrationTests
-from pytest_synodic.plugin import UnitTests as SynodicBaseUnitTests
 
 from cppython.core.plugin_schema.generator import Generator, GeneratorPluginGroupData
 from cppython.core.plugin_schema.provider import Provider, ProviderPluginGroupData
@@ -30,6 +26,14 @@ from cppython.core.schema import (
     PluginGroupData,
     ProjectConfiguration,
     ProjectData,
+)
+from tests.plugin_helper.plugin import BaseTests as SynodicBaseTests
+from tests.plugin_helper.plugin import IntegrationTests as SynodicBaseIntegrationTests
+from tests.plugin_helper.plugin import UnitTests as SynodicBaseUnitTests
+from tests.plugin_helper.variants import (
+    generator_variants,
+    provider_variants,
+    scm_variants,
 )
 
 

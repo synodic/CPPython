@@ -5,9 +5,9 @@ from typing import Any
 import pytest
 from pytest_mock import MockerFixture
 
-from pytest_cppython.mock.generator import MockGenerator
-from pytest_cppython.mock.provider import MockProvider
-from pytest_cppython.tests import ProviderUnitTests
+from tests.plugin_helper.mock.generator import MockGenerator
+from tests.plugin_helper.mock.provider import MockProvider
+from tests.plugin_helper.tests import ProviderUnitTests
 
 
 class TestMockProvider(ProviderUnitTests[MockProvider]):

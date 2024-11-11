@@ -5,12 +5,6 @@ from pathlib import Path
 from typing import cast
 
 import pytest
-from pytest_cppython.variants import (
-    cppython_global_variants,
-    cppython_local_variants,
-    pep621_variants,
-    project_variants,
-)
 
 from cppython.core.plugin_schema.generator import Generator
 from cppython.core.plugin_schema.provider import Provider
@@ -33,6 +27,12 @@ from cppython.core.schema import (
     ProjectData,
     PyProject,
     ToolData,
+)
+from tests.plugin_helper.variants import (
+    cppython_global_variants,
+    cppython_local_variants,
+    pep621_variants,
+    project_variants,
 )
 
 

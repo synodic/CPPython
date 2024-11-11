@@ -23,25 +23,6 @@ dependencies = [
 homepage = "https://github.com/Synodic-Software/CPPython"
 repository = "https://github.com/Synodic-Software/CPPython"
 
-[project.optional-dependencies]
-#all = [
-# "cppython[cmake]",
-#]
-#cmake = []
-
-# [project.entry-points."cppython.scm"]
-# mock = "pytest_cppython.mock.scm:MockSCM"
-
-# [project.entry-points."cppython.generator"]
-# mock = "pytest_cppython.mock.generator:MockGenerator"
-
-# [project.entry-points."cppython.provider"]
-# mock = "pytest_cppython.mock.provider:MockProvider"
-
-# [project.entry-points.pytest11]
-# pytest_cppython = "pytest_cppython.plugin"
-
-# Plugin registration
 [project.entry-points."cppython.scm"]
 git = "cppython_git.plugin:GitSCM"
 
@@ -54,12 +35,6 @@ cppython = "cppython_pdm.plugin:CPPythonPlugin"
 [project.entry-points."cppython.provider"]
 vcpkg = "cppython_vcpkg.plugin:VcpkgProvider"
 
-[tool.pdm.options]
-update = ["--update-all"]
-
-[tool.pdm.version]
-source = "scm"
-
 [dependency-groups]
 lint = [
   "black>=24.10.0",
@@ -68,22 +43,13 @@ lint = [
   "mypy>=1.13",
 ]
 test = [
-  "pytest>=8.3.3",
-  "pytest-cov>=6.0.0",
-  "pytest-click>=1.1.0",
-  "pytest-mock>=3.14.0",
+    "pytest>=8.3.3",
+    "pytest-cov>=6.0.0",
+    "pytest-mock>=3.14.0",
 ]
 
 [project.scripts]
 cppython = "cppython.console.interface:cli"
-
-[tool.pdm.scripts]
-analyze = {shell = "pylint --verbose cppython tests"}
-format = {shell = "black --check --verbose ."}
-lint = {composite = ["analyze", "format", "sort-imports", "type-check"]}
-sort-imports = {shell = "isort --check-only --diff --verbose ."}
-test = {shell = "pytest --cov=cppython --verbose tests"}
-type-check = {shell = "mypy ."}
 
 [tool.pytest.ini_options]
 log_cli = true
@@ -126,6 +92,21 @@ default-docstring-type = "google"
 
 [tool.coverage.report]
 skip_empty = true
+
+
+[tool.pdm.options]
+update = ["--update-all"]
+
+[tool.pdm.version]
+source = "scm"
+
+[tool.pdm.scripts]
+analyze = {shell = "pylint --verbose cppython tests"}
+format = {shell = "black --check --verbose ."}
+lint = {composite = ["analyze", "format", "sort-imports", "type-check"]}
+sort-imports = {shell = "isort --check-only --diff --verbose ."}
+test = {shell = "pytest --cov=cppython --verbose tests"}
+type-check = {shell = "mypy ."}
 
 [build-system]
 build-backend = "pdm.backend"

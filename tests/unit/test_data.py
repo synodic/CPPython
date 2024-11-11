@@ -3,9 +3,6 @@
 import logging
 
 import pytest
-from pytest_cppython.mock.generator import MockGenerator
-from pytest_cppython.mock.provider import MockProvider
-from pytest_cppython.mock.scm import MockSCM
 
 from cppython.builder import Builder
 from cppython.core.resolution import PluginBuildData
@@ -15,6 +12,9 @@ from cppython.core.schema import (
     ProjectConfiguration,
 )
 from cppython.data import Data
+from tests.plugin_helper.mock.generator import MockGenerator
+from tests.plugin_helper.mock.provider import MockProvider
+from tests.plugin_helper.mock.scm import MockSCM
 
 
 class TestData:
