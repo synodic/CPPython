@@ -6,11 +6,10 @@ from inspect import getmodule
 from logging import Logger
 from typing import Any
 
-from cppython_core.exceptions import PluginError
-from cppython_core.plugin_schema.generator import Generator
-from cppython_core.plugin_schema.provider import Provider
-from cppython_core.plugin_schema.scm import SCM
-from cppython_core.resolution import (
+from cppython.core.plugin_schema.generator import Generator
+from cppython.core.plugin_schema.provider import Provider
+from cppython.core.plugin_schema.scm import SCM
+from cppython.core.resolution import (
     PluginBuildData,
     PluginCPPythonData,
     resolve_cppython,
@@ -21,7 +20,7 @@ from cppython_core.resolution import (
     resolve_provider,
     resolve_scm,
 )
-from cppython_core.schema import (
+from cppython.core.schema import (
     CoreData,
     CorePluginData,
     CPPythonGlobalConfiguration,
@@ -32,8 +31,8 @@ from cppython_core.schema import (
     ProjectConfiguration,
     ProjectData,
 )
-
 from cppython.data import Data, Plugins
+from cppython.utility.exception import PluginError
 
 
 class Resolver:

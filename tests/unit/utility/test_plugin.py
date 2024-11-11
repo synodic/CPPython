@@ -1,6 +1,6 @@
 """This module tests the plugin functionality"""
 
-from synodic_utilities.plugin import Plugin
+from cppython.utility.plugin import Plugin
 
 
 class MockPlugin(Plugin):

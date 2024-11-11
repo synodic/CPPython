@@ -1,13 +1,12 @@
-"""Unit test the provider plugin
-"""
+"""Unit test the provider plugin"""
 
 from typing import Any
 
 import pytest
-from pytest_cppython.tests import ProviderUnitTests
 
-from cppython_vcpkg.plugin import VcpkgProvider
-from cppython_vcpkg.resolution import generate_manifest
+from cppython.plugins.vcpkg.plugin import VcpkgProvider
+from cppython.plugins.vcpkg.resolution import generate_manifest
+from tests.plugin_helper.tests import ProviderUnitTests
 
 
 class TestCPPythonProvider(ProviderUnitTests[VcpkgProvider]):

@@ -1,9 +1,12 @@
 """Definitions for the plugin"""
-from pathlib import Path
 
-from cppython_core.schema import CPPythonModel
+from pathlib import Path
+from typing import Annotated
+
 from pydantic import Field, HttpUrl
 from pydantic.types import DirectoryPath
+
+from cppython.core.schema import CPPythonModel
 
 
 class VcpkgDependency(CPPythonModel):
@@ -22,11 +25,14 @@ class VcpkgData(CPPythonModel):
 class VcpkgConfiguration(CPPythonModel):
     """vcpkg provider data"""
 
-    install_directory: Path = Field(
-        default=Path("build"),
-        alias="install-directory",
-        description="The referenced dependencies defined by the local vcpkg.json manifest file",
-    )
+    install_directory: Annotated[
+        Path,
+        Field(
+            default=Path("build"),
+            alias="install-directory",
+            description="The referenced dependencies defined by the local vcpkg.json manifest file",
+        ),
+    ]
 
     dependencies: list[VcpkgDependency] = Field(
         default=[], description="The directory to store the manifest file, vcpkg.json"
@@ -38,6 +44,8 @@ class Manifest(CPPythonModel):
 
     name: str = Field(description="The project name")
 
-    version_string: str = Field(default="", alias="version-string", description="The arbitrary version string")
+    version_string: Annotated[
+        str, Field(default="", alias="version-string", description="The arbitrary version string")
+    ]
     homepage: HttpUrl | None = Field(default=None, description="Homepage URL")
     dependencies: list[VcpkgDependency] = Field(default=[], description="List of dependencies")

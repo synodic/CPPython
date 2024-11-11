@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from synodic_utilities.exception import ProcessError
+from cppython.utility.exception import ProcessError
 
 
 def call(

@@ -9,9 +9,9 @@ from typing import NamedTuple
 import pytest
 from pytest import LogCaptureFixture
 
-from synodic_utilities.exception import ProcessError
-from synodic_utilities.subprocess import call
-from synodic_utilities.utility import canonicalize_name
+from cppython.utility.exception import ProcessError
+from cppython.utility.subprocess import call
+from cppython.utility.utility import canonicalize_name
 
 cppython_logger = logging.getLogger("cppython")
 cppython_logger.addHandler(StreamHandler())

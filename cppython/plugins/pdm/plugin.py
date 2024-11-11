@@ -5,7 +5,7 @@ from logging import getLogger
 from typing import Any
 
 from cppython.project import Project as CPPythonProject
-from cppython_core.schema import Interface, ProjectConfiguration
+from cppython.core.schema import Interface, ProjectConfiguration
 from pdm.core import Core
 from pdm.project.core import Project
 from pdm.signals import post_install

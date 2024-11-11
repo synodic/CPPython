@@ -2,9 +2,8 @@
 
 from typing import Any
 
-from cppython_core.schema import CorePluginData
-
-from cppython_cmake.schema import CMakeConfiguration, CMakeData
+from cppython.core.schema import CorePluginData
+from cppython.plugins.cmake.schema import CMakeConfiguration, CMakeData
 
 
 def resolve_cmake_data(data: dict[str, Any], core_data: CorePluginData) -> CMakeData:

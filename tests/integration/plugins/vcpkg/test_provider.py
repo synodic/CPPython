@@ -1,12 +1,11 @@
-"""Integration tests for the provider
-"""
+"""Integration tests for the provider"""
 
 from typing import Any
 
 import pytest
-from pytest_cppython.tests import ProviderIntegrationTests
 
-from cppython_vcpkg.plugin import VcpkgProvider
+from cppython.plugins.vcpkg.plugin import VcpkgProvider
+from tests.plugin_helper.tests import ProviderIntegrationTests
 
 
 class TestCPPythonProvider(ProviderIntegrationTests[VcpkgProvider]):

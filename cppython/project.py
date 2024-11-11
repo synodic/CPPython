@@ -4,11 +4,10 @@ import asyncio
 import logging
 from typing import Any
 
-from cppython_core.exceptions import ConfigException
-from cppython_core.resolution import resolve_model
-from cppython_core.schema import Interface, ProjectConfiguration, PyProject
-
 from cppython.builder import Builder
+from cppython.core.exception import ConfigException
+from cppython.core.resolution import resolve_model
+from cppython.core.schema import Interface, ProjectConfiguration, PyProject
 from cppython.schema import API
 
 

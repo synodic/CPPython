@@ -2,14 +2,15 @@
 
 from pathlib import Path
 
-from cppython_core.plugin_schema.scm import (
+from dulwich.errors import NotGitRepository
+from dulwich.repo import Repo
+
+from cppython.core.plugin_schema.scm import (
     SCM,
     SCMPluginGroupData,
     SupportedSCMFeatures,
 )
-from cppython_core.schema import Information
-from dulwich.errors import NotGitRepository
-from dulwich.repo import Repo
+from cppython.core.schema import Information
 
 
 class GitSCM(SCM):

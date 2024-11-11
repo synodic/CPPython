@@ -5,7 +5,7 @@ from tomllib import loads
 import pytest
 from pydantic import Field
 
-from cppython_core.schema import (
+from cppython.core.schema import (
     CPPythonGlobalConfiguration,
     CPPythonLocalConfiguration,
     CPPythonModel,

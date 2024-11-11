@@ -1,5 +1,4 @@
-"""The vcpkg provider implementation
-"""
+"""The vcpkg provider implementation"""
 
 import json
 from logging import getLogger
@@ -7,20 +6,20 @@ from os import name as system_name
 from pathlib import Path, PosixPath, WindowsPath
 from typing import Any
 
-from cppython_cmake.plugin import CMakeGenerator
-from cppython_cmake.schema import CMakeSyncData
-from cppython_core.exceptions import NotSupportedError, ProcessError
-from cppython_core.plugin_schema.generator import SyncConsumer
-from cppython_core.plugin_schema.provider import (
+from cppython.core.plugin_schema.generator import SyncConsumer
+from cppython.core.plugin_schema.provider import (
     Provider,
     ProviderPluginGroupData,
     SupportedProviderFeatures,
 )
-from cppython_core.schema import CorePluginData, Information, PluginName, SyncData
-from cppython_core.utility import subprocess_call
-
-from cppython_vcpkg.resolution import generate_manifest, resolve_vcpkg_data
-from cppython_vcpkg.schema import VcpkgData
+from cppython.core.schema import CorePluginData, Information, SyncData
+from cppython.plugins.cmake.plugin import CMakeGenerator
+from cppython.plugins.cmake.schema import CMakeSyncData
+from cppython.plugins.vcpkg.resolution import generate_manifest, resolve_vcpkg_data
+from cppython.plugins.vcpkg.schema import VcpkgData
+from cppython.utility.exception import NotSupportedError, ProcessError
+from cppython.utility.subprocess import call as subprocess_call
+from cppython.utility.utility import TypeName
 
 
 class VcpkgProvider(Provider):
@@ -102,7 +101,7 @@ class VcpkgProvider(Provider):
         for sync_type in consumer.sync_types():
             if sync_type == CMakeSyncData:
                 toolchain_file = self.core_data.cppython_data.install_path / "scripts/buildsystems/vcpkg.cmake"
-                return CMakeSyncData(provider_name=PluginName("vcpkg"), toolchain=toolchain_file)
+                return CMakeSyncData(provider_name=TypeName("vcpkg"), toolchain=toolchain_file)
 
         raise NotSupportedError("OOF")
 

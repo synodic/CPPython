@@ -1,11 +1,10 @@
-"""Unit tests for the interface
-"""
+"""Unit tests for the interface"""
 
 import pytest
 from pdm.core import Core
 from pdm.project.core import Project
 
-from cppython_pdm.plugin import CPPythonPlugin
+from cppython.plugins.pdm.plugin import CPPythonPlugin
 
 
 class TestCPPythonInterface:

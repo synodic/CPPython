@@ -3,16 +3,15 @@
 from pathlib import Path
 from typing import Any
 
-from cppython_core.plugin_schema.generator import (
+from cppython.core.plugin_schema.generator import (
     Generator,
     GeneratorPluginGroupData,
     SupportedGeneratorFeatures,
 )
-from cppython_core.schema import CorePluginData, Information, SyncData
-
-from cppython_cmake.builder import Builder
-from cppython_cmake.resolution import resolve_cmake_data
-from cppython_cmake.schema import CMakeSyncData
+from cppython.core.schema import CorePluginData, Information, SyncData
+from cppython.plugins.cmake.builder import Builder
+from cppython.plugins.cmake.resolution import resolve_cmake_data
+from cppython.plugins.cmake.schema import CMakeSyncData
 
 
 class CMakeGenerator(Generator):

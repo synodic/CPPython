@@ -3,10 +3,10 @@
 from typing import Any
 
 import pytest
-from pytest_cppython.tests import GeneratorIntegrationTests
 
-from cppython_cmake.plugin import CMakeGenerator
-from cppython_cmake.schema import CMakeConfiguration
+from cppython.plugins.cmake.plugin import CMakeGenerator
+from cppython.plugins.cmake.schema import CMakeConfiguration
+from tests.plugin_helper.tests import GeneratorIntegrationTests
 
 
 class TestCPPythonGenerator(GeneratorIntegrationTests[CMakeGenerator]):

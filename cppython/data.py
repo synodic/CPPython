@@ -3,11 +3,11 @@
 from dataclasses import dataclass
 from logging import Logger
 
-from cppython_core.exceptions import PluginError
-from cppython_core.plugin_schema.generator import Generator
-from cppython_core.plugin_schema.provider import Provider
-from cppython_core.plugin_schema.scm import SCM
-from cppython_core.schema import CoreData
+from cppython.core.plugin_schema.generator import Generator
+from cppython.core.plugin_schema.provider import Provider
+from cppython.core.plugin_schema.scm import SCM
+from cppython.core.schema import CoreData
+from cppython.utility.exception import PluginError
 
 
 @dataclass

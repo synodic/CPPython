@@ -4,7 +4,6 @@ import tomllib
 from pathlib import Path
 
 from pytest import FixtureRequest
-from pytest_cppython.mock.interface import MockInterface
 
 from cppython.core.schema import (
     CPPythonLocalConfiguration,
@@ -14,6 +13,7 @@ from cppython.core.schema import (
     ToolData,
 )
 from cppython.project import Project
+from tests.plugin_helper.mock.interface import MockInterface
 
 pep621 = PEP621Configuration(name="test-project", version="0.1.0")
 

@@ -5,7 +5,7 @@ from typing import Any, cast
 
 from pydantic import BaseModel, DirectoryPath, ValidationError
 
-from cppython.core.exceptions import ConfigError, ConfigException
+from cppython.core.exception import ConfigError, ConfigException
 from cppython.core.plugin_schema.generator import Generator, GeneratorPluginGroupData
 from cppython.core.plugin_schema.provider import Provider, ProviderPluginGroupData
 from cppython.core.plugin_schema.scm import SCM, SCMPluginGroupData

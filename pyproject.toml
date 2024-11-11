@@ -19,6 +19,15 @@ dependencies = [
   "packaging>=24.1",
 ]
 
+[project.optional-dependencies]
+git = [
+  "dulwich>=0.22.5",
+]
+
+pdm = [
+  "pdm>=2.20.1",
+]
+
 [project.urls]
 homepage = "https://github.com/Synodic-Software/CPPython"
 repository = "https://github.com/Synodic-Software/CPPython"
@@ -43,9 +52,9 @@ lint = [
   "mypy>=1.13",
 ]
 test = [
-    "pytest>=8.3.3",
-    "pytest-cov>=6.0.0",
-    "pytest-mock>=3.14.0",
+  "pytest>=8.3.3",
+  "pytest-cov>=6.0.0",
+  "pytest-mock>=3.14.0",
 ]
 
 [project.scripts]
@@ -92,7 +101,6 @@ default-docstring-type = "google"
 
 [tool.coverage.report]
 skip_empty = true
-
 
 [tool.pdm.options]
 update = ["--update-all"]

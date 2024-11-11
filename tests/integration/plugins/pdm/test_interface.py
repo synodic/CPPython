@@ -1,11 +1,10 @@
-"""Integration tests for the interface
-"""
+"""Integration tests for the interface"""
 
 import pytest
 from pdm.core import Core
 from pytest_mock import MockerFixture
 
-from cppython_pdm.plugin import CPPythonPlugin
+from cppython.plugins.pdm.plugin import CPPythonPlugin
 
 
 class TestCPPythonInterface:

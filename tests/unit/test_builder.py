@@ -2,8 +2,6 @@
 
 import logging
 
-import pytest_cppython
-
 from cppython.builder import Builder, Resolver
 from cppython.core.schema import (
     CPPythonLocalConfiguration,

@@ -1,9 +1,9 @@
 """Unit tests for the cppython SCM plugin"""
 
 import pytest
-from pytest_cppython.tests import SCMUnitTests
 
-from cppython_git.plugin import GitSCM
+from cppython.plugins.git.plugin import GitSCM
+from tests.plugin_helper.tests import SCMUnitTests
 
 
 class TestGitInterface(SCMUnitTests[GitSCM]):

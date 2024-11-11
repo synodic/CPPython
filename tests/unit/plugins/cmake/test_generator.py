@@ -4,13 +4,17 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from cppython_core.utility import write_model_json
-from pytest_cppython.tests import GeneratorUnitTests
-from synodic_utilities.utility import TypeName
 
-from cppython_cmake.builder import Builder
-from cppython_cmake.plugin import CMakeGenerator
-from cppython_cmake.schema import CMakeConfiguration, CMakePresets, CMakeSyncData
+from cppython.core.utility import write_model_json
+from cppython.plugins.cmake.builder import Builder
+from cppython.plugins.cmake.plugin import CMakeGenerator
+from cppython.plugins.cmake.schema import (
+    CMakeConfiguration,
+    CMakePresets,
+    CMakeSyncData,
+)
+from cppython.utility.utility import TypeName
+from tests.plugin_helper.tests import GeneratorUnitTests
 
 
 class TestCPPythonGenerator(GeneratorUnitTests[CMakeGenerator]):

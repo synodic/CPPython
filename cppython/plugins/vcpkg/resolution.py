@@ -2,9 +2,8 @@
 
 from typing import Any
 
-from cppython_core.schema import CorePluginData
-
-from cppython_vcpkg.schema import (
+from cppython.core.schema import CorePluginData
+from cppython.plugins.vcpkg.schema import (
     Manifest,
     VcpkgConfiguration,
     VcpkgData,

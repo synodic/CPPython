@@ -3,9 +3,8 @@
 from copy import deepcopy
 from pathlib import Path
 
-from cppython_core.utility import read_json, write_json, write_model_json
-
-from cppython_cmake.schema import CMakePresets, CMakeSyncData, ConfigurePreset
+from cppython.core.utility import read_json, write_json, write_model_json
+from cppython.plugins.cmake.schema import CMakePresets, CMakeSyncData, ConfigurePreset
 
 
 class Builder:
