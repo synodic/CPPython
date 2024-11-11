@@ -277,9 +277,7 @@ class DataPlugin(Plugin, Protocol):
 class CPPythonGlobalConfiguration(CPPythonModel, extra="forbid"):
     """Global data extracted by the tool"""
 
-    current_check: Annotated[
-        bool, Field(serialization_alias="current-check", description="Checks for a new CPPython version")
-    ] = True
+    current_check: Annotated[bool, Field(alias="current-check", description="Checks for a new CPPython version")] = True
 
 
 ProviderData = NewType("ProviderData", dict[str, Any])
@@ -292,17 +290,17 @@ class CPPythonLocalConfiguration(CPPythonModel, extra="forbid"):
     install_path: Annotated[
         Path,
         Field(
-            serialization_alias="install-path",
+            alias="install-path",
             description="The global install path for the project",
         ),
     ] = _default_install_location()
-    tool_path: Annotated[
-        Path, Field(serialization_alias="tool-path", description="The local tooling path for the project")
-    ] = Path("tool")
+    tool_path: Annotated[Path, Field(alias="tool-path", description="The local tooling path for the project")] = Path(
+        "tool"
+    )
 
-    build_path: Annotated[
-        Path, Field(serialization_alias="build-path", description="The local build path for the project")
-    ] = Path("build")
+    build_path: Annotated[Path, Field(alias="build-path", description="The local build path for the project")] = Path(
+        "build"
+    )
 
     provider: Annotated[ProviderData, Field(description="Provider plugin data associated with 'provider_name")] = (
         ProviderData({})
@@ -311,7 +309,7 @@ class CPPythonLocalConfiguration(CPPythonModel, extra="forbid"):
     provider_name: Annotated[
         TypeName | None,
         Field(
-            serialization_alias="provider-name",
+            alias="provider-name",
             description="If empty, the provider will be automatically deduced.",
         ),
     ] = None
@@ -323,7 +321,7 @@ class CPPythonLocalConfiguration(CPPythonModel, extra="forbid"):
     generator_name: Annotated[
         TypeName | None,
         Field(
-            serialization_alias="generator-name",
+            alias="generator-name",
             description="If empty, the generator will be automatically deduced.",
         ),
     ] = None

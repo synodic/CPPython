@@ -20,9 +20,7 @@ class TestSchema:
     class Model(CPPythonModel):
         """Testing Model"""
 
-        aliased_variable: Annotated[bool, Field(serialization_alias="aliased-variable", description="Alias test")] = (
-            False
-        )
+        aliased_variable: Annotated[bool, Field(alias="aliased-variable", description="Alias test")] = False
 
     def test_model_construction(self) -> None:
         """Verifies that the base model type has the expected construction behaviors"""
