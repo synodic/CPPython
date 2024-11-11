@@ -1,6 +1,6 @@
 """Data variations for testing"""
 
-from pathlib import Path
+# from pathlib import Path
 from typing import cast
 
 import pytest

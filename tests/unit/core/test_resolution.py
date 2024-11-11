@@ -1,6 +1,7 @@
 """Test data resolution"""
 
 from pathlib import Path
+from typing import Annotated
 
 import pytest
 from pydantic import Field
@@ -77,7 +78,7 @@ class TestResolve:
         class MockModel(CPPythonModel):
             """Mock model for testing"""
 
-            field: str = Field()
+            field: Annotated[str, Field()]
 
         bad_data = {"field": 4}
 

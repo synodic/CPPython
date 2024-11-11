@@ -1,7 +1,7 @@
 """Version control data plugin definitions"""
 
 from abc import abstractmethod
-from typing import Protocol, runtime_checkable
+from typing import Annotated, Protocol, runtime_checkable
 
 from pydantic import DirectoryPath, Field
 
@@ -15,7 +15,9 @@ class SCMPluginGroupData(PluginGroupData):
 class SupportedSCMFeatures(SupportedFeatures):
     """SCM plugin feature support"""
 
-    repository: bool = Field(description="True if the directory is a repository for the SCM. False, otherwise")
+    repository: Annotated[
+        bool, Field(description="True if the directory is a repository for the SCM. False, otherwise")
+    ]
 
 
 @runtime_checkable

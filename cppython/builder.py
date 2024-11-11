@@ -427,7 +427,8 @@ class Builder:
         Args:
             pep621_configuration: The PEP621 configuration
             cppython_local_configuration: The local configuration
-            plugin_build_data: Plugin override data. If it exists, the build will use the given types instead of resolving them
+            plugin_build_data: Plugin override data. If it exists, the build will use the given types
+                instead of resolving them
 
         Returns:
             The built data object

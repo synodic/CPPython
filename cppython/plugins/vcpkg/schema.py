@@ -28,24 +28,24 @@ class VcpkgConfiguration(CPPythonModel):
     install_directory: Annotated[
         Path,
         Field(
-            default=Path("build"),
-            alias="install-directory",
+            serialization_alias="install-directory",
             description="The referenced dependencies defined by the local vcpkg.json manifest file",
         ),
-    ]
+    ] = Path("build")
 
-    dependencies: list[VcpkgDependency] = Field(
-        default=[], description="The directory to store the manifest file, vcpkg.json"
-    )
+    dependencies: Annotated[
+        list[VcpkgDependency], Field(description="The directory to store the manifest file, vcpkg.json")
+    ] = []
 
 
 class Manifest(CPPythonModel):
     """The manifest schema"""
 
-    name: str = Field(description="The project name")
+    name: Annotated[str, Field(description="The project name")]
 
     version_string: Annotated[
-        str, Field(default="", alias="version-string", description="The arbitrary version string")
-    ]
-    homepage: HttpUrl | None = Field(default=None, description="Homepage URL")
-    dependencies: list[VcpkgDependency] = Field(default=[], description="List of dependencies")
+        str, Field(serialization_alias="version-string", description="The arbitrary version string")
+    ] = ""
+
+    homepage: Annotated[HttpUrl | None, Field(description="Homepage URL")] = None
+    dependencies: Annotated[list[VcpkgDependency], Field(description="List of dependencies")] = []

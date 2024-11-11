@@ -46,10 +46,10 @@ vcpkg = "cppython_vcpkg.plugin:VcpkgProvider"
 
 [dependency-groups]
 lint = [
-  "black>=24.10.0",
-  "pylint>=3.3.1",
-  "isort>=5.13.2",
-  "mypy>=1.13",
+    "black>=24.10.0",
+    "pylint>=3.3.1",
+    "isort>=5.13.2",
+    "mypy>=1.13",
 ]
 test = [
   "pytest>=8.3.3",

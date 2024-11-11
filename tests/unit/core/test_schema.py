@@ -1,6 +1,7 @@
 """Test custom schema validation that cannot be verified by the Pydantic validation"""
 
 from tomllib import loads
+from typing import Annotated
 
 import pytest
 from pydantic import Field
@@ -19,7 +20,9 @@ class TestSchema:
     class Model(CPPythonModel):
         """Testing Model"""
 
-        aliased_variable: bool = Field(default=False, alias="aliased-variable", description="Alias test")
+        aliased_variable: Annotated[bool, Field(serialization_alias="aliased-variable", description="Alias test")] = (
+            False
+        )
 
     def test_model_construction(self) -> None:
         """Verifies that the base model type has the expected construction behaviors"""

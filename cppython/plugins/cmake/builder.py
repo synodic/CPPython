@@ -26,14 +26,12 @@ class Builder:
         write_model_json(json_path, presets)
 
     def write_cppython_preset(
-        self, cppython_preset_directory: Path, provider_directory: Path, provider_data: CMakeSyncData
+        self, cppython_preset_directory: Path, _provider_directory: Path, _provider_data: CMakeSyncData
     ) -> Path:
         """Write the cppython presets which inherit from the provider presets
 
         Args:
             cppython_preset_directory: The tool directory
-            provider_directory: The provider directory
-            provider_data: The collected data of all providers
 
         Returns:
             A file path to the written data
@@ -47,7 +45,7 @@ class Builder:
         write_model_json(cppython_json_path, presets)
         return cppython_json_path
 
-    def write_root_presets(self, preset_file: Path, cppython_preset_file: Path) -> None:
+    def write_root_presets(self, preset_file: Path, _cppython_preset_file: Path) -> None:
         """Read the top level json file and insert the include reference.
         Receives a relative path to the tool cmake json file
 
@@ -56,11 +54,9 @@ class Builder:
 
         Args:
             preset_file: Preset file to modify
-            cppython_preset_file: The tool generated file path
         """
 
         initial_root_preset = read_json(preset_file)
-        root_preset = deepcopy(initial_root_preset)
 
-        if root_preset != initial_root_preset:
+        if (root_preset := deepcopy(initial_root_preset)) != initial_root_preset:
             write_json(preset_file, root_preset)

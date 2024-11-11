@@ -30,7 +30,8 @@ class TestData:
         pep621_configuration: PEP621Configuration,
         cppython_local_configuration: CPPythonLocalConfiguration,
     ) -> Data:
-        """Creates a mock plugins fixture. We want all the plugins to use the same data variants at the same time, so we have to resolve data inside the fixture instead of using other data fixtures
+        """Creates a mock plugins fixture. We want all the plugins to use the same data variants at the same time, so we
+            have to resolve data inside the fixture instead of using other data fixtures
 
         Args:
             project_configuration: Variant fixture for the project configuration
