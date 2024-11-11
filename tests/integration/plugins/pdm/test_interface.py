@@ -30,7 +30,7 @@ class TestCPPythonInterface:
             mocker: Mocker fixture for plugin patch
         """
 
-        patch = mocker.patch("cppython_pdm.plugin.CPPythonPlugin")
+        patch = mocker.patch("cppython.plugins.pdm.plugin.CPPythonPlugin")
 
         core = Core()
         core.load_plugins()

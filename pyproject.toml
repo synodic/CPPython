@@ -33,23 +33,23 @@ homepage = "https://github.com/Synodic-Software/CPPython"
 repository = "https://github.com/Synodic-Software/CPPython"
 
 [project.entry-points."cppython.scm"]
-git = "cppython_git.plugin:GitSCM"
+git = "cppython.plugins.git.plugin:GitSCM"
 
 [project.entry-points."cppython.generator"]
-cmake = "cppython_cmake.plugin:CMakeGenerator"
+cmake = "cppython.plugins.cmake.plugin:CMakeGenerator"
 
 [project.entry-points.pdm]
-cppython = "cppython_pdm.plugin:CPPythonPlugin"
+cppython = "cppython.plugins.pdm.plugin:CPPythonPlugin"
 
 [project.entry-points."cppython.provider"]
-vcpkg = "cppython_vcpkg.plugin:VcpkgProvider"
+vcpkg = "cppython.plugins.vcpkg.plugin:VcpkgProvider"
 
 [dependency-groups]
 lint = [
-    "black>=24.10.0",
-    "pylint>=3.3.1",
-    "isort>=5.13.2",
-    "mypy>=1.13",
+  "black>=24.10.0",
+  "pylint>=3.3.1",
+  "isort>=5.13.2",
+  "mypy>=1.13",
 ]
 test = [
   "pytest>=8.3.3",
