@@ -1,6 +1,7 @@
 """Composable test types"""
 
 from abc import ABCMeta
+from importlib.metadata import entry_points
 from pathlib import Path
 from typing import Any, LiteralString, cast
 
@@ -27,9 +28,6 @@ from cppython.core.schema import (
     ProjectConfiguration,
     ProjectData,
 )
-from tests.plugin_helper.plugin import BaseTests as SynodicBaseTests
-from tests.plugin_helper.plugin import IntegrationTests as SynodicBaseIntegrationTests
-from tests.plugin_helper.plugin import UnitTests as SynodicBaseUnitTests
 from tests.plugin_helper.variants import (
     generator_variants,
     provider_variants,
@@ -37,7 +35,7 @@ from tests.plugin_helper.variants import (
 )
 
 
-class BaseTests[T: Plugin](SynodicBaseTests[T], metaclass=ABCMeta):
+class BaseTests[T: Plugin](metaclass=ABCMeta):
     """Shared testing information for all plugin test classes."""
 
     @pytest.fixture(name="plugin_type", scope="session")
@@ -94,11 +92,37 @@ class BaseTests[T: Plugin](SynodicBaseTests[T], metaclass=ABCMeta):
         return "cppython"
 
 
-class BaseIntegrationTests[T: Plugin](SynodicBaseIntegrationTests[T], metaclass=ABCMeta):
+class BaseIntegrationTests[T: Plugin](metaclass=ABCMeta):
     """Integration testing information for all plugin test classes"""
 
+    def test_entry_point(self, plugin_type: type[T], plugin_group_name: LiteralString) -> None:
+        """Verify that the plugin was registered
 
-class BaseUnitTests[T: Plugin](SynodicBaseUnitTests[T], metaclass=ABCMeta):
+        Args:
+            plugin_type: The type to register
+            plugin_group_name: The group name for the plugin type
+        """
+        types = []
+        for entry in list(entry_points(group=f"{plugin_group_name}.{plugin_type.group()}")):
+            types.append(entry.load())
+
+        assert plugin_type in types
+
+    def test_name(self, plugin_type: type[Plugin]) -> None:
+        """Verifies the the class name allows name extraction
+
+        Args:
+            plugin_type: The type to register
+        """
+
+        assert plugin_type.group()
+        assert len(plugin_type.group())
+
+        assert plugin_type.name()
+        assert len(plugin_type.name())
+
+
+class BaseUnitTests[T: Plugin](metaclass=ABCMeta):
     """Unit testing information for all plugin test classes"""
 
     def test_feature_extraction(self, plugin_type: type[T], project_configuration: ProjectConfiguration) -> None:

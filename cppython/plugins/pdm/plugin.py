@@ -1,14 +1,14 @@
-"""Implementation of the PDM Interface Plugin
-"""
+"""Implementation of the PDM Interface Plugin"""
 
 from logging import getLogger
 from typing import Any
 
-from cppython.project import Project as CPPythonProject
-from cppython.core.schema import Interface, ProjectConfiguration
 from pdm.core import Core
 from pdm.project.core import Project
 from pdm.signals import post_install
+
+from cppython.core.schema import Interface, ProjectConfiguration
+from cppython.project import Project as CPPythonProject
 
 
 class CPPythonPlugin(Interface):

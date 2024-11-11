@@ -100,8 +100,8 @@ class VcpkgProvider(Provider):
 
         for sync_type in consumer.sync_types():
             if sync_type == CMakeSyncData:
-                toolchain_file = self.core_data.cppython_data.install_path / "scripts/buildsystems/vcpkg.cmake"
-                return CMakeSyncData(provider_name=TypeName("vcpkg"), toolchain=toolchain_file)
+                # toolchain_file = self.core_data.cppython_data.install_path / "scripts/buildsystems/vcpkg.cmake"
+                return CMakeSyncData(provider_name=TypeName("vcpkg"))
 
         raise NotSupportedError("OOF")
 

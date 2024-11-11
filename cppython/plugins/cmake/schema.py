@@ -49,7 +49,7 @@ class CMakePresets(CPPythonModel, extra="allow"):
 class CMakeSyncData(SyncData):
     """The CMake sync data"""
 
-    top_level_includes: FilePath
+    # top_level_includes: FilePath
 
 
 class CMakeData(CPPythonModel):
