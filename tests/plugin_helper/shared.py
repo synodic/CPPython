@@ -102,6 +102,12 @@ class BaseIntegrationTests[T: Plugin](metaclass=ABCMeta):
             plugin_type: The type to register
             plugin_group_name: The group name for the plugin type
         """
+
+        # We only require the entry point to be registered if the plugin is not a Mocked type
+
+        if plugin_type.name() == "mock":
+            pytest.skip("Mocked plugin type")
+
         types = []
         for entry in list(entry_points(group=f"{plugin_group_name}.{plugin_type.group()}")):
             types.append(entry.load())
