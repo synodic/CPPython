@@ -370,7 +370,8 @@ def fixture_cmake_data(request: pytest.FixtureRequest) -> CMakeConfiguration:
 
 
 def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
-    """Called for each test function
+    """Called for each test function. Provides a parametrization of the specified fixtures with the appropriate paths or
+        lists of paths, allowing pytest to run tests with different sets of data
 
     Args:
         metafunc: Pytest hook data
@@ -379,24 +380,31 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     for fixture in metafunc.fixturenames:
         match fixture.split("_", 1):
             case ["internal", "plugin_data_path"]:
+                # Gathers directories from tests/data from the project's root directory
+
                 # There should only ever be one fixture named 'internal_plugin_data_path' for value caching
-                data_path = metafunc.config.rootpath / "tests" / "data"
+                plugin_data_path = metafunc.config.rootpath / "tests" / "data"
 
-                test_paths: list[Path | None] = []
+                plugin_test_paths: list[Path | None] = []
 
-                for path in data_path.glob("*"):
-                    if path.is_dir():
-                        test_paths.append(path)
+                for plugin_path in plugin_data_path.glob("*"):
+                    if plugin_path.is_dir():
+                        plugin_test_paths.append(plugin_path)
 
-                if not test_paths:
-                    test_paths = [None]
-                metafunc.parametrize(fixture, test_paths, scope="session")
+                if not plugin_test_paths:
+                    plugin_test_paths = [None]
+                metafunc.parametrize(fixture, plugin_test_paths, scope="session")
 
             case ["internal", "data_path"]:
+                # Gathers directories from tests/data from the package's root directory
+
                 # There should only ever be one fixture named 'internal_data_path' for value caching
-                data_path = Path(__file__).parent / "data"
-                metafunc.parametrize(fixture, list(data_path.glob("*")), scope="session")
+                internal_data_path = Path(__file__).parent / "data"
+                metafunc.parametrize(fixture, list(internal_data_path.glob("*")), scope="session")
 
             case ["build", directory]:
-                data_path = metafunc.config.rootpath / "tests" / "build" / directory
-                metafunc.parametrize(fixture, [data_path], scope="session")
+
+                # Parameterizes the paths under tests/build/<directory> where <directory> is the fixture suffix
+
+                build_data_path = metafunc.config.rootpath / "tests" / "build" / directory
+                metafunc.parametrize(fixture, [build_data_path], scope="session")
