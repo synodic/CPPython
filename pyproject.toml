@@ -20,6 +20,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+pytest = [
+  "pytest>=8.3.3",
+  "pytest-mock>=3.14.0",
+]
+
 git = [
   "dulwich>=0.22.5",
 ]
