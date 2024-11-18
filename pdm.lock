@@ -231,7 +231,7 @@ files = [
 
 [[package]]
 name = "dulwich"
-version = "0.22.5"
+version = "0.22.6"
 requires_python = ">=3.9"
 summary = "Python Git Library"
 groups = ["git"]
@@ -239,14 +239,14 @@ dependencies = [
     "urllib3>=1.25",
 ]
 files = [
-    {file = "dulwich-0.22.5-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:0d2ff25da411862194065fae2fae2bfe3246d60dc03d1c67369f6dd20ba88c6a"},
-    {file = "dulwich-0.22.5-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:d24b40c011d3f7efe3e83f786a20b9021c8709c5456823415d50a5f7b08eb0c7"},
-    {file = "dulwich-0.22.5-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b32f901704a18a87587f6a2e3655cfaacebfbdea4b5e2a0f5908aea3d6c34d0d"},
-    {file = "dulwich-0.22.5-cp313-cp313-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:81f87e7ff2954bcbd5e520bcbee882810bf10667cf780d6ea93c87f758b273c6"},
-    {file = "dulwich-0.22.5-cp313-cp313-win32.whl", hash = "sha256:74b615facfbe2385e4ed2166e109c83db2c93056740618b94e4d612354dbe50d"},
-    {file = "dulwich-0.22.5-cp313-cp313-win_amd64.whl", hash = "sha256:2de0440ea2c372e86e907900684c36b99d55dce805069bf345fbdbcfc3f6e419"},
-    {file = "dulwich-0.22.5-py3-none-any.whl", hash = "sha256:7728938fd90e171b8e9429ec6689626a84ae50817606098f05405002f1958066"},
-    {file = "dulwich-0.22.5.tar.gz", hash = "sha256:15af5feeaaf8fc89f26abc0d9a1518785b66f1801c3101506400775f2da921d4"},
+    {file = "dulwich-0.22.6-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:dff11fe1ecd6f9d915b490c660456a467c9150404de5100b3cf112c6bd5c830d"},
+    {file = "dulwich-0.22.6-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f9e75774fe5f219490912931bb8d91a12ec5cc7155f377fd88088fe0f035e1b8"},
+    {file = "dulwich-0.22.6-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:eb5f8ff0eb0d6759cebd13cb9e6d7029af5d87f89074bd1a702c7a0943a33d6e"},
+    {file = "dulwich-0.22.6-cp313-cp313-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:096a9fe8754bce136e128b7161fca30ff1b2e5859f2324a7e2c8270dcb2ba672"},
+    {file = "dulwich-0.22.6-cp313-cp313-win32.whl", hash = "sha256:115920aff5756cdf02900504fe3c9b941f2f41fab5cea2670130783f02e0ae2c"},
+    {file = "dulwich-0.22.6-cp313-cp313-win_amd64.whl", hash = "sha256:4b84f9a849d64201a8e5cde024bbbf9c56d3138f284eb5cc1a937ee3503f18b0"},
+    {file = "dulwich-0.22.6-py3-none-any.whl", hash = "sha256:a609c1939b8050c9876d0dd2b15302fef695759f479613c20025fbd4ece32bda"},
+    {file = "dulwich-0.22.6.tar.gz", hash = "sha256:c1f44d599fa5dc59ca43e0789f835b8689b4d831d8de5ae009c442192a1408b5"},
 ]
 
 [[package]]
