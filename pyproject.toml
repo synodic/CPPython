@@ -110,6 +110,14 @@ source = "scm"
 
 [tool.pdm.scripts]
 analyze = {shell = "pylint --verbose cppython tests"}
+install-docs.cmd = "npm install"
+install-docs.working_dir = "docs"
+
+build-docs.cmd = "npm run generate"
+build-docs.working_dir = "docs"
+
+docs = {composite = ["install-docs", "build-docs"]}
+
 format = {shell = "black --check --verbose ."}
 lint = {composite = ["analyze", "format", "sort-imports", "type-check"]}
 sort-imports = {shell = "isort --check-only --diff --verbose ."}

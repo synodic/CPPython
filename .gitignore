@@ -25,5 +25,5 @@ __pypackages__/
 !.vscode/launch.json
 !.vscode/extensions.json
 /.mypy_cache
-/docs/node_modules
-/docs/build
+node_modules/
+build/

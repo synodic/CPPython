@@ -1,5 +1,12 @@
 {
   "devDependencies": {
+    "@antora/cli": "3.1.9",
     "antora": "3.1.9"
+  },
+  "scripts": {
+    "generate": "antora playbook.yml"
+  },
+  "dependencies": {
+    "@antora/lunr-extension": "^1.0.0-alpha.8"
   }
 }
