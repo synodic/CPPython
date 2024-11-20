@@ -20,7 +20,7 @@ from cppython.test.mock.interface import MockInterface
 from cppython.test.mock.provider import MockProvider
 from cppython.test.mock.scm import MockSCM
 
-pep621 = PEP621Configuration(name="test-project", version="0.1.0")
+pep621 = PEP621Configuration(name='test-project', version='0.1.0')
 
 
 class TestProject:
@@ -32,13 +32,12 @@ class TestProject:
         Args:
             request: The pytest request fixture
         """
-
         # Use the CPPython directory as the test data
-        file = request.config.rootpath / "pyproject.toml"
+        file = request.config.rootpath / 'pyproject.toml'
         project_configuration = ProjectConfiguration(pyproject_file=file, version=None)
         interface = MockInterface()
 
-        pyproject_data = tomllib.loads(file.read_text(encoding="utf-8"))
+        pyproject_data = tomllib.loads(file.read_text(encoding='utf-8'))
         project = Project(project_configuration, interface, pyproject_data)
 
         # Doesn't have the cppython table
@@ -50,10 +49,9 @@ class TestProject:
         Args:
             tmp_path: Temporary directory for dummy data
         """
+        file_path = tmp_path / 'pyproject.toml'
 
-        file_path = tmp_path / "pyproject.toml"
-
-        with open(file_path, "a", encoding="utf8"):
+        with open(file_path, 'a', encoding='utf8'):
             pass
 
         project_configuration = ProjectConfiguration(pyproject_file=file_path, version=None)
@@ -70,10 +68,9 @@ class TestProject:
         Args:
             tmp_path: Temporary directory for dummy data
         """
+        file_path = tmp_path / 'pyproject.toml'
 
-        file_path = tmp_path / "pyproject.toml"
-
-        with open(file_path, "a", encoding="utf8"):
+        with open(file_path, 'a', encoding='utf8'):
             pass
 
         project_configuration = ProjectConfiguration(pyproject_file=file_path, version=None)
@@ -92,17 +89,16 @@ class TestProject:
             tmp_path: Temporary directory for dummy data
             mocker: Pytest mocker fixture
         """
-
         mocker.patch.object(
             metadata,
-            "entry_points",
-            return_value=[metadata.EntryPoint(name="mock", value="mock", group="mock")],
+            'entry_points',
+            return_value=[metadata.EntryPoint(name='mock', value='mock', group='mock')],
         )
-        mocker.patch.object(metadata.EntryPoint, "load", side_effect=[MockGenerator, MockProvider, MockSCM])
+        mocker.patch.object(metadata.EntryPoint, 'load', side_effect=[MockGenerator, MockProvider, MockSCM])
 
-        file_path = tmp_path / "pyproject.toml"
+        file_path = tmp_path / 'pyproject.toml'
 
-        with open(file_path, "a", encoding="utf8"):
+        with open(file_path, 'a', encoding='utf8'):
             pass
 
         project_configuration = ProjectConfiguration(pyproject_file=file_path, version=None)

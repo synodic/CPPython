@@ -26,25 +26,26 @@ class VariableType(Enum):
     UNINITIALIZED = auto()  # Type not yet specified.
 
 
-class CacheVariable(CPPythonModel, extra="forbid"):
+class CacheVariable(CPPythonModel, extra='forbid'):
     """_summary_"""
 
     type: None | VariableType
     value: bool | str
 
 
-class ConfigurePreset(CPPythonModel, extra="allow"):
+class ConfigurePreset(CPPythonModel, extra='allow'):
     """Partial Configure Preset specification to allow cache variable injection"""
 
     name: str
     cacheVariables: dict[str, None | bool | str | CacheVariable] | None
 
 
-class CMakePresets(CPPythonModel, extra="allow"):
+class CMakePresets(CPPythonModel, extra='allow'):
     """The schema for the CMakePresets and CMakeUserPresets files.
-    The only information needed is the configure preset list for cache variable injection"""
+    The only information needed is the configure preset list for cache variable injection
+    """
 
-    configurePresets: Annotated[list[ConfigurePreset], Field(description="The list of configure presets")] = []
+    configurePresets: Annotated[list[ConfigurePreset], Field(description='The list of configure presets')] = []
 
 
 class CMakeSyncData(SyncData):
@@ -68,5 +69,5 @@ class CMakeConfiguration(CPPythonModel):
         Field(
             description="The CMakePreset.json file that will be searched for the given 'configuration_name'",
         ),
-    ] = Path("CMakePresets.json")
-    configuration_name: Annotated[str, Field(description="The CMake configuration preset to look for and override")]
+    ] = Path('CMakePresets.json')
+    configuration_name: Annotated[str, Field(description='The CMake configuration preset to look for and override')]

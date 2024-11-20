@@ -40,10 +40,10 @@ class TestBuilder:
 
         mocker.patch.object(
             metadata,
-            "entry_points",
-            return_value=[metadata.EntryPoint(name="mock", value="mock", group="mock")],
+            'entry_points',
+            return_value=[metadata.EntryPoint(name='mock', value='mock', group='mock')],
         )
-        mocker.patch.object(metadata.EntryPoint, "load", side_effect=[MockGenerator, MockProvider, MockSCM])
+        mocker.patch.object(metadata.EntryPoint, 'load', side_effect=[MockGenerator, MockProvider, MockSCM])
 
         assert builder.build(pep621_configuration, cppython_local_configuration)
 

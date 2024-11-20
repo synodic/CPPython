@@ -29,7 +29,6 @@ class GitSCM(SCM):
         Returns:
             The supported features
         """
-
         is_repository = True
         try:
             Repo(str(directory))
@@ -56,7 +55,7 @@ class GitSCM(SCM):
         Returns:
             The git version
         """
-        return ""
+        return ''
 
     def description(self) -> str | None:
         """Requests extraction of the project description"""

@@ -54,7 +54,6 @@ class VcpkgProvider(Provider):
         Returns:
             _description_
         """
-
         return sync_type in CMakeGenerator.sync_types()
 
     @staticmethod
@@ -73,16 +72,15 @@ class VcpkgProvider(Provider):
         Args:
             path: The path where the script is located
         """
-
-        logger = getLogger("cppython.vcpkg")
+        logger = getLogger('cppython.vcpkg')
 
         try:
-            if system_name == "nt":
-                subprocess_call([str(WindowsPath("bootstrap-vcpkg.bat"))], logger=logger, cwd=path, shell=True)
-            elif system_name == "posix":
-                subprocess_call(["./" + str(PosixPath("bootstrap-vcpkg.sh"))], logger=logger, cwd=path, shell=True)
+            if system_name == 'nt':
+                subprocess_call([str(WindowsPath('bootstrap-vcpkg.bat'))], logger=logger, cwd=path, shell=True)
+            elif system_name == 'posix':
+                subprocess_call(['./' + str(PosixPath('bootstrap-vcpkg.sh'))], logger=logger, cwd=path, shell=True)
         except ProcessError:
-            logger.error("Unable to bootstrap the vcpkg repository", exc_info=True)
+            logger.error('Unable to bootstrap the vcpkg repository', exc_info=True)
             raise
 
     def sync_data(self, consumer: SyncConsumer) -> SyncData:
@@ -97,13 +95,12 @@ class VcpkgProvider(Provider):
         Returns:
             The synch data object
         """
-
         for sync_type in consumer.sync_types():
             if sync_type == CMakeSyncData:
                 # toolchain_file = self.core_data.cppython_data.install_path / "scripts/buildsystems/vcpkg.cmake"
-                return CMakeSyncData(provider_name=TypeName("vcpkg"), top_level_includes=Path("test"))
+                return CMakeSyncData(provider_name=TypeName('vcpkg'), top_level_includes=Path('test'))
 
-        raise NotSupportedError("OOF")
+        raise NotSupportedError('OOF')
 
     @classmethod
     def tooling_downloaded(cls, path: Path) -> bool:
@@ -118,13 +115,12 @@ class VcpkgProvider(Provider):
         Returns:
             Whether the tooling has been downloaded or not
         """
-
-        logger = getLogger("cppython.vcpkg")
+        logger = getLogger('cppython.vcpkg')
 
         try:
             # Hide output, given an error output is a logic conditional
             subprocess_call(
-                ["git", "rev-parse", "--is-inside-work-tree"],
+                ['git', 'rev-parse', '--is-inside-work-tree'],
                 logger=logger,
                 suppress=True,
                 cwd=path,
@@ -145,17 +141,17 @@ class VcpkgProvider(Provider):
         Raises:
             ProcessError: Failed vcpkg calls
         """
-        logger = getLogger("cppython.vcpkg")
+        logger = getLogger('cppython.vcpkg')
 
         if cls.tooling_downloaded(directory):
             try:
                 logger.debug("Updating the vcpkg repository at '%s'", directory.absolute())
 
                 # The entire history is need for vcpkg 'baseline' information
-                subprocess_call(["git", "fetch", "origin"], logger=logger, cwd=directory)
-                subprocess_call(["git", "pull"], logger=logger, cwd=directory)
+                subprocess_call(['git', 'fetch', 'origin'], logger=logger, cwd=directory)
+                subprocess_call(['git', 'pull'], logger=logger, cwd=directory)
             except ProcessError:
-                logger.exception("Unable to update the vcpkg repository")
+                logger.exception('Unable to update the vcpkg repository')
                 raise
         else:
             try:
@@ -163,13 +159,13 @@ class VcpkgProvider(Provider):
 
                 # The entire history is need for vcpkg 'baseline' information
                 subprocess_call(
-                    ["git", "clone", "https://github.com/microsoft/vcpkg", "."],
+                    ['git', 'clone', 'https://github.com/microsoft/vcpkg', '.'],
                     logger=logger,
                     cwd=directory,
                 )
 
             except ProcessError:
-                logger.exception("Unable to clone the vcpkg repository")
+                logger.exception('Unable to clone the vcpkg repository')
                 raise
 
         cls._update_provider(directory)
@@ -180,29 +176,28 @@ class VcpkgProvider(Provider):
         Raises:
             ProcessError: Failed vcpkg calls
         """
-
         manifest_directory = self.core_data.project_data.pyproject_file.parent
         manifest = generate_manifest(self.core_data, self.data)
 
         # Write out the manifest
         serialized = json.loads(manifest.model_dump_json(exclude_none=True, by_alias=True))
-        with open(manifest_directory / "vcpkg.json", "w", encoding="utf8") as file:
+        with open(manifest_directory / 'vcpkg.json', 'w', encoding='utf8') as file:
             json.dump(serialized, file, ensure_ascii=False, indent=4)
 
-        executable = self.core_data.cppython_data.install_path / "vcpkg"
-        logger = getLogger("cppython.vcpkg")
+        executable = self.core_data.cppython_data.install_path / 'vcpkg'
+        logger = getLogger('cppython.vcpkg')
         try:
             subprocess_call(
                 [
                     executable,
-                    "install",
-                    f"--x-install-root={self.data.install_directory}",
+                    'install',
+                    f'--x-install-root={self.data.install_directory}',
                 ],
                 logger=logger,
                 cwd=self.core_data.cppython_data.build_path,
             )
         except ProcessError:
-            logger.exception("Unable to install project dependencies")
+            logger.exception('Unable to install project dependencies')
             raise
 
     def update(self) -> None:
@@ -216,21 +211,21 @@ class VcpkgProvider(Provider):
 
         # Write out the manifest
         serialized = json.loads(manifest.model_dump_json(exclude_none=True, by_alias=True))
-        with open(manifest_directory / "vcpkg.json", "w", encoding="utf8") as file:
+        with open(manifest_directory / 'vcpkg.json', 'w', encoding='utf8') as file:
             json.dump(serialized, file, ensure_ascii=False, indent=4)
 
-        executable = self.core_data.cppython_data.install_path / "vcpkg"
-        logger = getLogger("cppython.vcpkg")
+        executable = self.core_data.cppython_data.install_path / 'vcpkg'
+        logger = getLogger('cppython.vcpkg')
         try:
             subprocess_call(
                 [
                     executable,
-                    "install",
-                    f"--x-install-root={self.data.install_directory}",
+                    'install',
+                    f'--x-install-root={self.data.install_directory}',
                 ],
                 logger=logger,
                 cwd=self.core_data.cppython_data.build_path,
             )
         except ProcessError:
-            logger.exception("Unable to install project dependencies")
+            logger.exception('Unable to install project dependencies')
             raise

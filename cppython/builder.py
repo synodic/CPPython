@@ -40,7 +40,6 @@ class Resolver:
     """The resolution of data sources for the builder"""
 
     def __init__(self, project_configuration: ProjectConfiguration, logger: Logger) -> None:
-
         self._project_configuration = project_configuration
         self._logger = logger
 
@@ -56,19 +55,18 @@ class Resolver:
         Returns:
             The resolved plugin data
         """
-
         raw_generator_plugins = self.find_generators()
         generator_plugins = self.filter_plugins(
             raw_generator_plugins,
             cppython_local_configuration.generator_name,
-            "Generator",
+            'Generator',
         )
 
         raw_provider_plugins = self.find_providers()
         provider_plugins = self.filter_plugins(
             raw_provider_plugins,
             cppython_local_configuration.provider_name,
-            "Provider",
+            'Provider',
         )
 
         scm_plugins = self.find_source_managers()
@@ -89,7 +87,6 @@ class Resolver:
         Returns:
             The plugin data used by CPPython
         """
-
         return PluginCPPythonData(
             generator_name=plugin_build_data.generator_type.name(),
             provider_name=plugin_build_data.provider_type.name(),
@@ -117,7 +114,6 @@ class Resolver:
         Returns:
             The global configuration object
         """
-
         return CPPythonGlobalConfiguration()
 
     def find_generators(self) -> list[type[Generator]]:
@@ -129,12 +125,11 @@ class Resolver:
         Returns:
             The list of generator plugin types
         """
-
-        group_name = "generator"
+        group_name = 'generator'
         plugin_types: list[type[Generator]] = []
 
         # Filter entries by type
-        for entry_point in list(entry_points(group=f"cppython.{group_name}")):
+        for entry_point in list(entry_points(group=f'cppython.{group_name}')):
             loaded_type = entry_point.load()
             if not issubclass(loaded_type, Generator):
                 self._logger.warning(
@@ -142,11 +137,11 @@ class Resolver:
                     f" '{group_name}'"
                 )
             else:
-                self._logger.warning(f"{group_name} plugin found: {loaded_type.name()} from {getmodule(loaded_type)}")
+                self._logger.warning(f'{group_name} plugin found: {loaded_type.name()} from {getmodule(loaded_type)}')
                 plugin_types.append(loaded_type)
 
         if not plugin_types:
-            raise PluginError(f"No {group_name} plugin was found")
+            raise PluginError(f'No {group_name} plugin was found')
 
         return plugin_types
 
@@ -159,12 +154,11 @@ class Resolver:
         Returns:
             The list of provider plugin types
         """
-
-        group_name = "provider"
+        group_name = 'provider'
         plugin_types: list[type[Provider]] = []
 
         # Filter entries by type
-        for entry_point in list(entry_points(group=f"cppython.{group_name}")):
+        for entry_point in list(entry_points(group=f'cppython.{group_name}')):
             loaded_type = entry_point.load()
             if not issubclass(loaded_type, Provider):
                 self._logger.warning(
@@ -172,11 +166,11 @@ class Resolver:
                     f" '{group_name}'"
                 )
             else:
-                self._logger.warning(f"{group_name} plugin found: {loaded_type.name()} from {getmodule(loaded_type)}")
+                self._logger.warning(f'{group_name} plugin found: {loaded_type.name()} from {getmodule(loaded_type)}')
                 plugin_types.append(loaded_type)
 
         if not plugin_types:
-            raise PluginError(f"No {group_name} plugin was found")
+            raise PluginError(f'No {group_name} plugin was found')
 
         return plugin_types
 
@@ -189,12 +183,11 @@ class Resolver:
         Returns:
             The list of source control manager plugin types
         """
-
-        group_name = "scm"
+        group_name = 'scm'
         plugin_types: list[type[SCM]] = []
 
         # Filter entries by type
-        for entry_point in list(entry_points(group=f"cppython.{group_name}")):
+        for entry_point in list(entry_points(group=f'cppython.{group_name}')):
             loaded_type = entry_point.load()
             if not issubclass(loaded_type, SCM):
                 self._logger.warning(
@@ -202,17 +195,17 @@ class Resolver:
                     f" '{group_name}'"
                 )
             else:
-                self._logger.warning(f"{group_name} plugin found: {loaded_type.name()} from {getmodule(loaded_type)}")
+                self._logger.warning(f'{group_name} plugin found: {loaded_type.name()} from {getmodule(loaded_type)}')
                 plugin_types.append(loaded_type)
 
         if not plugin_types:
-            raise PluginError(f"No {group_name} plugin was found")
+            raise PluginError(f'No {group_name} plugin was found')
 
         return plugin_types
 
-    def filter_plugins[
-        T: DataPlugin
-    ](self, plugin_types: list[type[T]], pinned_name: str | None, group_name: str) -> list[type[T]]:
+    def filter_plugins[T: DataPlugin](
+        self, plugin_types: list[type[T]], pinned_name: str | None, group_name: str
+    ) -> list[type[T]]:
         """Finds and filters data plugins
 
         Args:
@@ -226,13 +219,12 @@ class Resolver:
         Returns:
             The list of applicable plugins
         """
-
         # Lookup the requested plugin if given
         if pinned_name is not None:
             for loaded_type in plugin_types:
                 if loaded_type.name() == pinned_name:
                     self._logger.warning(
-                        f"Using {group_name} plugin: {loaded_type.name()} from {getmodule(loaded_type)}"
+                        f'Using {group_name} plugin: {loaded_type.name()} from {getmodule(loaded_type)}'
                     )
                     return [loaded_type]
 
@@ -243,13 +235,13 @@ class Resolver:
         # Deduce types
         for loaded_type in plugin_types:
             self._logger.warning(
-                f"A {group_name} plugin is supported: {loaded_type.name()} from {getmodule(loaded_type)}"
+                f'A {group_name} plugin is supported: {loaded_type.name()} from {getmodule(loaded_type)}'
             )
             supported_types.append(loaded_type)
 
         # Fail
         if supported_types is None:
-            raise PluginError(f"No {group_name} could be deduced from the root directory.")
+            raise PluginError(f'No {group_name} could be deduced from the root directory.')
 
         return supported_types
 
@@ -263,12 +255,11 @@ class Resolver:
         Returns:
             The selected SCM plugin type
         """
-
         for scm_type in scm_plugins:
             if scm_type.features(project_data.pyproject_file.parent).repository:
                 return scm_type
 
-        self._logger.info("No SCM plugin was found that supports the given path")
+        self._logger.info('No SCM plugin was found that supports the given path')
 
         return DefaultSCM
 
@@ -287,7 +278,6 @@ class Resolver:
         Returns:
             A tuple of the selected generator and provider plugin types
         """
-
         combos: list[tuple[type[Generator], type[Provider]]] = []
 
         for generator_type in generator_types:
@@ -299,7 +289,7 @@ class Resolver:
                         break
 
         if not combos:
-            raise PluginError("No provider that supports a given generator could be deduced")
+            raise PluginError('No provider that supports a given generator could be deduced')
 
         return combos[0]
 
@@ -317,7 +307,6 @@ class Resolver:
         Returns:
             The constructed source control manager
         """
-
         cppython_plugin_data = resolve_cppython_plugin(core_data.cppython_data, scm_type)
         scm_data = resolve_scm(core_data.project_data, cppython_plugin_data)
 
@@ -343,7 +332,6 @@ class Resolver:
         Returns:
             The constructed generator
         """
-
         cppython_plugin_data = resolve_cppython_plugin(core_data.cppython_data, generator_type)
 
         generator_data = resolve_generator(core_data.project_data, cppython_plugin_data)
@@ -379,7 +367,6 @@ class Resolver:
         Returns:
             A constructed provider plugins
         """
-
         cppython_plugin_data = resolve_cppython_plugin(core_data.cppython_data, provider_type)
 
         provider_data = resolve_provider(core_data.project_data, cppython_plugin_data)
@@ -412,7 +399,7 @@ class Builder:
         self._logger.addHandler(logging.StreamHandler())
         self._logger.setLevel(levels[project_configuration.verbosity])
 
-        self._logger.info("Logging setup complete")
+        self._logger.info('Logging setup complete')
 
         self._resolver = Resolver(self._project_configuration, self._logger)
 
@@ -433,7 +420,6 @@ class Builder:
         Returns:
             The built data object
         """
-
         project_data = resolve_project_configuration(self._project_configuration)
 
         if plugin_build_data is None:

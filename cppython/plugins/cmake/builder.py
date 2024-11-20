@@ -17,11 +17,10 @@ class Builder:
             provider_directory: The base directory to place the preset files
             data: The providers synchronization data
         """
-
         configure_preset = ConfigurePreset(name=data.provider_name, cacheVariables=None)
         presets = CMakePresets(configurePresets=[configure_preset])
 
-        json_path = provider_directory / f"{data.provider_name}.json"
+        json_path = provider_directory / f'{data.provider_name}.json'
 
         write_model_json(json_path, presets)
 
@@ -36,11 +35,10 @@ class Builder:
         Returns:
             A file path to the written data
         """
-
-        configure_preset = ConfigurePreset(name="cppython", cacheVariables=None)
+        configure_preset = ConfigurePreset(name='cppython', cacheVariables=None)
         presets = CMakePresets(configurePresets=[configure_preset])
 
-        cppython_json_path = cppython_preset_directory / "cppython.json"
+        cppython_json_path = cppython_preset_directory / 'cppython.json'
 
         write_model_json(cppython_json_path, presets)
         return cppython_json_path
@@ -55,7 +53,6 @@ class Builder:
         Args:
             preset_file: Preset file to modify
         """
-
         initial_root_preset = read_json(preset_file)
 
         if (root_preset := deepcopy(initial_root_preset)) != initial_root_preset:

@@ -27,15 +27,14 @@ def call(
     Raises:
         ProcessError: If the underlying process fails
     """
-
     with subprocess.Popen(arguments, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, **kwargs) as process:
         if process.stdout is None:
             return
 
         with process.stdout as pipe:
-            for line in iter(pipe.readline, ""):
+            for line in iter(pipe.readline, ''):
                 if not suppress:
                     logger.log(log_level, line.rstrip())
 
     if process.returncode != 0:
-        raise ProcessError("Subprocess task failed")
+        raise ProcessError('Subprocess task failed')

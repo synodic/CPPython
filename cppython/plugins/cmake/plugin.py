@@ -33,7 +33,6 @@ class CMakeGenerator(Generator):
         Returns:
             Supported?
         """
-
         return SupportedGeneratorFeatures()
 
     @staticmethod
@@ -43,7 +42,6 @@ class CMakeGenerator(Generator):
         Returns:
             Plugin information
         """
-
         return Information()
 
     @staticmethod
@@ -53,7 +51,6 @@ class CMakeGenerator(Generator):
         Returns:
             The available types
         """
-
         return [CMakeSyncData]
 
     def sync(self, sync_data: SyncData) -> None:
@@ -62,12 +59,11 @@ class CMakeGenerator(Generator):
         Args:
             sync_data: The input data
         """
-
         if isinstance(sync_data, CMakeSyncData):
-            cppython_preset_directory = self.core_data.cppython_data.tool_path / "cppython"
+            cppython_preset_directory = self.core_data.cppython_data.tool_path / 'cppython'
             cppython_preset_directory.mkdir(parents=True, exist_ok=True)
 
-            provider_directory = cppython_preset_directory / "providers"
+            provider_directory = cppython_preset_directory / 'providers'
             provider_directory.mkdir(parents=True, exist_ok=True)
 
             self.builder.write_provider_preset(provider_directory, sync_data)

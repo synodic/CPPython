@@ -15,5 +15,4 @@ class API(Protocol):
     @abstractmethod
     def update(self) -> None:
         """Updates project dependencies"""
-
         raise NotImplementedError()

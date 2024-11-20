@@ -20,20 +20,18 @@ class TestSchema:
     class Model(CPPythonModel):
         """Testing Model"""
 
-        aliased_variable: Annotated[bool, Field(alias="aliased-variable", description="Alias test")] = False
+        aliased_variable: Annotated[bool, Field(alias='aliased-variable', description='Alias test')] = False
 
     def test_model_construction(self) -> None:
         """Verifies that the base model type has the expected construction behaviors"""
-
-        model = self.Model(**{"aliased_variable": True})
+        model = self.Model(**{'aliased_variable': True})
         assert model.aliased_variable is False
 
-        model = self.Model(**{"aliased-variable": True})
+        model = self.Model(**{'aliased-variable': True})
         assert model.aliased_variable is True
 
     def test_model_construction_from_data(self) -> None:
         """Verifies that the base model type has the expected construction behaviors"""
-
         toml_str = """
         aliased_variable = false\n
         aliased-variable = true
@@ -53,9 +51,8 @@ class TestSchema:
 
     def test_pep621_version(self) -> None:
         """Tests the dynamic version validation"""
+        with pytest.raises(ValueError):
+            PEP621Configuration(name='empty-test')
 
         with pytest.raises(ValueError):
-            PEP621Configuration(name="empty-test")
-
-        with pytest.raises(ValueError):
-            PEP621Configuration(name="both-test", version="1.0.0", dynamic=["version"])
+            PEP621Configuration(name='both-test', version='1.0.0', dynamic=['version'])

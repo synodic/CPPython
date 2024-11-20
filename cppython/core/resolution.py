@@ -53,9 +53,8 @@ def resolve_pep621(
     Returns:
         The resolved type
     """
-
     # Update the dynamic version
-    if "version" in pep621_configuration.dynamic:
+    if 'version' in pep621_configuration.dynamic:
         if project_configuration.version is not None:
             modified_version = project_configuration.version
         elif scm is not None:
@@ -111,7 +110,6 @@ def resolve_cppython(
     Returns:
         An instance of the resolved type
     """
-
     root_directory = project_data.pyproject_file.parent.absolute()
 
     # Add the base path to all relative paths
@@ -168,7 +166,6 @@ def resolve_cppython_plugin(cppython_data: CPPythonData, plugin_type: type[Plugi
     Returns:
         The resolved type with plugin specific modifications
     """
-
     # Add plugin specific paths to the base path
     modified_install_path = cppython_data.install_path / plugin_type.name()
     modified_install_path.mkdir(parents=True, exist_ok=True)
@@ -196,8 +193,7 @@ def _write_tool_directory(cppython_data: CPPythonData, directory: Path) -> Direc
     Returns:
         The written path
     """
-
-    plugin_directory = cppython_data.tool_path / "cppython" / directory
+    plugin_directory = cppython_data.tool_path / 'cppython' / directory
     plugin_directory.mkdir(parents=True, exist_ok=True)
 
     return plugin_directory
@@ -213,9 +209,8 @@ def resolve_generator(project_data: ProjectData, cppython_data: CPPythonPluginDa
     Returns:
         The plugin specific configuration
     """
-
     root_directory = project_data.pyproject_file.parent
-    tool_directory = _write_tool_directory(cppython_data, Path("generators") / cppython_data.generator_name)
+    tool_directory = _write_tool_directory(cppython_data, Path('generators') / cppython_data.generator_name)
     configuration = GeneratorPluginGroupData(root_directory=root_directory, tool_directory=tool_directory)
     return configuration
 
@@ -230,9 +225,8 @@ def resolve_provider(project_data: ProjectData, cppython_data: CPPythonPluginDat
     Returns:
         The plugin specific configuration
     """
-
     root_directory = project_data.pyproject_file.parent
-    tool_directory = _write_tool_directory(cppython_data, Path("providers") / cppython_data.provider_name)
+    tool_directory = _write_tool_directory(cppython_data, Path('providers') / cppython_data.provider_name)
     configuration = ProviderPluginGroupData(root_directory=root_directory, tool_directory=tool_directory)
     return configuration
 
@@ -247,9 +241,8 @@ def resolve_scm(project_data: ProjectData, cppython_data: CPPythonPluginData) ->
     Returns:
         The plugin specific configuration
     """
-
     root_directory = project_data.pyproject_file.parent
-    tool_directory = _write_tool_directory(cppython_data, Path("managers") / cppython_data.scm_name)
+    tool_directory = _write_tool_directory(cppython_data, Path('managers') / cppython_data.scm_name)
     configuration = SCMPluginGroupData(root_directory=root_directory, tool_directory=tool_directory)
     return configuration
 
@@ -267,12 +260,11 @@ def resolve_model[T: BaseModel](model: type[T], data: dict[str, Any]) -> T:
     Returns:
         The instance of the model
     """
-
     try:
         # BaseModel is setup to ignore extra fields
         return model(**data)
     except ValidationError as e:
         new_errors: list[ConfigError] = []
         for error in e.errors():
-            new_errors.append(ConfigError(message=error["msg"]))
-        raise ConfigException("The input project failed", new_errors) from e
+            new_errors.append(ConfigError(message=error['msg']))
+        raise ConfigException('The input project failed', new_errors) from e

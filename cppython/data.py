@@ -38,7 +38,6 @@ class Data:
         Raises:
             PluginError: Plugin error
         """
-
         if (sync_data := self.plugins.provider.sync_data(self.plugins.generator)) is None:
             raise PluginError("The provider doesn't support the generator")
 
@@ -52,5 +51,5 @@ class Data:
 
         path.mkdir(parents=True, exist_ok=True)
 
-        self.logger.warning("Downloading the %s requirements to %s", self.plugins.provider.name(), path)
+        self.logger.warning('Downloading the %s requirements to %s', self.plugins.provider.name(), path)
         await self.plugins.provider.download_tooling(path)

@@ -14,36 +14,36 @@ from cppython.utility.utility import TypeName
 class CPPythonModel(BaseModel):
     """The base model to use for all CPPython models"""
 
-    model_config = {"populate_by_name": False}
+    model_config = {'populate_by_name': False}
 
 
-class ProjectData(CPPythonModel, extra="forbid"):
+class ProjectData(CPPythonModel, extra='forbid'):
     """Resolved data of 'ProjectConfiguration'"""
 
-    pyproject_file: Annotated[FilePath, Field(description="The path where the pyproject.toml exists")]
-    verbosity: Annotated[int, Field(description="The verbosity level as an integer [0,2]")] = 0
+    pyproject_file: Annotated[FilePath, Field(description='The path where the pyproject.toml exists')]
+    verbosity: Annotated[int, Field(description='The verbosity level as an integer [0,2]')] = 0
 
 
-class ProjectConfiguration(CPPythonModel, extra="forbid"):
+class ProjectConfiguration(CPPythonModel, extra='forbid'):
     """Project-wide configuration"""
 
-    pyproject_file: Annotated[FilePath, Field(description="The path where the pyproject.toml exists")]
+    pyproject_file: Annotated[FilePath, Field(description='The path where the pyproject.toml exists')]
     version: Annotated[
         str | None,
         Field(
             description=(
                 "The version number a 'dynamic' project version will resolve to. If not provided"
-                "a CPPython project will"
-                " initialize its SCM plugins to discover any available version"
+                'a CPPython project will'
+                ' initialize its SCM plugins to discover any available version'
             )
         ),
     ]
-    verbosity: Annotated[int, Field(description="The verbosity level as an integer [0,2]")] = 0
+    verbosity: Annotated[int, Field(description='The verbosity level as an integer [0,2]')] = 0
     debug: Annotated[
-        bool, Field(description="Debug mode. Additional processing will happen to expose more debug information")
+        bool, Field(description='Debug mode. Additional processing will happen to expose more debug information')
     ] = False
 
-    @field_validator("verbosity")
+    @field_validator('verbosity')
     @classmethod
     def min_max(cls, value: int) -> int:
         """Validator that clamps the input value
@@ -56,7 +56,7 @@ class ProjectConfiguration(CPPythonModel, extra="forbid"):
         """
         return min(max(value, 0), 2)
 
-    @field_validator("pyproject_file")
+    @field_validator('pyproject_file')
     @classmethod
     def pyproject_name(cls, value: FilePath) -> FilePath:
         """Validator that verifies the name of the file
@@ -70,8 +70,7 @@ class ProjectConfiguration(CPPythonModel, extra="forbid"):
         Returns:
             The file path
         """
-
-        if value.name != "pyproject.toml":
+        if value.name != 'pyproject.toml':
             raise ValueError('The given file is not named "pyproject.toml"')
 
         return value
@@ -91,14 +90,14 @@ class PEP621Configuration(CPPythonModel):
         Schema: https://www.python.org/dev/peps/pep-0621/
     """
 
-    dynamic: Annotated[list[str], Field(description="https://peps.python.org/pep-0621/#dynamic")] = []
-    name: Annotated[str, Field(description="https://peps.python.org/pep-0621/#name")]
-    version: Annotated[str | None, Field(description="https://peps.python.org/pep-0621/#version")] = None
-    description: Annotated[str, Field(description="https://peps.python.org/pep-0621/#description")] = ""
+    dynamic: Annotated[list[str], Field(description='https://peps.python.org/pep-0621/#dynamic')] = []
+    name: Annotated[str, Field(description='https://peps.python.org/pep-0621/#name')]
+    version: Annotated[str | None, Field(description='https://peps.python.org/pep-0621/#version')] = None
+    description: Annotated[str, Field(description='https://peps.python.org/pep-0621/#description')] = ''
 
-    @model_validator(mode="after")  # type: ignore
+    @model_validator(mode='after')  # type: ignore
     @classmethod
-    def dynamic_data(cls, model: "PEP621Configuration") -> "PEP621Configuration":
+    def dynamic_data(cls, model: 'PEP621Configuration') -> 'PEP621Configuration':
         """Validates that dynamic data is represented correctly
 
         Args:
@@ -110,26 +109,24 @@ class PEP621Configuration(CPPythonModel):
         Returns:
             The data
         """
-
         for field in model.model_fields.keys():
-            if field == "dynamic":
+            if field == 'dynamic':
                 continue
             value = getattr(model, field)
             if field not in model.dynamic:
                 if value is None:
                     raise ValueError(f"'{field}' is not a dynamic field. It must be defined")
-            else:
-                if value is not None:
-                    raise ValueError(f"'{field}' is a dynamic field. It must not be defined")
+            elif value is not None:
+                raise ValueError(f"'{field}' is a dynamic field. It must not be defined")
 
         return model
 
 
 def _default_install_location() -> Path:
-    return Path.home() / ".cppython"
+    return Path.home() / '.cppython'
 
 
-class CPPythonData(CPPythonModel, extra="forbid"):
+class CPPythonData(CPPythonModel, extra='forbid'):
     """Resolved CPPython data with local and global configuration"""
 
     install_path: DirectoryPath
@@ -140,7 +137,7 @@ class CPPythonData(CPPythonModel, extra="forbid"):
     generator_name: TypeName
     scm_name: TypeName
 
-    @field_validator("install_path", "tool_path", "build_path")
+    @field_validator('install_path', 'tool_path', 'build_path')
     @classmethod
     def validate_absolute_path(cls, value: DirectoryPath) -> DirectoryPath:
         """Enforce the input is an absolute path
@@ -155,12 +152,12 @@ class CPPythonData(CPPythonModel, extra="forbid"):
             The validated input value
         """
         if not value.is_absolute():
-            raise ValueError("Absolute path required")
+            raise ValueError('Absolute path required')
 
         return value
 
 
-CPPythonPluginData = NewType("CPPythonPluginData", CPPythonData)
+CPPythonPluginData = NewType('CPPythonPluginData', CPPythonData)
 
 
 class SyncData(CPPythonModel):
@@ -173,7 +170,7 @@ class SupportedFeatures(CPPythonModel):
     """Plugin feature support"""
 
     initialization: Annotated[
-        bool, Field(description="Whether the plugin supports initialization from an empty state")
+        bool, Field(description='Whether the plugin supports initialization from an empty state')
     ] = False
 
 
@@ -181,16 +178,16 @@ class Information(CPPythonModel):
     """Plugin information that complements the packaged project metadata"""
 
 
-class PluginGroupData(CPPythonModel, extra="forbid"):
+class PluginGroupData(CPPythonModel, extra='forbid'):
     """Plugin group data"""
 
-    root_directory: Annotated[DirectoryPath, Field(description="The directory of the project")]
+    root_directory: Annotated[DirectoryPath, Field(description='The directory of the project')]
     tool_directory: Annotated[
         DirectoryPath,
         Field(
             description=(
-                "Points to the project plugin directory within the tool directory. "
-                "This directory is for project specific cached data."
+                'Points to the project plugin directory within the tool directory. '
+                'This directory is for project specific cached data.'
             )
         ),
     ]
@@ -274,32 +271,32 @@ class DataPlugin(Plugin, Protocol):
         """
 
 
-class CPPythonGlobalConfiguration(CPPythonModel, extra="forbid"):
+class CPPythonGlobalConfiguration(CPPythonModel, extra='forbid'):
     """Global data extracted by the tool"""
 
-    current_check: Annotated[bool, Field(alias="current-check", description="Checks for a new CPPython version")] = True
+    current_check: Annotated[bool, Field(alias='current-check', description='Checks for a new CPPython version')] = True
 
 
-ProviderData = NewType("ProviderData", dict[str, Any])
-GeneratorData = NewType("GeneratorData", dict[str, Any])
+ProviderData = NewType('ProviderData', dict[str, Any])
+GeneratorData = NewType('GeneratorData', dict[str, Any])
 
 
-class CPPythonLocalConfiguration(CPPythonModel, extra="forbid"):
+class CPPythonLocalConfiguration(CPPythonModel, extra='forbid'):
     """Data required by the tool"""
 
     install_path: Annotated[
         Path,
         Field(
-            alias="install-path",
-            description="The global install path for the project",
+            alias='install-path',
+            description='The global install path for the project',
         ),
     ] = _default_install_location()
-    tool_path: Annotated[Path, Field(alias="tool-path", description="The local tooling path for the project")] = Path(
-        "tool"
+    tool_path: Annotated[Path, Field(alias='tool-path', description='The local tooling path for the project')] = Path(
+        'tool'
     )
 
-    build_path: Annotated[Path, Field(alias="build-path", description="The local build path for the project")] = Path(
-        "build"
+    build_path: Annotated[Path, Field(alias='build-path', description='The local build path for the project')] = Path(
+        'build'
     )
 
     provider: Annotated[ProviderData, Field(description="Provider plugin data associated with 'provider_name")] = (
@@ -309,8 +306,8 @@ class CPPythonLocalConfiguration(CPPythonModel, extra="forbid"):
     provider_name: Annotated[
         TypeName | None,
         Field(
-            alias="provider-name",
-            description="If empty, the provider will be automatically deduced.",
+            alias='provider-name',
+            description='If empty, the provider will be automatically deduced.',
         ),
     ] = None
 
@@ -321,8 +318,8 @@ class CPPythonLocalConfiguration(CPPythonModel, extra="forbid"):
     generator_name: Annotated[
         TypeName | None,
         Field(
-            alias="generator-name",
-            description="If empty, the generator will be automatically deduced.",
+            alias='generator-name',
+            description='If empty, the generator will be automatically deduced.',
         ),
     ] = None
 
@@ -330,14 +327,14 @@ class CPPythonLocalConfiguration(CPPythonModel, extra="forbid"):
 class ToolData(CPPythonModel):
     """Tool entry of pyproject.toml"""
 
-    cppython: Annotated[CPPythonLocalConfiguration | None, Field(description="CPPython tool data")] = None
+    cppython: Annotated[CPPythonLocalConfiguration | None, Field(description='CPPython tool data')] = None
 
 
 class PyProject(CPPythonModel):
     """pyproject.toml schema"""
 
-    project: Annotated[PEP621Configuration, Field(description="PEP621: https://www.python.org/dev/peps/pep-0621/")]
-    tool: Annotated[ToolData | None, Field(description="Tool data")] = None
+    project: Annotated[PEP621Configuration, Field(description='PEP621: https://www.python.org/dev/peps/pep-0621/')]
+    tool: Annotated[ToolData | None, Field(description='Tool data')] = None
 
 
 class CoreData(CPPythonModel):

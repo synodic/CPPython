@@ -20,7 +20,7 @@ from cppython.utility.utility import TypeName
 class TestCPPythonGenerator(GeneratorUnitTests[CMakeGenerator]):
     """The tests for the CMake generator"""
 
-    @pytest.fixture(name="plugin_data", scope="session")
+    @pytest.fixture(name='plugin_data', scope='session')
     def fixture_plugin_data(self, cmake_data: CMakeConfiguration) -> dict[str, Any]:
         """A required testing hook that allows data generation
 
@@ -30,10 +30,9 @@ class TestCPPythonGenerator(GeneratorUnitTests[CMakeGenerator]):
         Returns:
             The constructed plugin data
         """
-
         return cmake_data.model_dump()
 
-    @pytest.fixture(name="plugin_type", scope="session")
+    @pytest.fixture(name='plugin_type', scope='session')
     def fixture_plugin_type(self) -> type[CMakeGenerator]:
         """A required testing hook that allows type generation
 
@@ -50,11 +49,11 @@ class TestCPPythonGenerator(GeneratorUnitTests[CMakeGenerator]):
         """
         builder = Builder()
 
-        includes_file = tmp_path / "includes.cmake"
-        with includes_file.open("w", encoding="utf-8") as file:
-            file.write("example contents")
+        includes_file = tmp_path / 'includes.cmake'
+        with includes_file.open('w', encoding='utf-8') as file:
+            file.write('example contents')
 
-        data = CMakeSyncData(provider_name=TypeName("test-provider"), top_level_includes=includes_file)
+        data = CMakeSyncData(provider_name=TypeName('test-provider'), top_level_includes=includes_file)
         builder.write_provider_preset(tmp_path, data)
 
     def test_cppython_write(self, tmp_path: Path) -> None:
@@ -63,17 +62,16 @@ class TestCPPythonGenerator(GeneratorUnitTests[CMakeGenerator]):
         Args:
             tmp_path: The input path the use
         """
-
         builder = Builder()
 
-        provider_directory = tmp_path / "providers"
+        provider_directory = tmp_path / 'providers'
         provider_directory.mkdir(parents=True, exist_ok=True)
 
-        includes_file = provider_directory / "includes.cmake"
-        with includes_file.open("w", encoding="utf-8") as file:
-            file.write("example contents")
+        includes_file = provider_directory / 'includes.cmake'
+        with includes_file.open('w', encoding='utf-8') as file:
+            file.write('example contents')
 
-        data = CMakeSyncData(provider_name=TypeName("test-provider"), top_level_includes=includes_file)
+        data = CMakeSyncData(provider_name=TypeName('test-provider'), top_level_includes=includes_file)
         builder.write_provider_preset(provider_directory, data)
 
         builder.write_cppython_preset(tmp_path, provider_directory, data)
@@ -84,24 +82,23 @@ class TestCPPythonGenerator(GeneratorUnitTests[CMakeGenerator]):
         Args:
             tmp_path: The input path the use
         """
-
         builder = Builder()
 
-        cppython_preset_directory = tmp_path / "cppython"
+        cppython_preset_directory = tmp_path / 'cppython'
         cppython_preset_directory.mkdir(parents=True, exist_ok=True)
 
-        provider_directory = cppython_preset_directory / "providers"
+        provider_directory = cppython_preset_directory / 'providers'
         provider_directory.mkdir(parents=True, exist_ok=True)
 
-        includes_file = provider_directory / "includes.cmake"
-        with includes_file.open("w", encoding="utf-8") as file:
-            file.write("example contents")
+        includes_file = provider_directory / 'includes.cmake'
+        with includes_file.open('w', encoding='utf-8') as file:
+            file.write('example contents')
 
-        root_file = tmp_path / "CMakePresets.json"
+        root_file = tmp_path / 'CMakePresets.json'
         presets = CMakePresets()
         write_model_json(root_file, presets)
 
-        data = CMakeSyncData(provider_name=TypeName("test-provider"), top_level_includes=includes_file)
+        data = CMakeSyncData(provider_name=TypeName('test-provider'), top_level_includes=includes_file)
         builder.write_provider_preset(provider_directory, data)
 
         cppython_preset_file = builder.write_cppython_preset(cppython_preset_directory, provider_directory, data)
@@ -114,27 +111,26 @@ class TestCPPythonGenerator(GeneratorUnitTests[CMakeGenerator]):
         Args:
             tmp_path: The input path the use
         """
-
         builder = Builder()
 
-        cppython_preset_directory = tmp_path / "tool" / "cppython"
+        cppython_preset_directory = tmp_path / 'tool' / 'cppython'
         cppython_preset_directory.mkdir(parents=True, exist_ok=True)
 
-        provider_directory = cppython_preset_directory / "providers"
+        provider_directory = cppython_preset_directory / 'providers'
         provider_directory.mkdir(parents=True, exist_ok=True)
 
-        includes_file = provider_directory / "includes.cmake"
-        with includes_file.open("w", encoding="utf-8") as file:
-            file.write("example contents")
+        includes_file = provider_directory / 'includes.cmake'
+        with includes_file.open('w', encoding='utf-8') as file:
+            file.write('example contents')
 
-        relative_indirection = tmp_path / "nested"
+        relative_indirection = tmp_path / 'nested'
         relative_indirection.mkdir(parents=True, exist_ok=True)
 
-        root_file = relative_indirection / "CMakePresets.json"
+        root_file = relative_indirection / 'CMakePresets.json'
         presets = CMakePresets()
         write_model_json(root_file, presets)
 
-        data = CMakeSyncData(provider_name=TypeName("test-provider"), top_level_includes=includes_file)
+        data = CMakeSyncData(provider_name=TypeName('test-provider'), top_level_includes=includes_file)
         builder.write_provider_preset(provider_directory, data)
 
         cppython_preset_file = builder.write_cppython_preset(cppython_preset_directory, provider_directory, data)

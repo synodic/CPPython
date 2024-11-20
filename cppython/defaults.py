@@ -1,6 +1,7 @@
 """Defines a SCM subclass that is used as the default SCM if no plugin is found or selected"""
 
 from pydantic import DirectoryPath
+
 from cppython.core.plugin_schema.scm import SCM, SCMPluginGroupData, SupportedSCMFeatures
 from cppython.core.schema import Information
 
@@ -21,7 +22,6 @@ class DefaultSCM(SCM):
         Returns:
             The supported features
         """
-
         return SupportedSCMFeatures(repository=True)
 
     @staticmethod
@@ -39,4 +39,4 @@ class DefaultSCM(SCM):
         Returns:
             A version
         """
-        return "1.0.0"
+        return '1.0.0'

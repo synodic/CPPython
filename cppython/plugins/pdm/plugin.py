@@ -16,7 +16,7 @@ class CPPythonPlugin(Interface):
 
     def __init__(self, _core: Core) -> None:
         post_install.connect(self.on_post_install, weak=False)
-        self.logger = getLogger("cppython.interface.pdm")
+        self.logger = getLogger('cppython.interface.pdm')
 
     def write_pyproject(self) -> None:
         """Write to file"""
@@ -32,11 +32,10 @@ class CPPythonPlugin(Interface):
             dry_run: If true, won't perform any actions
             _kwargs: Sink for unknown arguments
         """
-
         pyproject_file = project.root.absolute() / project.PYPROJECT_FILENAME
 
         # Attach configuration for CPPythonPlugin callbacks
-        version = project.pyproject.metadata.get("version")
+        version = project.pyproject.metadata.get('version')
         verbosity = project.core.ui.verbosity
 
         project_configuration = ProjectConfiguration(
@@ -46,7 +45,7 @@ class CPPythonPlugin(Interface):
         self.logger.info("CPPython: Entered 'on_post_install'")
 
         if (pdm_pyproject := project.pyproject.read()) is None:
-            self.logger.info("CPPython: Project data was not available")
+            self.logger.info('CPPython: Project data was not available')
             return
 
         cppython_project = CPPythonProject(project_configuration, self, pdm_pyproject)

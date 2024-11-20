@@ -19,15 +19,14 @@ def _find_pyproject_file() -> Path:
     Returns:
         The found directory
     """
-
     # Search for a path upward
     path = Path.cwd()
 
-    while not path.glob("pyproject.toml"):
+    while not path.glob('pyproject.toml'):
         if path.is_absolute():
-            assert (
-                False
-            ), "This is not a valid project. No pyproject.toml found in the current directory or any of its parents."
+            assert False, (
+                'This is not a valid project. No pyproject.toml found in the current directory or any of its parents.'
+            )
 
     path = Path(path)
 
@@ -38,7 +37,7 @@ def _find_pyproject_file() -> Path:
 def main(
     context: typer.Context,
     verbose: Annotated[
-        int, typer.Option("-v", "--verbose", count=True, min=0, max=2, help="Print additional output")
+        int, typer.Option('-v', '--verbose', count=True, min=0, max=2, help='Print additional output')
     ] = 0,
     debug: Annotated[bool, typer.Option()] = False,
 ) -> None:
@@ -49,9 +48,8 @@ def main(
         verbose: The verbosity level
         debug: Debug mode
     """
-
     path = _find_pyproject_file()
-    file_path = path / "pyproject.toml"
+    file_path = path / 'pyproject.toml'
 
     project_configuration = ProjectConfiguration(verbosity=verbose, debug=debug, pyproject_file=file_path, version=None)
 
@@ -78,12 +76,11 @@ def install(
     Raises:
         ValueError: If the configuration object is missing
     """
-
     if (configuration := context.find_object(ConsoleConfiguration)) is None:
-        raise ValueError("The configuration object is missing")
+        raise ValueError('The configuration object is missing')
 
     path = configuration.project_configuration.pyproject_file
-    pyproject_data = loads(path.read_text(encoding="utf-8"))
+    pyproject_data = loads(path.read_text(encoding='utf-8'))
 
     project = Project(configuration.project_configuration, configuration.interface, pyproject_data)
     project.install()
@@ -102,16 +99,16 @@ def update(
         ValueError: If the configuration object is missing
     """
     if (configuration := context.find_object(ConsoleConfiguration)) is None:
-        raise ValueError("The configuration object is missing")
+        raise ValueError('The configuration object is missing')
 
     path = configuration.project_configuration.pyproject_file
-    pyproject_data = loads(path.read_text(encoding="utf-8"))
+    pyproject_data = loads(path.read_text(encoding='utf-8'))
 
     project = Project(configuration.project_configuration, configuration.interface, pyproject_data)
     project.update()
 
 
-@app.command(name="list")
+@app.command(name='list')
 def list_command(
     _: typer.Context,
 ) -> None:

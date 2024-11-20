@@ -26,7 +26,7 @@ def _pep621_configuration_list() -> list[PEP621Configuration]:
     variants = []
 
     # Default
-    variants.append(PEP621Configuration(name="default-test", version="1.0.0"))
+    variants.append(PEP621Configuration(name='default-test', version='1.0.0'))
 
     return variants
 
@@ -53,7 +53,7 @@ def _cppython_global_configuration_list() -> list[CPPythonGlobalConfiguration]:
     """
     variants = []
 
-    data = {"current-check": False}
+    data = {'current-check': False}
 
     # Default
     variants.append(CPPythonGlobalConfiguration())
@@ -75,7 +75,7 @@ def _project_configuration_list() -> list[ProjectConfiguration]:
     # NOTE: pyproject_file will be overridden by fixture
 
     # Default
-    variants.append(ProjectConfiguration(pyproject_file=Path("pyproject.toml"), version="0.1.0"))
+    variants.append(ProjectConfiguration(pyproject_file=Path('pyproject.toml'), version='0.1.0'))
 
     return variants
 

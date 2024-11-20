@@ -21,11 +21,10 @@ def generate_manifest(core_data: CorePluginData, data: VcpkgData) -> Manifest:
     Returns:
         The manifest
     """
-
     manifest = {
-        "name": core_data.pep621_data.name,
-        "version_string": core_data.pep621_data.version,
-        "dependencies": data.dependencies,
+        'name': core_data.pep621_data.name,
+        'version_string': core_data.pep621_data.version,
+        'dependencies': data.dependencies,
     }
 
     return Manifest(**manifest)
@@ -41,7 +40,6 @@ def resolve_vcpkg_data(data: dict[str, Any], core_data: CorePluginData) -> Vcpkg
     Returns:
         The resolved data
     """
-
     parsed_data = VcpkgConfiguration(**data)
 
     root_directory = core_data.project_data.pyproject_file.parent.absolute()

@@ -11,17 +11,16 @@ from cppython.test.pytest.tests import GeneratorUnitTests
 class TestCPPythonGenerator(GeneratorUnitTests[MockGenerator]):
     """The tests for the Mock generator"""
 
-    @pytest.fixture(name="plugin_data", scope="session")
+    @pytest.fixture(name='plugin_data', scope='session')
     def fixture_plugin_data(self) -> dict[str, Any]:
         """Returns mock data
 
         Returns:
             An overridden data instance
         """
-
         return {}
 
-    @pytest.fixture(name="plugin_type", scope="session")
+    @pytest.fixture(name='plugin_type', scope='session')
     def fixture_plugin_type(self) -> type[MockGenerator]:
         """A required testing hook that allows type generation
 

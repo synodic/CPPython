@@ -21,8 +21,8 @@ class TestData:
     """Various tests for the Data type"""
 
     @pytest.fixture(
-        name="data",
-        scope="session",
+        name='data',
+        scope='session',
     )
     def fixture_data(
         self,
@@ -41,7 +41,6 @@ class TestData:
         Returns:
             The mock plugins fixture
         """
-
         logger = logging.getLogger()
         builder = Builder(project_configuration, logger)
 

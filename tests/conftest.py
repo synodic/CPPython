@@ -46,7 +46,7 @@ def _cmake_data_list() -> list[CMakeConfiguration]:
     variants = []
 
     # Default
-    variants.append(CMakeConfiguration(configuration_name="default"))
+    variants.append(CMakeConfiguration(configuration_name='default'))
 
     # variants.append(CMakeConfiguration(preset_file=Path("inner/CMakePresets.json"), configuration_name="default"))
 
@@ -54,8 +54,8 @@ def _cmake_data_list() -> list[CMakeConfiguration]:
 
 
 @pytest.fixture(
-    name="install_path",
-    scope="session",
+    name='install_path',
+    scope='session',
 )
 def fixture_install_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """Creates temporary install location
@@ -70,8 +70,8 @@ def fixture_install_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 @pytest.fixture(
-    name="pep621_configuration",
-    scope="session",
+    name='pep621_configuration',
+    scope='session',
     params=pep621_variants,
 )
 def fixture_pep621_configuration(request: pytest.FixtureRequest) -> PEP621Configuration:
@@ -83,13 +83,12 @@ def fixture_pep621_configuration(request: pytest.FixtureRequest) -> PEP621Config
     Returns:
         PEP621 variant
     """
-
     return cast(PEP621Configuration, request.param)
 
 
 @pytest.fixture(
-    name="pep621_data",
-    scope="session",
+    name='pep621_data',
+    scope='session',
 )
 def fixture_pep621_data(
     pep621_configuration: PEP621Configuration, project_configuration: ProjectConfiguration
@@ -103,13 +102,12 @@ def fixture_pep621_data(
     Returns:
         The resolved project table
     """
-
     return resolve_pep621(pep621_configuration, project_configuration, None)
 
 
 @pytest.fixture(
-    name="cppython_local_configuration",
-    scope="session",
+    name='cppython_local_configuration',
+    scope='session',
     params=cppython_local_variants,
 )
 def fixture_cppython_local_configuration(
@@ -129,18 +127,18 @@ def fixture_cppython_local_configuration(
     data = cppython_local_configuration.model_dump(by_alias=True)
 
     # Pin the install location to the base temporary directory
-    data["install-path"] = install_path
+    data['install-path'] = install_path
 
     # Fill the plugin names with mocked values
-    data["provider-name"] = "mock"
-    data["generator-name"] = "mock"
+    data['provider-name'] = 'mock'
+    data['generator-name'] = 'mock'
 
     return CPPythonLocalConfiguration(**data)
 
 
 @pytest.fixture(
-    name="cppython_global_configuration",
-    scope="session",
+    name='cppython_global_configuration',
+    scope='session',
     params=cppython_global_variants,
 )
 def fixture_cppython_global_configuration(request: pytest.FixtureRequest) -> CPPythonGlobalConfiguration:
@@ -158,8 +156,8 @@ def fixture_cppython_global_configuration(request: pytest.FixtureRequest) -> CPP
 
 
 @pytest.fixture(
-    name="plugin_build_data",
-    scope="session",
+    name='plugin_build_data',
+    scope='session',
 )
 def fixture_plugin_build_data(
     provider_type: type[Provider],
@@ -176,13 +174,12 @@ def fixture_plugin_build_data(
     Returns:
         The plugin build data
     """
-
     return PluginBuildData(generator_type=generator_type, provider_type=provider_type, scm_type=scm_type)
 
 
 @pytest.fixture(
-    name="plugin_cppython_data",
-    scope="session",
+    name='plugin_cppython_data',
+    scope='session',
 )
 def fixture_plugin_cppython_data(
     provider_type: type[Provider],
@@ -199,15 +196,14 @@ def fixture_plugin_cppython_data(
     Returns:
         The plugin data for CPPython resolution
     """
-
     return PluginCPPythonData(
         generator_name=generator_type.name(), provider_name=provider_type.name(), scm_name=scm_type.name()
     )
 
 
 @pytest.fixture(
-    name="cppython_data",
-    scope="session",
+    name='cppython_data',
+    scope='session',
 )
 def fixture_cppython_data(
     cppython_local_configuration: CPPythonLocalConfiguration,
@@ -226,14 +222,13 @@ def fixture_cppython_data(
     Returns:
         The resolved CPPython table
     """
-
     return resolve_cppython(
         cppython_local_configuration, cppython_global_configuration, project_data, plugin_cppython_data
     )
 
 
 @pytest.fixture(
-    name="core_data",
+    name='core_data',
 )
 def fixture_core_data(cppython_data: CPPythonData, project_data: ProjectData) -> CoreData:
     """Fixture for creating the wrapper CoreData type
@@ -245,13 +240,12 @@ def fixture_core_data(cppython_data: CPPythonData, project_data: ProjectData) ->
     Returns:
         Wrapper Core Type
     """
-
     return CoreData(cppython_data=cppython_data, project_data=project_data)
 
 
 @pytest.fixture(
-    name="project_configuration",
-    scope="session",
+    name='project_configuration',
+    scope='session',
     params=project_variants,
 )
 def fixture_project_configuration(
@@ -267,13 +261,13 @@ def fixture_project_configuration(
     Returns:
         Configuration with temporary directory capabilities
     """
-    tmp_path = tmp_path_factory.mktemp("workspace-")
+    tmp_path = tmp_path_factory.mktemp('workspace-')
     configuration = cast(ProjectConfiguration, request.param)
 
-    pyproject_file = tmp_path / "pyproject.toml"
+    pyproject_file = tmp_path / 'pyproject.toml'
 
     # Write a dummy file to satisfy the config constraints
-    with open(pyproject_file, "w", encoding="utf-8"):
+    with open(pyproject_file, 'w', encoding='utf-8'):
         pass
 
     configuration.pyproject_file = pyproject_file
@@ -282,8 +276,8 @@ def fixture_project_configuration(
 
 
 @pytest.fixture(
-    name="project_data",
-    scope="session",
+    name='project_data',
+    scope='session',
 )
 def fixture_project_data(project_configuration: ProjectConfiguration) -> ProjectData:
     """Fixture that creates a project space at 'workspace/test_project/pyproject.toml'
@@ -292,11 +286,10 @@ def fixture_project_data(project_configuration: ProjectConfiguration) -> Project
     Returns:
         A project data object that has populated a function level temporary directory
     """
-
     return resolve_project_configuration(project_configuration)
 
 
-@pytest.fixture(name="project")
+@pytest.fixture(name='project')
 def fixture_project(
     cppython_local_configuration: CPPythonLocalConfiguration, pep621_configuration: PEP621Configuration
 ) -> PyProject:
@@ -307,14 +300,13 @@ def fixture_project(
     Returns:
         All the data as one object
     """
-
     tool = ToolData(cppython=cppython_local_configuration)
     return PyProject(project=pep621_configuration, tool=tool)
 
 
 @pytest.fixture(
-    name="cmake_data",
-    scope="session",
+    name='cmake_data',
+    scope='session',
     params=_cmake_data_list(),
 )
 def fixture_cmake_data(request: pytest.FixtureRequest) -> CMakeConfiguration:
@@ -326,7 +318,6 @@ def fixture_cmake_data(request: pytest.FixtureRequest) -> CMakeConfiguration:
     Returns:
         A configuration type instance
     """
-
     return cast(CMakeConfiguration, request.param)
 
 
@@ -337,12 +328,10 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     Args:
         metafunc: Pytest hook data
     """
-
     for fixture in metafunc.fixturenames:
-        match fixture.split("_", 1):
-            case ["build", directory]:
-
+        match fixture.split('_', 1):
+            case ['build', directory]:
                 # Parameterizes the paths under tests/build/<directory> where <directory> is the fixture suffix
 
-                build_data_path = metafunc.config.rootpath / "tests" / "build" / directory
-                metafunc.parametrize(fixture, [build_data_path], scope="session")
+                build_data_path = metafunc.config.rootpath / 'tests' / 'build' / directory
+                metafunc.parametrize(fixture, [build_data_path], scope='session')

@@ -58,7 +58,6 @@ class MockGenerator(Generator):
         Returns:
             _description_
         """
-
         return [MockSyncData]
 
     def sync(self, sync_data: SyncData) -> None:

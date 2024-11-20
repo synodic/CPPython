@@ -12,24 +12,20 @@ class TestConsole:
 
     def test_info(self) -> None:
         """Verifies that the info command functions with CPPython hooks"""
-
-        result = runner.invoke(app, ["info"])
+        result = runner.invoke(app, ['info'])
         assert result.exit_code == 0
 
     def test_list(self) -> None:
         """Verifies that the list command functions with CPPython hooks"""
-
-        result = runner.invoke(app, ["list"])
+        result = runner.invoke(app, ['list'])
         assert result.exit_code == 0
 
     def test_update(self) -> None:
         """Verifies that the update command functions with CPPython hooks"""
-
-        result = runner.invoke(app, ["update"])
+        result = runner.invoke(app, ['update'])
         assert result.exit_code == 0
 
     def test_install(self) -> None:
         """Verifies that the install command functions with CPPython hooks"""
-
-        result = runner.invoke(app, ["install"])
+        result = runner.invoke(app, ['install'])
         assert result.exit_code == 0

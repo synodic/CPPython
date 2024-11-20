@@ -12,7 +12,6 @@ class TestFixtures:
         Args:
             build_test_build: The plugins build folder directory
         """
-
-        requirement = build_test_build / "build.txt"
+        requirement = build_test_build / 'build.txt'
 
         assert requirement.exists()

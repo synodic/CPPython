@@ -16,7 +16,7 @@ class SupportedSCMFeatures(SupportedFeatures):
     """SCM plugin feature support"""
 
     repository: Annotated[
-        bool, Field(description="True if the directory is a repository for the SCM. False, otherwise")
+        bool, Field(description='True if the directory is a repository for the SCM. False, otherwise')
     ]
 
 

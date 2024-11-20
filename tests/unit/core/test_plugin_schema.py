@@ -1,10 +1,9 @@
 """Test plugin schemas"""
 
-from cppython.utility.utility import TypeName
-
 from cppython.core.plugin_schema.generator import SyncConsumer
 from cppython.core.plugin_schema.provider import SyncProducer
 from cppython.core.schema import SyncData
+from cppython.utility.utility import TypeName
 
 
 class TestSchema:
@@ -30,7 +29,6 @@ class TestSchema:
             Returns:
                 Fulfils protocol
             """
-
             return [TestSchema.GeneratorSyncDataSuccess, TestSchema.GeneratorSyncDataFail]
 
         def sync(self, sync_data: SyncData) -> None:
@@ -39,7 +37,6 @@ class TestSchema:
             Args:
                 sync_data: Fulfils protocol
             """
-
             if isinstance(sync_data, TestSchema.GeneratorSyncDataSuccess):
                 assert sync_data.success
             else:
@@ -71,13 +68,12 @@ class TestSchema:
             """
             for sync_type in consumer.sync_types():
                 if sync_type == TestSchema.GeneratorSyncDataSuccess:
-                    return TestSchema.GeneratorSyncDataSuccess(provider_name=TypeName("Dummy"), success=True)
+                    return TestSchema.GeneratorSyncDataSuccess(provider_name=TypeName('Dummy'), success=True)
 
             return None
 
     def test_sync_broadcast(self) -> None:
         """Verifies broadcast support"""
-
         consumer = self.Consumer()
         producer = self.Producer()
 
@@ -88,22 +84,19 @@ class TestSchema:
 
     def test_sync_production(self) -> None:
         """Verifies the variant behavior of SyncData"""
-
         producer = self.Producer()
         consumer = self.Consumer()
         assert producer.sync_data(consumer)
 
     def test_sync_consumption(self) -> None:
         """Verifies the variant behavior of SyncData"""
-
         consumer = self.Consumer()
 
-        data = self.GeneratorSyncDataSuccess(provider_name=TypeName("Dummy"), success=True)
+        data = self.GeneratorSyncDataSuccess(provider_name=TypeName('Dummy'), success=True)
         consumer.sync(data)
 
     def test_sync_flow(self) -> None:
         """Verifies the variant behavior of SyncData"""
-
         consumer = self.Consumer()
         producer = self.Producer()
 

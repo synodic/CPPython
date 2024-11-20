@@ -13,17 +13,16 @@ from cppython.test.pytest.tests import ProviderUnitTests
 class TestMockProvider(ProviderUnitTests[MockProvider]):
     """The tests for our Mock provider"""
 
-    @pytest.fixture(name="plugin_data", scope="session")
+    @pytest.fixture(name='plugin_data', scope='session')
     def fixture_provider_data(self) -> dict[str, Any]:
         """Returns mock data
 
         Returns:
             An overridden data instance
         """
-
         return {}
 
-    @pytest.fixture(name="plugin_type", scope="session")
+    @pytest.fixture(name='plugin_type', scope='session')
     def fixture_plugin_type(self) -> type[MockProvider]:
         """A required testing hook that allows type generation
 
@@ -39,7 +38,6 @@ class TestMockProvider(ProviderUnitTests[MockProvider]):
             plugin: The plugin instance
             mocker: The pytest-mock fixture
         """
-
         mock_generator = mocker.Mock(spec=MockGenerator)
         mock_generator.sync_types.return_value = MockGenerator.sync_types()
 

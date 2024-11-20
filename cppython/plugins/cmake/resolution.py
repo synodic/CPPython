@@ -16,7 +16,6 @@ def resolve_cmake_data(data: dict[str, Any], core_data: CorePluginData) -> CMake
     Returns:
         The resolved data
     """
-
     parsed_data = CMakeConfiguration(**data)
 
     root_directory = core_data.project_data.pyproject_file.parent.absolute()

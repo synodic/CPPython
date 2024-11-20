@@ -26,7 +26,6 @@ class MockSCM(SCM):
         Returns:
             The supported features
         """
-
         return SupportedSCMFeatures(repository=True)
 
     @staticmethod
@@ -47,4 +46,4 @@ class MockSCM(SCM):
         Returns:
             A version
         """
-        return "1.0.0"
+        return '1.0.0'

@@ -24,10 +24,9 @@ from cppython.utility.utility import canonicalize_type
 class ProviderIntegrationTests[T: Provider](DataPluginIntegrationTests[T], ProviderTests[T], metaclass=ABCMeta):
     """Base class for all provider integration tests that test plugin agnostic behavior"""
 
-    @pytest.fixture(autouse=True, scope="session")
+    @pytest.fixture(autouse=True, scope='session')
     def _fixture_install_dependency(self, plugin: T, install_path: Path) -> None:
         """Forces the download to only happen once per test session"""
-
         path = install_path / canonicalize_type(type(plugin)).name
         path.mkdir(parents=True, exist_ok=True)
 
@@ -55,7 +54,7 @@ class ProviderIntegrationTests[T: Provider](DataPluginIntegrationTests[T], Provi
         Args:
             plugin_type: The type to register
         """
-        assert canonicalize_type(plugin_type).group == "provider"
+        assert canonicalize_type(plugin_type).group == 'provider'
 
 
 class ProviderUnitTests[T: Provider](DataPluginUnitTests[T], ProviderTests[T], metaclass=ABCMeta):
@@ -73,12 +72,13 @@ class GeneratorIntegrationTests[T: Generator](DataPluginIntegrationTests[T], Gen
         Args:
             plugin_type: The type to register
         """
-        assert canonicalize_type(plugin_type).group == "generator"
+        assert canonicalize_type(plugin_type).group == 'generator'
 
 
 class GeneratorUnitTests[T: Generator](DataPluginUnitTests[T], GeneratorTests[T], metaclass=ABCMeta):
     """Custom implementations of the Generator class should inherit from this class for its tests.
-    Base class for all Generator unit tests that test plugin agnostic behavior"""
+    Base class for all Generator unit tests that test plugin agnostic behavior
+    """
 
 
 class SCMIntegrationTests[T: SCM](PluginIntegrationTests[T], SCMTests[T], metaclass=ABCMeta):
@@ -90,7 +90,7 @@ class SCMIntegrationTests[T: SCM](PluginIntegrationTests[T], SCMTests[T], metacl
         Args:
             plugin_type: The type to register
         """
-        assert canonicalize_type(plugin_type).group == "scm"
+        assert canonicalize_type(plugin_type).group == 'scm'
 
 
 class SCMUnitTests[T: SCM](PluginUnitTests[T], SCMTests[T], metaclass=ABCMeta):

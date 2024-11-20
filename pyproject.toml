@@ -51,10 +51,9 @@ vcpkg = "cppython.plugins.vcpkg.plugin:VcpkgProvider"
 
 [dependency-groups]
 lint = [
-  "black>=24.10.0",
-  "pylint>=3.3.1",
-  "isort>=5.13.2",
+  "ruff>=0.7.4",
   "mypy>=1.13",
+  "isort>=5.13.2",
 ]
 test = [
   "pytest>=8.3.3",
@@ -71,38 +70,45 @@ testpaths = [
   "tests",
 ]
 
-[tool.black]
-line-length = 120
-preview = true
-
-[tool.isort]
-profile = "black"
-skip_gitignore = true
-
 [tool.mypy]
 exclude = "__pypackages__"
 plugins = ["pydantic.mypy"]
 strict = true
 
-[tool.pylint.MAIN]
-load-plugins = [
-  "pylint.extensions.code_style",
-  "pylint.extensions.typing",
-  "pylint.extensions.docstyle",
-  "pylint.extensions.docparams",
-  "pylint.extensions.private_import",
-  "pylint.extensions.bad_builtin",
+[tool.isort]
+profile = "black"
+
+[tool.ruff]
+line-length = 120
+preview = true
+
+[tool.ruff.lint]
+ignore = [
+  "D206",
+  "D300",
+  "D415",
+  "E111",
+  "E114",
+  "E117",
+]
+select = [
+  "D", # pydocstyle
+  "F", # Pyflakes
+  "I", # isort
+  "PL", # pylint
+  "UP", # pyupgrade
+  "E", # pycodestyle
+  "B", # flake8-bugbear
+  "SIM", # flake8-simplify
 ]
 
-[tool.pylint.format]
-max-line-length = "120"
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
-[tool.pylint.parameter_documentation]
-accept-no-param-doc = false
-accept-no-raise-doc = false
-accept-no-return-doc = false
-accept-no-yields-doc = false
-default-docstring-type = "google"
+[tool.ruff.format]
+docstring-code-format = true
+indent-style = "space"
+quote-style = "single"
 
 [tool.coverage.report]
 skip_empty = true
@@ -114,8 +120,8 @@ update = ["--update-all"]
 source = "scm"
 
 [tool.pdm.scripts]
-analyze = {shell = "pylint --verbose cppython tests"}
-format = {shell = "black --check --verbose ."}
+analyze = {shell = "ruff check cppython tests"}
+format = {shell = "ruff format"}
 lint = {composite = ["analyze", "format", "sort-imports", "type-check"]}
 sort-imports = {shell = "isort --check-only --diff --verbose ."}
 test = {shell = "pytest --cov=cppython --verbose tests"}

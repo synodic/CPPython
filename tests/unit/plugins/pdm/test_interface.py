@@ -10,7 +10,7 @@ from cppython.plugins.pdm.plugin import CPPythonPlugin
 class TestCPPythonInterface:
     """The tests for the PDM interface"""
 
-    @pytest.fixture(name="interface")
+    @pytest.fixture(name='interface')
     def fixture_interface(self, plugin_type: type[CPPythonPlugin]) -> CPPythonPlugin:
         """A hook allowing implementations to override the fixture
 
@@ -24,7 +24,6 @@ class TestCPPythonInterface:
 
     def test_pdm_project(self) -> None:
         """Verify that this PDM won't return empty data"""
-
         core = Core()
         core.load_plugins()
         pdm_project = Project(core, root_path=None)

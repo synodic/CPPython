@@ -40,7 +40,6 @@ class MockProvider(Provider):
         Returns:
             The supported features
         """
-
         return SupportedProviderFeatures()
 
     @staticmethod
@@ -62,7 +61,6 @@ class MockProvider(Provider):
         Returns:
             Support
         """
-
         return sync_type == MockSyncData
 
     def sync_data(self, consumer: SyncConsumer) -> SyncData | None:
@@ -74,7 +72,6 @@ class MockProvider(Provider):
         Returns:
             The sync data object
         """
-
         # This is a mock class, so any generator sync type is OK
         for sync_type in consumer.sync_types():
             match sync_type:
