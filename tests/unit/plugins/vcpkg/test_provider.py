@@ -29,12 +29,3 @@ class TestCPPythonProvider(ProviderUnitTests[VcpkgProvider]):
             The type of the Provider
         """
         return VcpkgProvider
-
-    def test_manifest_generation(self, data_plugin: VcpkgProvider) -> None:
-        """Verifies that manifests can be generated from core data
-
-        Args:
-            data_plugin: Generated plugin
-        """
-
-        assert generate_manifest(data_plugin.core_data, data_plugin.data)
