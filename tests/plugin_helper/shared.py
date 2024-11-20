@@ -104,7 +104,6 @@ class BaseIntegrationTests[T: Plugin](metaclass=ABCMeta):
         """
 
         # We only require the entry point to be registered if the plugin is not a Mocked type
-
         if plugin_type.name() == "mock":
             pytest.skip("Mocked plugin type")
 
