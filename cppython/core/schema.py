@@ -2,7 +2,7 @@
 
 from abc import abstractmethod
 from pathlib import Path
-from typing import Annotated, Any, NewType, Protocol
+from typing import Annotated, Any, NewType, Protocol, runtime_checkable
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 from pydantic.types import DirectoryPath, FilePath
@@ -347,6 +347,7 @@ class CoreData(CPPythonModel):
     cppython_data: CPPythonData
 
 
+@runtime_checkable
 class Interface(Protocol):
     """Type for interfaces to allow feedback from CPPython"""
 

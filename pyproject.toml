@@ -14,7 +14,7 @@ dynamic = ["version"]
 requires-python = ">=3.13"
 
 dependencies = [
-  "typer>=0.12.4",
+  "typer>=0.13.1",
   "pydantic>=2.8.2",
   "packaging>=24.1",
 ]
@@ -63,7 +63,7 @@ test = [
 ]
 
 [project.scripts]
-cppython = "cppython.console.interface:cli"
+cppython = "cppython.console.entry:app"
 
 [tool.pytest.ini_options]
 log_cli = true
