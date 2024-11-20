@@ -6,25 +6,9 @@ Fixtures can be accessed by installing the optional `pytest` module, `cppython.p
 
 With the pytest feature of `pytest_generate_tests` we register multiple dynamic fixtures for collecting test data, both for plugins and for the test suite itself.
 
-=== `data_path` Fixture
-
-A list of directories that contain
-
-* Parameterized over `tests/data`
-* Merged with paths from the`cppython.test` module
-** The module defines configuration data that all plugins should test against
-
-=== `plugin_data_path` Fixture
-
-
-
-- Parameterized over `tests/plugin/<plugin_name>/data`
 
 === `build_<directory>` Fixture
 
-- Discovered from `tests/build`
+* Discovered from `tests/build/<directory>`
+* The contents of the directory are copied to a temporary directory
 
-
-=== `plugin_build_<directory>` Fixture
-
-- Discovered from `tests/plugin/<plugin_name>/build`

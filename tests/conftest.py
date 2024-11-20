@@ -1,7 +1,5 @@
 """Data variations for testing"""
 
-import shutil
-
 # from pathlib import Path
 from pathlib import Path
 from typing import cast
@@ -251,71 +249,22 @@ def fixture_core_data(cppython_data: CPPythonData, project_data: ProjectData) ->
     return CoreData(cppython_data=cppython_data, project_data=project_data)
 
 
-@pytest.fixture(name="plugin_data_path", scope="session")
-def fixture_plugin_data_path(internal_plugin_data_path: list[Path | None]) -> list[Path | None]:
-    """Fixture cache of internal_plugin_data_path
-
-    Args:
-        internal_plugin_data_path: The input meta data
-
-    Returns:
-        The session scoped data
-    """
-
-    return internal_plugin_data_path
-
-
-@pytest.fixture(name="data_path", scope="session")
-def fixture_data_path(internal_data_path: list[Path]) -> list[Path]:
-    """Fixture cache of internal_data_path
-
-    Args:
-        internal_data_path: The input meta data
-
-    Returns:
-        The session scoped data
-    """
-
-    return internal_data_path
-
-
 @pytest.fixture(
     name="project_configuration",
     scope="session",
     params=project_variants,
 )
-def fixture_project_configuration(
-    request: pytest.FixtureRequest,
-    tmp_path_factory: pytest.TempPathFactory,
-    data_path: Path,
-    plugin_data_path: Path | None,
-) -> ProjectConfiguration:
+def fixture_project_configuration(request: pytest.FixtureRequest) -> ProjectConfiguration:
     """Project configuration fixture
 
     Args:
         request: Parameterized configuration data
-        tmp_path_factory: Factory for centralized temporary directories
-        data_path: Project file requirements
-        plugin_data_path: Parameterized path to a data directory
 
     Returns:
         Configuration with temporary directory capabilities
     """
 
-    tmp_path = tmp_path_factory.mktemp("workspace-")
-
-    shutil.copytree(data_path, tmp_path, dirs_exist_ok=True)
-
-    if plugin_data_path is not None:
-        shutil.copytree(plugin_data_path, tmp_path, dirs_exist_ok=True)
-
     configuration = cast(ProjectConfiguration, request.param)
-
-    # Pin the project location
-    paths = list(tmp_path.rglob("pyproject.toml"))
-
-    # 'paths' length guaranteed to be 1
-    configuration.pyproject_file = paths[0].resolve()
 
     return configuration
 
@@ -379,29 +328,6 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
 
     for fixture in metafunc.fixturenames:
         match fixture.split("_", 1):
-            case ["internal", "plugin_data_path"]:
-                # Gathers directories from tests/data from the project's root directory
-
-                # There should only ever be one fixture named 'internal_plugin_data_path' for value caching
-                plugin_data_path = metafunc.config.rootpath / "tests" / "data"
-
-                plugin_test_paths: list[Path | None] = []
-
-                for plugin_path in plugin_data_path.glob("*"):
-                    if plugin_path.is_dir():
-                        plugin_test_paths.append(plugin_path)
-
-                if not plugin_test_paths:
-                    plugin_test_paths = [None]
-                metafunc.parametrize(fixture, plugin_test_paths, scope="session")
-
-            case ["internal", "data_path"]:
-                # Gathers directories from tests/data from the package's root directory
-
-                # There should only ever be one fixture named 'internal_data_path' for value caching
-                internal_data_path = Path(__file__).parent / "data"
-                metafunc.parametrize(fixture, list(internal_data_path.glob("*")), scope="session")
-
             case ["build", directory]:
 
                 # Parameterizes the paths under tests/build/<directory> where <directory> is the fixture suffix
