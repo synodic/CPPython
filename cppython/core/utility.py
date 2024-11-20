@@ -29,7 +29,7 @@ def write_model_json(path: Path, model: BaseModel) -> None:
         model: The model to write into a json
     """
 
-    serialized = json.loads(model.json(exclude_none=True))
+    serialized = json.loads(model.model_dump_json(exclude_none=True))
     with open(path, "w", encoding="utf8") as file:
         json.dump(serialized, file, ensure_ascii=False, indent=4)
 
