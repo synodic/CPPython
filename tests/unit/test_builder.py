@@ -1,9 +1,10 @@
 """Tests the Builder and Resolver types"""
 
 import logging
+from importlib import metadata
 
 from pytest_mock import MockerFixture
-from importlib import metadata
+
 from cppython.builder import Builder, Resolver
 from cppython.core.schema import (
     CPPythonLocalConfiguration,
@@ -11,9 +12,9 @@ from cppython.core.schema import (
     ProjectConfiguration,
     ProjectData,
 )
-from tests.plugin_helper.mock.generator import MockGenerator
-from tests.plugin_helper.mock.provider import MockProvider
-from tests.plugin_helper.mock.scm import MockSCM
+from cppython.test.mock.generator import MockGenerator
+from cppython.test.mock.provider import MockProvider
+from cppython.test.mock.scm import MockSCM
 
 
 class TestBuilder:

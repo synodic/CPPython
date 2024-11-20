@@ -4,8 +4,8 @@ from typing import Any
 
 import pytest
 
-from tests.plugin_helper.mock.scm import MockSCM
-from tests.plugin_helper.tests import SCMIntegrationTests
+from cppython.test.pytest.tests import SCMIntegrationTests
+from cppython.test.mock.scm import MockSCM
 
 
 class TestCPPythonSCM(SCMIntegrationTests[MockSCM]):

@@ -11,7 +11,7 @@ from cppython.core.plugin_schema.provider import (
     SupportedProviderFeatures,
 )
 from cppython.core.schema import CorePluginData, CPPythonModel, Information, SyncData
-from tests.plugin_helper.mock.generator import MockSyncData
+from cppython.test.mock.generator import MockSyncData
 
 
 class MockProviderData(CPPythonModel):

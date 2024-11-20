@@ -1,12 +1,11 @@
 """Tests the Project type"""
 
 import tomllib
+from importlib import metadata
 from pathlib import Path
-from typing import Any
 
 from pytest import FixtureRequest
 from pytest_mock import MockerFixture
-from importlib import metadata
 
 from cppython.core.schema import (
     CPPythonLocalConfiguration,
@@ -16,10 +15,10 @@ from cppython.core.schema import (
     ToolData,
 )
 from cppython.project import Project
-from tests.plugin_helper.mock.generator import MockGenerator
-from tests.plugin_helper.mock.interface import MockInterface
-from tests.plugin_helper.mock.provider import MockProvider
-from tests.plugin_helper.mock.scm import MockSCM
+from cppython.test.mock.generator import MockGenerator
+from cppython.test.mock.interface import MockInterface
+from cppython.test.mock.provider import MockProvider
+from cppython.test.mock.scm import MockSCM
 
 pep621 = PEP621Configuration(name="test-project", version="0.1.0")
 

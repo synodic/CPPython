@@ -12,9 +12,9 @@ from cppython.core.schema import (
     PEP621Configuration,
     ProjectConfiguration,
 )
-from tests.plugin_helper.mock.generator import MockGenerator
-from tests.plugin_helper.mock.provider import MockProvider
-from tests.plugin_helper.mock.scm import MockSCM
+from cppython.test.mock.generator import MockGenerator
+from cppython.test.mock.provider import MockProvider
+from cppython.test.mock.scm import MockSCM
 
 
 def _pep621_configuration_list() -> list[PEP621Configuration]:

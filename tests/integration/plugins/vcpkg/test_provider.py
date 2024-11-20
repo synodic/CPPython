@@ -5,7 +5,7 @@ from typing import Any
 import pytest
 
 from cppython.plugins.vcpkg.plugin import VcpkgProvider
-from tests.plugin_helper.tests import ProviderIntegrationTests
+from cppython.test.pytest.tests import ProviderIntegrationTests
 
 
 class TestCPPythonProvider(ProviderIntegrationTests[VcpkgProvider]):

@@ -6,7 +6,7 @@ import pytest
 
 from cppython.plugins.cmake.plugin import CMakeGenerator
 from cppython.plugins.cmake.schema import CMakeConfiguration
-from tests.plugin_helper.tests import GeneratorIntegrationTests
+from cppython.test.pytest.tests import GeneratorIntegrationTests
 
 
 class TestCPPythonGenerator(GeneratorIntegrationTests[CMakeGenerator]):

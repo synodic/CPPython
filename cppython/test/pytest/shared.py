@@ -28,7 +28,7 @@ from cppython.core.schema import (
     ProjectConfiguration,
     ProjectData,
 )
-from tests.plugin_helper.variants import (
+from cppython.test.pytest.variants import (
     generator_variants,
     provider_variants,
     scm_variants,

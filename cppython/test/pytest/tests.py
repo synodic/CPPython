@@ -9,8 +9,7 @@ import pytest
 from cppython.core.plugin_schema.generator import Generator
 from cppython.core.plugin_schema.provider import Provider
 from cppython.core.plugin_schema.scm import SCM
-from cppython.utility.utility import canonicalize_type
-from tests.plugin_helper.shared import (
+from cppython.test.pytest.shared import (
     DataPluginIntegrationTests,
     DataPluginUnitTests,
     GeneratorTests,
@@ -19,6 +18,7 @@ from tests.plugin_helper.shared import (
     ProviderTests,
     SCMTests,
 )
+from cppython.utility.utility import canonicalize_type
 
 
 class ProviderIntegrationTests[T: Provider](DataPluginIntegrationTests[T], ProviderTests[T], metaclass=ABCMeta):

@@ -4,8 +4,8 @@ from typing import Any
 
 import pytest
 
-from tests.plugin_helper.mock.provider import MockProvider
-from tests.plugin_helper.tests import ProviderIntegrationTests
+from cppython.test.mock.provider import MockProvider
+from cppython.test.pytest.tests import ProviderIntegrationTests
 
 
 class TestMockProvider(ProviderIntegrationTests[MockProvider]):

@@ -6,7 +6,7 @@ import pytest
 
 from cppython.plugins.vcpkg.plugin import VcpkgProvider
 from cppython.plugins.vcpkg.resolution import generate_manifest
-from tests.plugin_helper.tests import ProviderUnitTests
+from cppython.test.pytest.tests import ProviderUnitTests
 
 
 class TestCPPythonProvider(ProviderUnitTests[VcpkgProvider]):

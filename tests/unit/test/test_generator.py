@@ -4,8 +4,8 @@ from typing import Any
 
 import pytest
 
-from tests.plugin_helper.mock.generator import MockGenerator
-from tests.plugin_helper.tests import GeneratorUnitTests
+from cppython.test.mock.generator import MockGenerator
+from cppython.test.pytest.tests import GeneratorUnitTests
 
 
 class TestCPPythonGenerator(GeneratorUnitTests[MockGenerator]):

@@ -29,7 +29,7 @@ from cppython.core.schema import (
     ToolData,
 )
 from cppython.plugins.cmake.schema import CMakeConfiguration
-from tests.plugin_helper.variants import (
+from cppython.test.pytest.variants import (
     cppython_global_variants,
     cppython_local_variants,
     pep621_variants,

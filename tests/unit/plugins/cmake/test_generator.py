@@ -13,8 +13,8 @@ from cppython.plugins.cmake.schema import (
     CMakePresets,
     CMakeSyncData,
 )
+from cppython.test.pytest.tests import GeneratorUnitTests
 from cppython.utility.utility import TypeName
-from tests.plugin_helper.tests import GeneratorUnitTests
 
 
 class TestCPPythonGenerator(GeneratorUnitTests[CMakeGenerator]):
