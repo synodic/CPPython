@@ -149,6 +149,8 @@ class VcpkgProvider(Provider):
 
         if cls.tooling_downloaded(directory):
             try:
+                logger.debug("Updating the vcpkg repository at '%s'", directory.absolute())
+
                 # The entire history is need for vcpkg 'baseline' information
                 subprocess_call(["git", "fetch", "origin"], logger=logger, cwd=directory)
                 subprocess_call(["git", "pull"], logger=logger, cwd=directory)
@@ -157,6 +159,8 @@ class VcpkgProvider(Provider):
                 raise
         else:
             try:
+                logger.debug("Cloning the vcpkg repository to '%s'", directory.absolute())
+
                 # The entire history is need for vcpkg 'baseline' information
                 subprocess_call(
                     ["git", "clone", "https://github.com/microsoft/vcpkg", "."],
@@ -181,7 +185,7 @@ class VcpkgProvider(Provider):
         manifest = generate_manifest(self.core_data, self.data)
 
         # Write out the manifest
-        serialized = json.loads(manifest.json(exclude_none=True, by_alias=True))
+        serialized = json.loads(manifest.model_dump_json(exclude_none=True, by_alias=True))
         with open(manifest_directory / "vcpkg.json", "w", encoding="utf8") as file:
             json.dump(serialized, file, ensure_ascii=False, indent=4)
 
@@ -211,7 +215,7 @@ class VcpkgProvider(Provider):
         manifest = generate_manifest(self.core_data, self.data)
 
         # Write out the manifest
-        serialized = json.loads(manifest.json(exclude_none=True, by_alias=True))
+        serialized = json.loads(manifest.model_dump_json(exclude_none=True, by_alias=True))
         with open(manifest_directory / "vcpkg.json", "w", encoding="utf8") as file:
             json.dump(serialized, file, ensure_ascii=False, indent=4)
 
