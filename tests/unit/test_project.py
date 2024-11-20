@@ -2,8 +2,11 @@
 
 import tomllib
 from pathlib import Path
+from typing import Any
 
 from pytest import FixtureRequest
+from pytest_mock import MockerFixture
+from importlib import metadata
 
 from cppython.core.schema import (
     CPPythonLocalConfiguration,
@@ -13,7 +16,9 @@ from cppython.core.schema import (
     ToolData,
 )
 from cppython.project import Project
+from tests.plugin_helper.mock.generator import MockGenerator
 from tests.plugin_helper.mock.interface import MockInterface
+from tests.plugin_helper.mock.provider import MockProvider
 
 pep621 = PEP621Configuration(name="test-project", version="0.1.0")
 
@@ -80,17 +85,15 @@ class TestProject:
 
         assert not project.enabled
 
-    def test_default_cppython_table(self, tmp_path: Path) -> None:
+    def test_default_cppython_table(self, tmp_path: Path, mocker: MockerFixture) -> None:
         """The project type should be constructable with the default cppython table
 
         Args:
             tmp_path: Temporary directory for dummy data
+            mocker: Pytest mocker fixture
         """
 
-        distribution = pkg_resources.Distribution(__file__)
-        entry_point = pkg_resources.EntryPoint.parse("plugin1 = plugins.plugin1:plugin1_class", dist=distribution)
-        distribution._ep_map = {"my_project.plugins": {"plugin1": entry_point}}
-        pkg_resources.working_set.add(distribution)
+        mocker.patch.object(metadata.EntryPoint, "load", side_effect=[MockGenerator, MockProvider])
 
         file_path = tmp_path / "pyproject.toml"
 
