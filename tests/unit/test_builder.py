@@ -20,8 +20,8 @@ from cppython.test.mock.scm import MockSCM
 class TestBuilder:
     """Various tests for the Builder type"""
 
+    @staticmethod
     def test_build(
-        self,
         project_configuration: ProjectConfiguration,
         pep621_configuration: PEP621Configuration,
         cppython_local_configuration: CPPythonLocalConfiguration,
@@ -51,8 +51,8 @@ class TestBuilder:
 class TestResolver:
     """Various tests for the Resolver type"""
 
+    @staticmethod
     def test_generate_plugins(
-        self,
         project_configuration: ProjectConfiguration,
         cppython_local_configuration: CPPythonLocalConfiguration,
         project_data: ProjectData,

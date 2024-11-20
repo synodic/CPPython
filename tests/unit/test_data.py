@@ -20,18 +20,20 @@ from cppython.test.mock.scm import MockSCM
 class TestData:
     """Various tests for the Data type"""
 
+    @staticmethod
     @pytest.fixture(
         name='data',
         scope='session',
     )
     def fixture_data(
-        self,
         project_configuration: ProjectConfiguration,
         pep621_configuration: PEP621Configuration,
         cppython_local_configuration: CPPythonLocalConfiguration,
     ) -> Data:
-        """Creates a mock plugins fixture. We want all the plugins to use the same data variants at the same time, so we
-            have to resolve data inside the fixture instead of using other data fixtures
+        """Creates a mock plugins fixture.
+
+        We want all the plugins to use the same data variants at the same time, so we
+        have to resolve data inside the fixture instead of using other data fixtures
 
         Args:
             project_configuration: Variant fixture for the project configuration
@@ -40,6 +42,7 @@ class TestData:
 
         Returns:
             The mock plugins fixture
+
         """
         logger = logging.getLogger()
         builder = Builder(project_configuration, logger)
@@ -48,7 +51,8 @@ class TestData:
 
         return builder.build(pep621_configuration, cppython_local_configuration, plugin_build_data)
 
-    def test_sync(self, data: Data) -> None:
+    @staticmethod
+    def test_sync(data: Data) -> None:
         """Verifies that the sync method executes without error
 
         Args:

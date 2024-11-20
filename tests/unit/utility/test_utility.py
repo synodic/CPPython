@@ -7,7 +7,6 @@ from sys import executable
 from typing import NamedTuple
 
 import pytest
-from pytest import LogCaptureFixture
 
 from cppython.utility.exception import ProcessError
 from cppython.utility.subprocess import call
@@ -26,41 +25,47 @@ class TestUtility:
         test_path: Path
         test_int: int
 
-    def test_none(self) -> None:
+    @staticmethod
+    def test_none() -> None:
         """Verifies that no exception is thrown with an empty string"""
         test = canonicalize_name('')
 
-        assert test.group == ''
-        assert test.name == ''
+        assert not test.group
+        assert not test.name
 
-    def test_only_group(self) -> None:
+    @staticmethod
+    def test_only_group() -> None:
         """Verifies that no exception is thrown when only a group is specified"""
         test = canonicalize_name('Group')
 
         assert test.group == 'group'
-        assert test.name == ''
+        assert not test.name
 
-    def test_name_group(self) -> None:
+    @staticmethod
+    def test_name_group() -> None:
         """Test that canonicalization works"""
         test = canonicalize_name('NameGroup')
 
         assert test.group == 'group'
         assert test.name == 'name'
 
-    def test_group_only_caps(self) -> None:
+    @staticmethod
+    def test_group_only_caps() -> None:
         """Test that canonicalization works"""
         test = canonicalize_name('NameGROUP')
 
         assert test.group == 'group'
         assert test.name == 'name'
 
-    def test_name_only_caps(self) -> None:
+    @staticmethod
+    def test_name_only_caps() -> None:
         """Test that canonicalization works"""
         test = canonicalize_name('NAMEGroup')
         assert test.group == 'group'
         assert test.name == 'name'
 
-    def test_name_multi_caps(self) -> None:
+    @staticmethod
+    def test_name_multi_caps() -> None:
         """Test that caps works"""
         test = canonicalize_name('NAmeGroup')
         assert test.group == 'group'
@@ -70,7 +75,8 @@ class TestUtility:
 class TestSubprocess:
     """Subprocess testing"""
 
-    def test_subprocess_stdout(self, caplog: LogCaptureFixture) -> None:
+    @staticmethod
+    def test_subprocess_stdout(caplog: pytest.LogCaptureFixture) -> None:
         """Test subprocess_call
 
         Args:
@@ -87,7 +93,8 @@ class TestSubprocess:
         assert len(caplog.records) == 1
         assert caplog.records[0].message == 'Test Out'
 
-    def test_subprocess_stderr(self, caplog: LogCaptureFixture) -> None:
+    @staticmethod
+    def test_subprocess_stderr(caplog: pytest.LogCaptureFixture) -> None:
         """Test subprocess_call
 
         Args:
@@ -104,7 +111,8 @@ class TestSubprocess:
         assert len(caplog.records) == 1
         assert caplog.records[0].message == 'Test Error'
 
-    def test_subprocess_suppression(self, caplog: LogCaptureFixture) -> None:
+    @staticmethod
+    def test_subprocess_suppression(caplog: pytest.LogCaptureFixture) -> None:
         """Test subprocess_call suppression flag
 
         Args:
@@ -120,7 +128,8 @@ class TestSubprocess:
             )
             assert len(caplog.records) == 0
 
-    def test_subprocess_exit(self, caplog: LogCaptureFixture) -> None:
+    @staticmethod
+    def test_subprocess_exit(caplog: pytest.LogCaptureFixture) -> None:
         """Test subprocess_call exception output
 
         Args:
@@ -134,12 +143,13 @@ class TestSubprocess:
                 cppython_logger,
             )
 
-            assert len(caplog.records) == 1
-            assert caplog.records[0].message == 'Test Exit Output'
+        assert len(caplog.records) == 1
+        assert caplog.records[0].message == 'Test Exit Output'
 
         assert 'Subprocess task failed' in str(exec_info.value)
 
-    def test_subprocess_exception(self, caplog: LogCaptureFixture) -> None:
+    @staticmethod
+    def test_subprocess_exception(caplog: pytest.LogCaptureFixture) -> None:
         """Test subprocess_call exception output
 
         Args:
@@ -152,12 +162,13 @@ class TestSubprocess:
                 [python, '-c', "import sys; raise Exception('Test Exception Output')"],
                 cppython_logger,
             )
-            assert len(caplog.records) == 1
-            assert caplog.records[0].message == 'Test Exception Output'
+        assert len(caplog.records) == 1
+        assert caplog.records[0].message == 'Test Exception Output'
 
         assert 'Subprocess task failed' in str(exec_info.value)
 
-    def test_stderr_exception(self, caplog: LogCaptureFixture) -> None:
+    @staticmethod
+    def test_stderr_exception(caplog: pytest.LogCaptureFixture) -> None:
         """Verify print and exit
 
         Args:
@@ -173,13 +184,16 @@ class TestSubprocess:
                 ],
                 cppython_logger,
             )
-            assert len(caplog.records) == 2
-            assert caplog.records[0].message == 'Test Out'
-            assert caplog.records[1].message == 'Test Exit Out'
+
+        LOG_COUNT = 2
+        assert len(caplog.records) == LOG_COUNT
+        assert caplog.records[0].message == 'Test Out'
+        assert caplog.records[1].message == 'Test Exit Out'
 
         assert 'Subprocess task failed' in str(exec_info.value)
 
-    def test_stdout_exception(self, caplog: LogCaptureFixture) -> None:
+    @staticmethod
+    def test_stdout_exception(caplog: pytest.LogCaptureFixture) -> None:
         """Verify print and exit
 
         Args:
@@ -195,8 +209,10 @@ class TestSubprocess:
                 ],
                 cppython_logger,
             )
-            assert len(caplog.records) == 2
-            assert caplog.records[0].message == 'Test Error'
-            assert caplog.records[1].message == 'Test Exit Error'
+
+        LOG_COUNT = 2
+        assert len(caplog.records) == LOG_COUNT
+        assert caplog.records[0].message == 'Test Error'
+        assert caplog.records[1].message == 'Test Exit Error'
 
         assert 'Subprocess task failed' in str(exec_info.value)

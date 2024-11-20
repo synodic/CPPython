@@ -4,7 +4,7 @@ import tomllib
 from importlib import metadata
 from pathlib import Path
 
-from pytest import FixtureRequest
+import pytest
 from pytest_mock import MockerFixture
 
 from cppython.core.schema import (
@@ -26,7 +26,8 @@ pep621 = PEP621Configuration(name='test-project', version='0.1.0')
 class TestProject:
     """Various tests for the project object"""
 
-    def test_self_construction(self, request: FixtureRequest) -> None:
+    @staticmethod
+    def test_self_construction(request: pytest.FixtureRequest) -> None:
         """The project type should be constructable with this projects configuration
 
         Args:
@@ -43,7 +44,8 @@ class TestProject:
         # Doesn't have the cppython table
         assert not project.enabled
 
-    def test_missing_tool_table(self, tmp_path: Path) -> None:
+    @staticmethod
+    def test_missing_tool_table(tmp_path: Path) -> None:
         """The project type should be constructable without the tool table
 
         Args:
@@ -62,7 +64,8 @@ class TestProject:
 
         assert not project.enabled
 
-    def test_missing_cppython_table(self, tmp_path: Path) -> None:
+    @staticmethod
+    def test_missing_cppython_table(tmp_path: Path) -> None:
         """The project type should be constructable without the cppython table
 
         Args:
@@ -82,7 +85,8 @@ class TestProject:
 
         assert not project.enabled
 
-    def test_default_cppython_table(self, tmp_path: Path, mocker: MockerFixture) -> None:
+    @staticmethod
+    def test_default_cppython_table(tmp_path: Path, mocker: MockerFixture) -> None:
         """The project type should be constructable with the default cppython table
 
         Args:
