@@ -11,8 +11,9 @@ from cppython.test.pytest.tests import GeneratorIntegrationTests
 class TestCPPythonGenerator(GeneratorIntegrationTests[MockGenerator]):
     """The tests for the Mock generator"""
 
+    @staticmethod
     @pytest.fixture(name='plugin_data', scope='session')
-    def fixture_plugin_data(self) -> dict[str, Any]:
+    def fixture_plugin_data() -> dict[str, Any]:
         """Returns mock data
 
         Returns:
@@ -20,8 +21,9 @@ class TestCPPythonGenerator(GeneratorIntegrationTests[MockGenerator]):
         """
         return {}
 
+    @staticmethod
     @pytest.fixture(name='plugin_type', scope='session')
-    def fixture_plugin_type(self) -> type[MockGenerator]:
+    def fixture_plugin_type() -> type[MockGenerator]:
         """A required testing hook that allows type generation
 
         Returns:

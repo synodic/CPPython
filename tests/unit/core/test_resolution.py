@@ -35,7 +35,8 @@ from cppython.utility.utility import TypeName
 class TestResolve:
     """Test resolution of data"""
 
-    def test_pep621_resolve(self) -> None:
+    @staticmethod
+    def test_pep621_resolve() -> None:
         """Test the PEP621 schema resolve function"""
         data = PEP621Configuration(name='pep621-resolve-test', dynamic=['version'])
         config = ProjectConfiguration(pyproject_file=Path('pyproject.toml'), version='0.1.0')
@@ -46,12 +47,14 @@ class TestResolve:
         assert len(class_variables)
         assert None not in class_variables.values()
 
-    def test_project_resolve(self) -> None:
+    @staticmethod
+    def test_project_resolve() -> None:
         """Tests project configuration resolution"""
         config = ProjectConfiguration(pyproject_file=Path('pyproject.toml'), version='0.1.0')
         assert resolve_project_configuration(config)
 
-    def test_cppython_resolve(self) -> None:
+    @staticmethod
+    def test_cppython_resolve() -> None:
         """Tests cppython configuration resolution"""
         cppython_local_configuration = CPPythonLocalConfiguration()
         cppython_global_configuration = CPPythonGlobalConfiguration()
@@ -69,7 +72,8 @@ class TestResolve:
 
         assert cppython_data
 
-    def test_model_resolve(self) -> None:
+    @staticmethod
+    def test_model_resolve() -> None:
         """Test model resolution"""
 
         class MockModel(CPPythonModel):
@@ -88,7 +92,8 @@ class TestResolve:
 
         resolve_model(MockModel, good_data)
 
-    def test_generator_resolve(self) -> None:
+    @staticmethod
+    def test_generator_resolve() -> None:
         """Test generator resolution"""
         project_data = ProjectData(pyproject_file=Path('pyproject.toml'))
         cppython_local_configuration = CPPythonLocalConfiguration()
@@ -111,7 +116,8 @@ class TestResolve:
 
         assert resolve_generator(project_data, cppython_plugin_data)
 
-    def test_provider_resolve(self) -> None:
+    @staticmethod
+    def test_provider_resolve() -> None:
         """Test provider resolution"""
         project_data = ProjectData(pyproject_file=Path('pyproject.toml'))
         cppython_local_configuration = CPPythonLocalConfiguration()
@@ -134,7 +140,8 @@ class TestResolve:
 
         assert resolve_provider(project_data, cppython_plugin_data)
 
-    def test_scm_resolve(self) -> None:
+    @staticmethod
+    def test_scm_resolve() -> None:
         """Test scm resolution"""
         project_data = ProjectData(pyproject_file=Path('pyproject.toml'))
         cppython_local_configuration = CPPythonLocalConfiguration()

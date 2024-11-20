@@ -11,8 +11,9 @@ from cppython.test.pytest.tests import SCMIntegrationTests
 class TestCPPythonSCM(SCMIntegrationTests[MockSCM]):
     """The tests for the Mock version control"""
 
+    @staticmethod
     @pytest.fixture(name='plugin_data', scope='session')
-    def fixture_plugin_data(self) -> dict[str, Any]:
+    def fixture_plugin_data() -> dict[str, Any]:
         """Returns mock data
 
         Returns:
@@ -20,8 +21,9 @@ class TestCPPythonSCM(SCMIntegrationTests[MockSCM]):
         """
         return {}
 
+    @staticmethod
     @pytest.fixture(name='plugin_type', scope='session')
-    def fixture_plugin_type(self) -> type[MockSCM]:
+    def fixture_plugin_type() -> type[MockSCM]:
         """A required testing hook that allows type generation
 
         Returns:

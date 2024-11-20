@@ -28,6 +28,7 @@ class VcpkgProvider(Provider):
     def __init__(
         self, group_data: ProviderPluginGroupData, core_data: CorePluginData, configuration_data: dict[str, Any]
     ) -> None:
+        """Initializes the provider"""
         self.group_data: ProviderPluginGroupData = group_data
         self.core_data: CorePluginData = core_data
         self.data: VcpkgData = resolve_vcpkg_data(configuration_data, core_data)
@@ -83,7 +84,8 @@ class VcpkgProvider(Provider):
             logger.error('Unable to bootstrap the vcpkg repository', exc_info=True)
             raise
 
-    def sync_data(self, consumer: SyncConsumer) -> SyncData:
+    @staticmethod
+    def sync_data(consumer: SyncConsumer) -> SyncData:
         """Gathers a data object for the given generator
 
         Args:

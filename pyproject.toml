@@ -124,7 +124,7 @@ source = "scm"
 analyze = {shell = "ruff check cppython tests"}
 format = {shell = "ruff format"}
 lint = {composite = ["analyze", "format", "sort-imports", "type-check"]}
-sort-imports = {shell = "isort --check-only --diff --verbose ."}
+sort-imports = {shell = "isort --check-only --diff ."}
 test = {shell = "pytest --cov=cppython --verbose tests"}
 type-check = {shell = "mypy ."}
 

@@ -40,6 +40,7 @@ class Resolver:
     """The resolution of data sources for the builder"""
 
     def __init__(self, project_configuration: ProjectConfiguration, logger: Logger) -> None:
+        """Initializes the resolver"""
         self._project_configuration = project_configuration
         self._logger = logger
 
@@ -78,7 +79,8 @@ class Resolver:
 
         return PluginBuildData(generator_type=generator_type, provider_type=provider_type, scm_type=scm_type)
 
-    def generate_cppython_plugin_data(self, plugin_build_data: PluginBuildData) -> PluginCPPythonData:
+    @staticmethod
+    def generate_cppython_plugin_data(plugin_build_data: PluginBuildData) -> PluginCPPythonData:
         """Generates the CPPython plugin data from the resolved plugins
 
         Args:
@@ -93,8 +95,9 @@ class Resolver:
             scm_name=plugin_build_data.scm_type.name(),
         )
 
+    @staticmethod
     def generate_pep621_data(
-        self, pep621_configuration: PEP621Configuration, project_configuration: ProjectConfiguration, scm: SCM | None
+        pep621_configuration: PEP621Configuration, project_configuration: ProjectConfiguration, scm: SCM | None
     ) -> PEP621Data:
         """Generates the PEP621 data from configuration sources
 
@@ -108,7 +111,8 @@ class Resolver:
         """
         return resolve_pep621(pep621_configuration, project_configuration, scm)
 
-    def resolve_global_config(self) -> CPPythonGlobalConfiguration:
+    @staticmethod
+    def resolve_global_config() -> CPPythonGlobalConfiguration:
         """Generates the global configuration object
 
         Returns:
@@ -263,8 +267,9 @@ class Resolver:
 
         return DefaultSCM
 
+    @staticmethod
     def solve(
-        self, generator_types: list[type[Generator]], provider_types: list[type[Provider]]
+        generator_types: list[type[Generator]], provider_types: list[type[Provider]]
     ) -> tuple[type[Generator], type[Provider]]:
         """Selects the first generator and provider that can work together
 
@@ -293,8 +298,8 @@ class Resolver:
 
         return combos[0]
 
+    @staticmethod
     def create_scm(
-        self,
         core_data: CoreData,
         scm_type: type[SCM],
     ) -> SCM:
@@ -389,6 +394,7 @@ class Builder:
     """Helper class for building CPPython projects"""
 
     def __init__(self, project_configuration: ProjectConfiguration, logger: Logger) -> None:
+        """Initializes the builder"""
         self._project_configuration = project_configuration
         self._logger = logger
 

@@ -11,8 +11,9 @@ from cppython.test.pytest.tests import ProviderUnitTests
 class TestCPPythonProvider(ProviderUnitTests[VcpkgProvider]):
     """The tests for the vcpkg Provider"""
 
+    @staticmethod
     @pytest.fixture(name='plugin_data', scope='session')
-    def fixture_plugin_data(self) -> dict[str, Any]:
+    def fixture_plugin_data() -> dict[str, Any]:
         """A required testing hook that allows data generation
 
         Returns:
@@ -20,8 +21,9 @@ class TestCPPythonProvider(ProviderUnitTests[VcpkgProvider]):
         """
         return {}
 
+    @staticmethod
     @pytest.fixture(name='plugin_type', scope='session')
-    def fixture_plugin_type(self) -> type[VcpkgProvider]:
+    def fixture_plugin_type() -> type[VcpkgProvider]:
         """A required testing hook that allows type generation
 
         Returns:

@@ -41,8 +41,9 @@ class SyncProducer(Protocol):
 
     @abstractmethod
     def sync_data(self, consumer: SyncConsumer) -> SyncData | None:
-        """Requests generator information from the provider. The generator is either defined by a provider specific file
-        or the CPPython configuration table
+        """Requests generator information from the provider.
+
+        The generator is either defined by a provider specific file or the CPPython configuration table
 
         Args:
             consumer: The consumer
@@ -61,6 +62,7 @@ class Provider(DataPlugin, SyncProducer, Protocol):
     def __init__(
         self, group_data: ProviderPluginGroupData, core_data: CorePluginData, configuration_data: dict[str, Any]
     ) -> None:
+        """Initializes the provider"""
         raise NotImplementedError
 
     @staticmethod

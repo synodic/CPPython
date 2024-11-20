@@ -26,6 +26,7 @@ class SCM(Plugin, Protocol):
 
     @abstractmethod
     def __init__(self, group_data: SCMPluginGroupData) -> None:
+        """Initializes the SCM plugin"""
         raise NotImplementedError
 
     @staticmethod

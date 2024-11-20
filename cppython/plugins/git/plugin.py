@@ -17,6 +17,7 @@ class GitSCM(SCM):
     """Git implementation hooks"""
 
     def __init__(self, group_data: SCMPluginGroupData) -> None:
+        """Initializes the plugin"""
         self.group_data = group_data
 
     @staticmethod
@@ -46,17 +47,16 @@ class GitSCM(SCM):
         """
         return Information()
 
-    def version(self, directory: Path) -> str:
+    @staticmethod
+    def version(_: Path) -> str:
         """Extracts the system's version metadata
-
-        Args:
-            directory: The repository path
 
         Returns:
             The git version
         """
         return ''
 
-    def description(self) -> str | None:
+    @staticmethod
+    def description() -> str | None:
         """Requests extraction of the project description"""
         return None

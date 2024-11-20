@@ -26,16 +26,14 @@ class MockProvider(Provider):
     def __init__(
         self, group_data: ProviderPluginGroupData, core_data: CorePluginData, configuration_data: dict[str, Any]
     ) -> None:
+        """Initializes the mock provider"""
         self.group_data = group_data
         self.core_data = core_data
         self.configuration_data = MockProviderData(**configuration_data)
 
     @staticmethod
-    def features(directory: DirectoryPath) -> SupportedProviderFeatures:
+    def features(_: DirectoryPath) -> SupportedProviderFeatures:
         """Broadcasts the shared features of the Provider plugin to CPPython
-
-        Args:
-            directory: The root directory where features are evaluated
 
         Returns:
             The supported features
@@ -82,10 +80,13 @@ class MockProvider(Provider):
 
     @classmethod
     async def download_tooling(cls, directory: DirectoryPath) -> None:
+        """Downloads the provider tooling"""
         cls.downloaded = directory
 
     def install(self) -> None:
+        """Installs the provider"""
         pass
 
     def update(self) -> None:
+        """Updates the provider"""
         pass

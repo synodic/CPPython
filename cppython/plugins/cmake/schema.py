@@ -42,6 +42,7 @@ class ConfigurePreset(CPPythonModel, extra='allow'):
 
 class CMakePresets(CPPythonModel, extra='allow'):
     """The schema for the CMakePresets and CMakeUserPresets files.
+
     The only information needed is the configure preset list for cache variable injection
     """
 

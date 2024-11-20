@@ -13,6 +13,7 @@ class ConfigException(ValueError):
     """Raised when there is a configuration error"""
 
     def __init__(self, message: str, errors: list[ConfigError]):
+        """Initializes the exception"""
         super().__init__(message)
         self._errors = errors
 

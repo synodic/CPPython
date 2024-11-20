@@ -53,6 +53,7 @@ class Generator(DataPlugin, SyncConsumer, Protocol):
     def __init__(
         self, group_data: GeneratorPluginGroupData, core_data: CorePluginData, configuration_data: dict[str, Any]
     ) -> None:
+        """Initializes the generator plugin"""
         raise NotImplementedError
 
     @staticmethod

@@ -20,8 +20,9 @@ from cppython.utility.utility import TypeName
 class TestCPPythonGenerator(GeneratorUnitTests[CMakeGenerator]):
     """The tests for the CMake generator"""
 
+    @staticmethod
     @pytest.fixture(name='plugin_data', scope='session')
-    def fixture_plugin_data(self, cmake_data: CMakeConfiguration) -> dict[str, Any]:
+    def fixture_plugin_data(cmake_data: CMakeConfiguration) -> dict[str, Any]:
         """A required testing hook that allows data generation
 
         Args:
@@ -32,8 +33,9 @@ class TestCPPythonGenerator(GeneratorUnitTests[CMakeGenerator]):
         """
         return cmake_data.model_dump()
 
+    @staticmethod
     @pytest.fixture(name='plugin_type', scope='session')
-    def fixture_plugin_type(self) -> type[CMakeGenerator]:
+    def fixture_plugin_type() -> type[CMakeGenerator]:
         """A required testing hook that allows type generation
 
         Returns:
@@ -41,7 +43,8 @@ class TestCPPythonGenerator(GeneratorUnitTests[CMakeGenerator]):
         """
         return CMakeGenerator
 
-    def test_provider_write(self, tmp_path: Path) -> None:
+    @staticmethod
+    def test_provider_write(tmp_path: Path) -> None:
         """Verifies that the provider preset writing works as intended
 
         Args:
@@ -56,7 +59,8 @@ class TestCPPythonGenerator(GeneratorUnitTests[CMakeGenerator]):
         data = CMakeSyncData(provider_name=TypeName('test-provider'), top_level_includes=includes_file)
         builder.write_provider_preset(tmp_path, data)
 
-    def test_cppython_write(self, tmp_path: Path) -> None:
+    @staticmethod
+    def test_cppython_write(tmp_path: Path) -> None:
         """Verifies that the cppython preset writing works as intended
 
         Args:
@@ -76,7 +80,8 @@ class TestCPPythonGenerator(GeneratorUnitTests[CMakeGenerator]):
 
         builder.write_cppython_preset(tmp_path, provider_directory, data)
 
-    def test_root_write(self, tmp_path: Path) -> None:
+    @staticmethod
+    def test_root_write(tmp_path: Path) -> None:
         """Verifies that the root preset writing works as intended
 
         Args:
@@ -105,7 +110,8 @@ class TestCPPythonGenerator(GeneratorUnitTests[CMakeGenerator]):
 
         builder.write_root_presets(root_file, cppython_preset_file)
 
-    def test_relative_root_write(self, tmp_path: Path) -> None:
+    @staticmethod
+    def test_relative_root_write(tmp_path: Path) -> None:
         """Verifies that the root preset writing works as intended
 
         Args:

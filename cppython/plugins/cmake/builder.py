@@ -10,7 +10,8 @@ from cppython.plugins.cmake.schema import CMakePresets, CMakeSyncData, Configure
 class Builder:
     """Aids in building the information needed for the CMake plugin"""
 
-    def write_provider_preset(self, provider_directory: Path, data: CMakeSyncData) -> None:
+    @staticmethod
+    def write_provider_preset(provider_directory: Path, data: CMakeSyncData) -> None:
         """Writes a provider preset from input sync data
 
         Args:
@@ -24,8 +25,9 @@ class Builder:
 
         write_model_json(json_path, presets)
 
+    @staticmethod
     def write_cppython_preset(
-        self, cppython_preset_directory: Path, _provider_directory: Path, _provider_data: CMakeSyncData
+        cppython_preset_directory: Path, _provider_directory: Path, _provider_data: CMakeSyncData
     ) -> Path:
         """Write the cppython presets which inherit from the provider presets
 
@@ -43,8 +45,10 @@ class Builder:
         write_model_json(cppython_json_path, presets)
         return cppython_json_path
 
-    def write_root_presets(self, preset_file: Path, _cppython_preset_file: Path) -> None:
+    @staticmethod
+    def write_root_presets(preset_file: Path, _: Path) -> None:
         """Read the top level json file and insert the include reference.
+
         Receives a relative path to the tool cmake json file
 
         Raises:

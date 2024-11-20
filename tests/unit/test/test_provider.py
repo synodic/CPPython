@@ -13,8 +13,9 @@ from cppython.test.pytest.tests import ProviderUnitTests
 class TestMockProvider(ProviderUnitTests[MockProvider]):
     """The tests for our Mock provider"""
 
+    @staticmethod
     @pytest.fixture(name='plugin_data', scope='session')
-    def fixture_provider_data(self) -> dict[str, Any]:
+    def fixture_provider_data() -> dict[str, Any]:
         """Returns mock data
 
         Returns:
@@ -22,8 +23,9 @@ class TestMockProvider(ProviderUnitTests[MockProvider]):
         """
         return {}
 
+    @staticmethod
     @pytest.fixture(name='plugin_type', scope='session')
-    def fixture_plugin_type(self) -> type[MockProvider]:
+    def fixture_plugin_type() -> type[MockProvider]:
         """A required testing hook that allows type generation
 
         Returns:
@@ -31,7 +33,8 @@ class TestMockProvider(ProviderUnitTests[MockProvider]):
         """
         return MockProvider
 
-    def test_sync_types(self, plugin: MockProvider, mocker: MockerFixture) -> None:
+    @staticmethod
+    def test_sync_types(plugin: MockProvider, mocker: MockerFixture) -> None:
         """Verify that the mock provider can handle the mock generator's sync data
 
         Args:

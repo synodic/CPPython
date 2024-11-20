@@ -10,8 +10,9 @@ from cppython.plugins.pdm.plugin import CPPythonPlugin
 class TestCPPythonInterface:
     """The tests for the PDM interface"""
 
+    @staticmethod
     @pytest.fixture(name='interface')
-    def fixture_interface(self, plugin_type: type[CPPythonPlugin]) -> CPPythonPlugin:
+    def fixture_interface(plugin_type: type[CPPythonPlugin]) -> CPPythonPlugin:
         """A hook allowing implementations to override the fixture
 
         Args:
@@ -22,7 +23,8 @@ class TestCPPythonInterface:
         """
         return plugin_type(Core())
 
-    def test_pdm_project(self) -> None:
+    @staticmethod
+    def test_pdm_project() -> None:
         """Verify that this PDM won't return empty data"""
         core = Core()
         core.load_plugins()

@@ -86,6 +86,7 @@ class PEP621Data(CPPythonModel):
 
 class PEP621Configuration(CPPythonModel):
     """CPPython relevant PEP 621 conforming data
+
     Because only the partial schema is used, we ignore 'extra' attributes
         Schema: https://www.python.org/dev/peps/pep-0621/
     """
@@ -109,7 +110,7 @@ class PEP621Configuration(CPPythonModel):
         Returns:
             The data
         """
-        for field in model.model_fields.keys():
+        for field in model.model_fields:
             if field == 'dynamic':
                 continue
             value = getattr(model, field)
@@ -198,6 +199,7 @@ class Plugin(SynodicPlugin, Protocol):
 
     @abstractmethod
     def __init__(self, group_data: PluginGroupData) -> None:
+        """Initializes the plugin"""
         raise NotImplementedError
 
     @staticmethod
@@ -247,6 +249,7 @@ class DataPlugin(Plugin, Protocol):
     def __init__(
         self, group_data: DataPluginGroupData, core_data: CorePluginData, configuration_data: dict[str, Any]
     ) -> None:
+        """Initializes the data plugin"""
         raise NotImplementedError
 
     @staticmethod

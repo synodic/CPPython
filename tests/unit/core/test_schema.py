@@ -41,18 +41,21 @@ class TestSchema:
         result = self.Model.model_validate(data)
         assert result.aliased_variable is True
 
-    def test_cppython_local(self) -> None:
+    @staticmethod
+    def test_cppython_local() -> None:
         """Ensures that the CPPython local config data can be defaulted"""
         CPPythonLocalConfiguration()
 
-    def test_cppython_global(self) -> None:
+    @staticmethod
+    def test_cppython_global() -> None:
         """Ensures that the CPPython global config data can be defaulted"""
         CPPythonGlobalConfiguration()
 
-    def test_pep621_version(self) -> None:
+    @staticmethod
+    def test_pep621_version() -> None:
         """Tests the dynamic version validation"""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="'version' is not a dynamic field. It must be defined"):
             PEP621Configuration(name='empty-test')
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="'version' is a dynamic field. It must not be defined"):
             PEP621Configuration(name='both-test', version='1.0.0', dynamic=['version'])

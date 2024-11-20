@@ -18,17 +18,15 @@ class CMakeGenerator(Generator):
     """CMake generator"""
 
     def __init__(self, group_data: GeneratorPluginGroupData, core_data: CorePluginData, data: dict[str, Any]) -> None:
+        """Initializes the generator"""
         self.group_data = group_data
         self.core_data = core_data
         self.data = resolve_cmake_data(data, core_data)
         self.builder = Builder()
 
     @staticmethod
-    def features(directory: Path) -> SupportedGeneratorFeatures:
+    def features(_: Path) -> SupportedGeneratorFeatures:
         """Queries if CMake is supported
-
-        Args:
-            directory: The input directory to query
 
         Returns:
             Supported?

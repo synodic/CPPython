@@ -187,8 +187,8 @@ def _write_tool_directory(cppython_data: CPPythonData, directory: Path) -> Direc
     """Creates directories following a certain format
 
     Args:
-        core_data: The core data
-        plugin_path: The relative plugin path to use
+        cppython_data: The cppython data
+        directory: The directory to create
 
     Returns:
         The written path

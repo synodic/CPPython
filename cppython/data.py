@@ -23,6 +23,7 @@ class Data:
     """Contains and manages the project data"""
 
     def __init__(self, core_data: CoreData, plugins: Plugins, logger: Logger) -> None:
+        """Initializes the data"""
         self._core_data = core_data
         self._plugins = plugins
         self.logger = logger

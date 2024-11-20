@@ -1,5 +1,7 @@
 """Test plugin schemas"""
 
+import pytest
+
 from cppython.core.plugin_schema.generator import SyncConsumer
 from cppython.core.plugin_schema.provider import SyncProducer
 from cppython.core.schema import SyncData
@@ -31,7 +33,8 @@ class TestSchema:
             """
             return [TestSchema.GeneratorSyncDataSuccess, TestSchema.GeneratorSyncDataFail]
 
-        def sync(self, sync_data: SyncData) -> None:
+        @staticmethod
+        def sync(sync_data: SyncData) -> None:
             """Fulfils protocol
 
             Args:
@@ -40,7 +43,7 @@ class TestSchema:
             if isinstance(sync_data, TestSchema.GeneratorSyncDataSuccess):
                 assert sync_data.success
             else:
-                assert False
+                pytest.fail('Invalid sync data')
 
     class Producer(SyncProducer):
         """Dummy producer"""
@@ -57,7 +60,8 @@ class TestSchema:
             """
             return sync_type == TestSchema.GeneratorSyncDataSuccess
 
-        def sync_data(self, consumer: SyncConsumer) -> SyncData | None:
+        @staticmethod
+        def sync_data(consumer: SyncConsumer) -> SyncData | None:
             """Fulfils protocol
 
             Args:
@@ -103,6 +107,5 @@ class TestSchema:
         types = consumer.sync_types()
 
         for test in types:
-            if producer.supported_sync_type(test):
-                if data := producer.sync_data(consumer):
-                    consumer.sync(data)
+            if producer.supported_sync_type(test) and (data := producer.sync_data(consumer)):
+                consumer.sync(data)

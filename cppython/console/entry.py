@@ -24,7 +24,7 @@ def _find_pyproject_file() -> Path:
 
     while not path.glob('pyproject.toml'):
         if path.is_absolute():
-            assert False, (
+            raise AssertionError(
                 'This is not a valid project. No pyproject.toml found in the current directory or any of its parents.'
             )
 

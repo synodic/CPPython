@@ -14,14 +14,12 @@ class MockSCM(SCM):
     """A mock generator class for behavior testing"""
 
     def __init__(self, group_data: SCMPluginGroupData) -> None:
+        """Initializes the mock generator"""
         self.group_data = group_data
 
     @staticmethod
-    def features(directory: DirectoryPath) -> SupportedSCMFeatures:
+    def features(_: DirectoryPath) -> SupportedSCMFeatures:
         """Broadcasts the shared features of the SCM plugin to CPPython
-
-        Args:
-            directory: The root directory where features are evaluated
 
         Returns:
             The supported features
@@ -37,11 +35,9 @@ class MockSCM(SCM):
         """
         return Information()
 
-    def version(self, directory: DirectoryPath) -> str:
+    @staticmethod
+    def version(_: DirectoryPath) -> str:
         """Extracts the system's version metadata
-
-        Args:
-            directory: The repository path
 
         Returns:
             A version

@@ -26,16 +26,14 @@ class MockGenerator(Generator):
     def __init__(
         self, group_data: GeneratorPluginGroupData, core_data: CorePluginData, configuration_data: dict[str, Any]
     ) -> None:
+        """Initializes the mock generator"""
         self.group_data = group_data
         self.core_data = core_data
         self.configuration_data = MockGeneratorData(**configuration_data)
 
     @staticmethod
-    def features(directory: DirectoryPath) -> SupportedGeneratorFeatures:
+    def features(_: DirectoryPath) -> SupportedGeneratorFeatures:
         """Broadcasts the shared features of the generator plugin to CPPython
-
-        Args:
-            directory: The root directory where features are evaluated
 
         Returns:
             The supported features
@@ -60,9 +58,5 @@ class MockGenerator(Generator):
         """
         return [MockSyncData]
 
-    def sync(self, sync_data: SyncData) -> None:
-        """Synchronizes generator files and state with the providers input
-
-        Args:
-            sync_data: List of information gathered from providers
-        """
+    def sync(self, _: SyncData) -> None:
+        """Synchronizes generator files and state with the providers input"""

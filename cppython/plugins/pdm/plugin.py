@@ -14,7 +14,8 @@ from cppython.project import Project as CPPythonProject
 class CPPythonPlugin(Interface):
     """Implementation of the PDM Interface Plugin"""
 
-    def __init__(self, _core: Core) -> None:
+    def __init__(self, _: Core) -> None:
+        """Initializes the plugin"""
         post_install.connect(self.on_post_install, weak=False)
         self.logger = getLogger('cppython.interface.pdm')
 

@@ -59,8 +59,10 @@ def _cmake_data_list() -> list[CMakeConfiguration]:
 )
 def fixture_install_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """Creates temporary install location
+
     Args:
         tmp_path_factory: Factory for centralized temporary directories
+
     Returns:
         A temporary directory
     """
@@ -251,8 +253,9 @@ def fixture_core_data(cppython_data: CPPythonData, project_data: ProjectData) ->
 def fixture_project_configuration(
     request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory
 ) -> ProjectConfiguration:
-    """Project configuration fixture. Here we provide overrides on the input variants so that
-    we can use a temporary directory for testing purposes.
+    """Project configuration fixture.
+
+    Here we provide overrides on the input variants so that we can use a temporary directory for testing purposes.
 
     Args:
         request: Parameterized configuration data
@@ -281,8 +284,10 @@ def fixture_project_configuration(
 )
 def fixture_project_data(project_configuration: ProjectConfiguration) -> ProjectData:
     """Fixture that creates a project space at 'workspace/test_project/pyproject.toml'
+
     Args:
         project_configuration: Project data
+
     Returns:
         A project data object that has populated a function level temporary directory
     """
@@ -294,9 +299,11 @@ def fixture_project(
     cppython_local_configuration: CPPythonLocalConfiguration, pep621_configuration: PEP621Configuration
 ) -> PyProject:
     """Parameterized construction of PyProject data
+
     Args:
         cppython_local_configuration: The parameterized cppython table
         pep621_configuration: The project table
+
     Returns:
         All the data as one object
     """
@@ -322,8 +329,7 @@ def fixture_cmake_data(request: pytest.FixtureRequest) -> CMakeConfiguration:
 
 
 def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
-    """Called for each test function. Provides a parametrization of the specified fixtures with the appropriate paths or
-        lists of paths, allowing pytest to run tests with different sets of data
+    """Provides custom parameterization for dynamic fixture names.
 
     Args:
         metafunc: Pytest hook data

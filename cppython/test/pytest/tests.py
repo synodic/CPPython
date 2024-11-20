@@ -24,15 +24,17 @@ from cppython.utility.utility import canonicalize_type
 class ProviderIntegrationTests[T: Provider](DataPluginIntegrationTests[T], ProviderTests[T], metaclass=ABCMeta):
     """Base class for all provider integration tests that test plugin agnostic behavior"""
 
+    @staticmethod
     @pytest.fixture(autouse=True, scope='session')
-    def _fixture_install_dependency(self, plugin: T, install_path: Path) -> None:
+    def _fixture_install_dependency(plugin: T, install_path: Path) -> None:
         """Forces the download to only happen once per test session"""
         path = install_path / canonicalize_type(type(plugin)).name
         path.mkdir(parents=True, exist_ok=True)
 
         asyncio.run(plugin.download_tooling(path))
 
-    def test_install(self, plugin: T) -> None:
+    @staticmethod
+    def test_install(plugin: T) -> None:
         """Ensure that the vanilla install command functions
 
         Args:
@@ -40,7 +42,8 @@ class ProviderIntegrationTests[T: Provider](DataPluginIntegrationTests[T], Provi
         """
         plugin.install()
 
-    def test_update(self, plugin: T) -> None:
+    @staticmethod
+    def test_update(plugin: T) -> None:
         """Ensure that the vanilla update command functions
 
         Args:
@@ -48,7 +51,8 @@ class ProviderIntegrationTests[T: Provider](DataPluginIntegrationTests[T], Provi
         """
         plugin.update()
 
-    def test_group_name(self, plugin_type: type[T]) -> None:
+    @staticmethod
+    def test_group_name(plugin_type: type[T]) -> None:
         """Verifies that the group name is the same as the plugin type
 
         Args:
@@ -58,15 +62,17 @@ class ProviderIntegrationTests[T: Provider](DataPluginIntegrationTests[T], Provi
 
 
 class ProviderUnitTests[T: Provider](DataPluginUnitTests[T], ProviderTests[T], metaclass=ABCMeta):
-    """Custom implementations of the Provider class should inherit from this class for its tests.
-    Base class for all provider unit tests that test plugin agnostic behavior
+    """Base class for all provider unit tests that test plugin agnostic behavior.
+
+    Custom implementations of the Provider class should inherit from this class for its tests.
     """
 
 
 class GeneratorIntegrationTests[T: Generator](DataPluginIntegrationTests[T], GeneratorTests[T], metaclass=ABCMeta):
     """Base class for all scm integration tests that test plugin agnostic behavior"""
 
-    def test_group_name(self, plugin_type: type[T]) -> None:
+    @staticmethod
+    def test_group_name(plugin_type: type[T]) -> None:
         """Verifies that the group name is the same as the plugin type
 
         Args:
@@ -76,15 +82,17 @@ class GeneratorIntegrationTests[T: Generator](DataPluginIntegrationTests[T], Gen
 
 
 class GeneratorUnitTests[T: Generator](DataPluginUnitTests[T], GeneratorTests[T], metaclass=ABCMeta):
-    """Custom implementations of the Generator class should inherit from this class for its tests.
-    Base class for all Generator unit tests that test plugin agnostic behavior
+    """Base class for all Generator unit tests that test plugin agnostic behavior.
+
+    Custom implementations of the Generator class should inherit from this class for its tests.
     """
 
 
 class SCMIntegrationTests[T: SCM](PluginIntegrationTests[T], SCMTests[T], metaclass=ABCMeta):
     """Base class for all generator integration tests that test plugin agnostic behavior"""
 
-    def test_group_name(self, plugin_type: type[T]) -> None:
+    @staticmethod
+    def test_group_name(plugin_type: type[T]) -> None:
         """Verifies that the group name is the same as the plugin type
 
         Args:
@@ -94,6 +102,7 @@ class SCMIntegrationTests[T: SCM](PluginIntegrationTests[T], SCMTests[T], metacl
 
 
 class SCMUnitTests[T: SCM](PluginUnitTests[T], SCMTests[T], metaclass=ABCMeta):
-    """Custom implementations of the Generator class should inherit from this class for its tests.
-    Base class for all Generator unit tests that test plugin agnostic behavior
+    """Base class for all Generator unit tests that test plugin agnostic behavior.
+
+    Custom implementations of the Generator class should inherit from this class for its tests.
     """

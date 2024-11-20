@@ -12,8 +12,9 @@ from cppython.test.pytest.tests import GeneratorIntegrationTests
 class TestCPPythonGenerator(GeneratorIntegrationTests[CMakeGenerator]):
     """The tests for the CMake generator"""
 
+    @staticmethod
     @pytest.fixture(name='plugin_data', scope='session')
-    def fixture_plugin_data(self, cmake_data: CMakeConfiguration) -> dict[str, Any]:
+    def fixture_plugin_data(cmake_data: CMakeConfiguration) -> dict[str, Any]:
         """A required testing hook that allows data generation
 
         Args:
@@ -24,8 +25,9 @@ class TestCPPythonGenerator(GeneratorIntegrationTests[CMakeGenerator]):
         """
         return cmake_data.model_dump()
 
+    @staticmethod
     @pytest.fixture(name='plugin_type', scope='session')
-    def fixture_plugin_type(self) -> type[CMakeGenerator]:
+    def fixture_plugin_type() -> type[CMakeGenerator]:
         """A required testing hook that allows type generation
 
         Returns:
