@@ -32,6 +32,7 @@ from cppython.core.schema import (
     ProjectData,
 )
 from cppython.data import Data, Plugins
+from cppython.defaults import DefaultSCM
 from cppython.utility.exception import PluginError
 
 
@@ -259,9 +260,6 @@ class Resolver:
             scm_plugins: The list of SCM plugin types
             project_data: The project data
 
-        Raises:
-            PluginError: Raised if no SCM plugin was found that supports the given data
-
         Returns:
             The selected SCM plugin type
         """
@@ -270,7 +268,9 @@ class Resolver:
             if scm_type.features(project_data.pyproject_file.parent).repository:
                 return scm_type
 
-        raise PluginError("No SCM plugin was found that supports the given path")
+        self._logger.info("No SCM plugin was found that supports the given path")
+
+        return DefaultSCM
 
     def solve(
         self, generator_types: list[type[Generator]], provider_types: list[type[Provider]]
