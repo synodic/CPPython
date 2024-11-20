@@ -1,7 +1,7 @@
 """Defines the data and routines for building a CPPython project type"""
 
 import logging
-from importlib import metadata
+from importlib.metadata import entry_points
 from inspect import getmodule
 from logging import Logger
 from typing import Any
@@ -134,7 +134,7 @@ class Resolver:
         plugin_types: list[type[Generator]] = []
 
         # Filter entries by type
-        for entry_point in list(metadata.entry_points(group=f"cppython.{group_name}")):
+        for entry_point in list(entry_points(group=f"cppython.{group_name}")):
             loaded_type = entry_point.load()
             if not issubclass(loaded_type, Generator):
                 self._logger.warning(
@@ -164,7 +164,7 @@ class Resolver:
         plugin_types: list[type[Provider]] = []
 
         # Filter entries by type
-        for entry_point in list(metadata.entry_points(group=f"cppython.{group_name}")):
+        for entry_point in list(entry_points(group=f"cppython.{group_name}")):
             loaded_type = entry_point.load()
             if not issubclass(loaded_type, Provider):
                 self._logger.warning(
@@ -194,7 +194,7 @@ class Resolver:
         plugin_types: list[type[SCM]] = []
 
         # Filter entries by type
-        for entry_point in list(metadata.entry_points(group=f"cppython.{group_name}")):
+        for entry_point in list(entry_points(group=f"cppython.{group_name}")):
             loaded_type = entry_point.load()
             if not issubclass(loaded_type, SCM):
                 self._logger.warning(
