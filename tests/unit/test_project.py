@@ -19,6 +19,7 @@ from cppython.project import Project
 from tests.plugin_helper.mock.generator import MockGenerator
 from tests.plugin_helper.mock.interface import MockInterface
 from tests.plugin_helper.mock.provider import MockProvider
+from tests.plugin_helper.mock.scm import MockSCM
 
 pep621 = PEP621Configuration(name="test-project", version="0.1.0")
 
@@ -93,7 +94,12 @@ class TestProject:
             mocker: Pytest mocker fixture
         """
 
-        mocker.patch.object(metadata.EntryPoint, "load", side_effect=[MockGenerator, MockProvider])
+        mocker.patch.object(
+            metadata,
+            "entry_points",
+            return_value=[metadata.EntryPoint(name="mock", value="mock", group="mock")],
+        )
+        mocker.patch.object(metadata.EntryPoint, "load", side_effect=[MockGenerator, MockProvider, MockSCM])
 
         file_path = tmp_path / "pyproject.toml"
 

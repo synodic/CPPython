@@ -2,6 +2,8 @@
 
 import logging
 
+from pytest_mock import MockerFixture
+from importlib import metadata
 from cppython.builder import Builder, Resolver
 from cppython.core.schema import (
     CPPythonLocalConfiguration,
@@ -9,6 +11,9 @@ from cppython.core.schema import (
     ProjectConfiguration,
     ProjectData,
 )
+from tests.plugin_helper.mock.generator import MockGenerator
+from tests.plugin_helper.mock.provider import MockProvider
+from tests.plugin_helper.mock.scm import MockSCM
 
 
 class TestBuilder:
@@ -19,6 +24,7 @@ class TestBuilder:
         project_configuration: ProjectConfiguration,
         pep621_configuration: PEP621Configuration,
         cppython_local_configuration: CPPythonLocalConfiguration,
+        mocker: MockerFixture,
     ) -> None:
         """Verifies that the builder can build a project with all test variants
 
@@ -26,9 +32,17 @@ class TestBuilder:
             project_configuration: Variant fixture for the project configuration
             pep621_configuration: Variant fixture for PEP 621 configuration
             cppython_local_configuration: Variant fixture for cppython configuration
+            mocker: Pytest mocker fixture
         """
         logger = logging.getLogger()
         builder = Builder(project_configuration, logger)
+
+        mocker.patch.object(
+            metadata,
+            "entry_points",
+            return_value=[metadata.EntryPoint(name="mock", value="mock", group="mock")],
+        )
+        mocker.patch.object(metadata.EntryPoint, "load", side_effect=[MockGenerator, MockProvider, MockSCM])
 
         assert builder.build(pep621_configuration, cppython_local_configuration)
 
