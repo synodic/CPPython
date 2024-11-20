@@ -87,6 +87,11 @@ class TestProject:
             tmp_path: Temporary directory for dummy data
         """
 
+        distribution = pkg_resources.Distribution(__file__)
+        entry_point = pkg_resources.EntryPoint.parse("plugin1 = plugins.plugin1:plugin1_class", dist=distribution)
+        distribution._ep_map = {"my_project.plugins": {"plugin1": entry_point}}
+        pkg_resources.working_set.add(distribution)
+
         file_path = tmp_path / "pyproject.toml"
 
         with open(file_path, "a", encoding="utf8"):
