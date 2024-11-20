@@ -48,8 +48,8 @@ class TestProject:
 
         file_path = tmp_path / "pyproject.toml"
 
-        with open(file_path, "a", encoding="utf8") as file:
-            file.write("")
+        with open(file_path, "a", encoding="utf8"):
+            pass
 
         project_configuration = ProjectConfiguration(pyproject_file=file_path, version=None)
         interface = MockInterface()
@@ -68,8 +68,8 @@ class TestProject:
 
         file_path = tmp_path / "pyproject.toml"
 
-        with open(file_path, "a", encoding="utf8") as file:
-            file.write("")
+        with open(file_path, "a", encoding="utf8"):
+            pass
 
         project_configuration = ProjectConfiguration(pyproject_file=file_path, version=None)
         interface = MockInterface()
@@ -89,8 +89,8 @@ class TestProject:
 
         file_path = tmp_path / "pyproject.toml"
 
-        with open(file_path, "a", encoding="utf8") as file:
-            file.write("")
+        with open(file_path, "a", encoding="utf8"):
+            pass
 
         project_configuration = ProjectConfiguration(pyproject_file=file_path, version=None)
         interface = MockInterface()
