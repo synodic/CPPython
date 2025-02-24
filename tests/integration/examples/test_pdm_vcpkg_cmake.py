@@ -16,3 +16,12 @@ class TestSetup:
         """Verify that the fixture is returning the right data"""
         assert example_directory.is_dir()
         assert (example_directory / 'pyproject.toml').is_file()
+
+    @staticmethod
+    def test_list(example_directory: Path) -> None:
+        """Verifies that the list command functions with CPPython hooks"""
+        with runner.isolated_filesystem() as temp_directory:
+            shutil.copytree(example_directory, temp_directory, dirs_exist_ok=True)
+
+            result = runner.invoke(app, ['list'])
+            assert result.exit_code == 0
