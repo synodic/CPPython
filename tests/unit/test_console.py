@@ -12,7 +12,7 @@ pytest_plugins = ['tests.fixtures.example']
 
 
 class TestConsole:
-    """Various that all the examples are accessible to cppython"""
+    """Various that all the examples are accessible to cppython. The project should be mocked so nothing executes"""
 
     @staticmethod
     def test_info(example_directory: Path) -> None:
