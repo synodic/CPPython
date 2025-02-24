@@ -1,4 +1,7 @@
-"""Example folder tests"""
+"""Example folder tests.
+
+All examples can be run with the CPPython entry-point, and we use the examples as the test data for the CLI.
+"""
 
 import shutil
 from pathlib import Path

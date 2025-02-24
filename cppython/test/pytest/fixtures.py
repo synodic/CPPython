@@ -286,18 +286,3 @@ def fixture_project(
     """
     tool = ToolData(cppython=cppython_local_configuration.configuration)
     return PyProject(project=pep621_configuration.configuration, tool=tool)
-
-
-def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
-    """Provides custom parameterization for dynamic fixture names.
-
-    Args:
-        metafunc: Pytest hook data
-    """
-    for fixture in metafunc.fixturenames:
-        match fixture.split('_', 1):
-            case ['build', directory]:
-                # Parametrizes the paths under tests/build/<directory> where <directory> is the fixture suffix
-
-                build_data_path = metafunc.config.rootpath / 'tests' / 'build' / directory
-                metafunc.parametrize(fixture, [build_data_path], scope='session')
