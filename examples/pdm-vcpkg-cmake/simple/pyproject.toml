@@ -1,6 +1,6 @@
 [project]
 description = "A simple project showing how to use vcpkg with CPPython"
-name = "cppython-vcpkg-simple"
+name = "cppython-pdm-vcpkg-cmake-simple"
 
 license = {text = "MIT"}
 
