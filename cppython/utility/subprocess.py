@@ -8,7 +8,8 @@ from typing import Any
 from cppython.utility.exception import ProcessError
 
 
-def call(
+def invoke(
+    executable: str | Path,
     arguments: list[str | Path],
     logger: logging.Logger,
     log_level: int = logging.WARNING,
@@ -18,6 +19,7 @@ def call(
     """Executes a subprocess call with logger and utility attachments. Captures STDOUT and STDERR
 
     Args:
+        executable: The executable to call
         arguments: Arguments to pass to Popen
         logger: The logger to log the process pipes to
         log_level: The level to log to. Defaults to logging.WARNING.
@@ -27,7 +29,9 @@ def call(
     Raises:
         ProcessError: If the underlying process fails
     """
-    with subprocess.Popen(arguments, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, **kwargs) as process:
+    with subprocess.Popen(
+        [executable] + arguments, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, **kwargs
+    ) as process:
         if process.stdout is None:
             return
 

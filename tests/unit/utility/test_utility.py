@@ -9,7 +9,7 @@ from typing import NamedTuple
 import pytest
 
 from cppython.utility.exception import ProcessError
-from cppython.utility.subprocess import call
+from cppython.utility.subprocess import invoke
 from cppython.utility.utility import canonicalize_name
 
 cppython_logger = logging.getLogger('cppython')
@@ -86,8 +86,9 @@ class TestSubprocess:
         python = Path(executable)
 
         with caplog.at_level(logging.INFO):
-            call(
-                [python, '-c', "import sys; print('Test Out', file = sys.stdout)"],
+            invoke(
+                python,
+                ['-c', "import sys; print('Test Out', file = sys.stdout)"],
                 cppython_logger,
             )
 
@@ -104,8 +105,9 @@ class TestSubprocess:
         python = Path(executable)
 
         with caplog.at_level(logging.INFO):
-            call(
-                [python, '-c', "import sys; print('Test Error', file = sys.stderr)"],
+            invoke(
+                python,
+                ['-c', "import sys; print('Test Error', file = sys.stderr)"],
                 cppython_logger,
             )
 
@@ -122,8 +124,9 @@ class TestSubprocess:
         python = Path(executable)
 
         with caplog.at_level(logging.INFO):
-            call(
-                [python, '-c', "import sys; print('Test Out', file = sys.stdout)"],
+            invoke(
+                python,
+                ['-c', "import sys; print('Test Out', file = sys.stdout)"],
                 cppython_logger,
                 suppress=True,
             )
@@ -139,8 +142,9 @@ class TestSubprocess:
         python = Path(executable)
 
         with pytest.raises(ProcessError) as exec_info, caplog.at_level(logging.INFO):
-            call(
-                [python, '-c', "import sys; sys.exit('Test Exit Output')"],
+            invoke(
+                python,
+                ['-c', "import sys; sys.exit('Test Exit Output')"],
                 cppython_logger,
             )
 
@@ -159,8 +163,9 @@ class TestSubprocess:
         python = Path(executable)
 
         with pytest.raises(ProcessError) as exec_info, caplog.at_level(logging.INFO):
-            call(
-                [python, '-c', "import sys; raise Exception('Test Exception Output')"],
+            invoke(
+                python,
+                ['-c', "import sys; raise Exception('Test Exception Output')"],
                 cppython_logger,
             )
 
@@ -175,9 +180,9 @@ class TestSubprocess:
         """
         python = Path(executable)
         with pytest.raises(ProcessError) as exec_info, caplog.at_level(logging.INFO):
-            call(
+            invoke(
+                python,
                 [
-                    python,
                     '-c',
                     "import sys; print('Test Out', file = sys.stdout); sys.exit('Test Exit Out')",
                 ],
@@ -200,9 +205,9 @@ class TestSubprocess:
         """
         python = Path(executable)
         with pytest.raises(ProcessError) as exec_info, caplog.at_level(logging.INFO):
-            call(
+            invoke(
+                python,
                 [
-                    python,
                     '-c',
                     "import sys; print('Test Error', file = sys.stderr); sys.exit('Test Exit Error')",
                 ],

@@ -18,7 +18,7 @@ from cppython.plugins.cmake.schema import CMakeSyncData
 from cppython.plugins.vcpkg.resolution import generate_manifest, resolve_vcpkg_data
 from cppython.plugins.vcpkg.schema import VcpkgData
 from cppython.utility.exception import NotSupportedError, ProcessError
-from cppython.utility.subprocess import call as subprocess_call
+from cppython.utility.subprocess import invoke as subprocess_call
 from cppython.utility.utility import TypeName
 
 
@@ -78,11 +78,12 @@ class VcpkgProvider(Provider):
         try:
             if system_name == 'nt':
                 subprocess_call(
-                    [str(WindowsPath('bootstrap-vcpkg.bat')), '-disableMetrics'], logger=logger, cwd=path, shell=True
+                    str(WindowsPath('bootstrap-vcpkg.bat')), ['-disableMetrics'], logger=logger, cwd=path, shell=True
                 )
             elif system_name == 'posix':
                 subprocess_call(
-                    ['./' + str(PosixPath('bootstrap-vcpkg.sh')), '-disableMetrics'],
+                    './' + str(PosixPath('bootstrap-vcpkg.sh')),
+                    ['-disableMetrics'],
                     logger=logger,
                     cwd=path,
                     shell=True,
@@ -130,7 +131,8 @@ class VcpkgProvider(Provider):
         try:
             # Hide output, given an error output is a logic conditional
             subprocess_call(
-                ['git', 'rev-parse', '--is-inside-work-tree'],
+                'git',
+                ['rev-parse', '--is-inside-work-tree'],
                 logger=logger,
                 suppress=True,
                 cwd=path,
@@ -158,8 +160,8 @@ class VcpkgProvider(Provider):
                 logger.debug("Updating the vcpkg repository at '%s'", directory.absolute())
 
                 # The entire history is need for vcpkg 'baseline' information
-                subprocess_call(['git', 'fetch', 'origin'], logger=logger, cwd=directory)
-                subprocess_call(['git', 'pull'], logger=logger, cwd=directory)
+                subprocess_call('git', ['fetch', 'origin'], logger=logger, cwd=directory)
+                subprocess_call('git', ['pull'], logger=logger, cwd=directory)
             except ProcessError:
                 logger.exception('Unable to update the vcpkg repository')
                 raise
@@ -169,7 +171,8 @@ class VcpkgProvider(Provider):
 
                 # The entire history is need for vcpkg 'baseline' information
                 subprocess_call(
-                    ['git', 'clone', 'https://github.com/microsoft/vcpkg', '.'],
+                    'git',
+                    ['clone', 'https://github.com/microsoft/vcpkg', '.'],
                     logger=logger,
                     cwd=directory,
                 )
@@ -198,8 +201,8 @@ class VcpkgProvider(Provider):
         logger = getLogger('cppython.vcpkg')
         try:
             subprocess_call(
+                executable,
                 [
-                    executable,
                     'install',
                     f'--x-install-root={self.data.install_directory}',
                 ],
@@ -229,8 +232,8 @@ class VcpkgProvider(Provider):
         logger = getLogger('cppython.vcpkg')
         try:
             subprocess_call(
+                executable,
                 [
-                    executable,
                     'install',
                     f'--x-install-root={self.data.install_directory}',
                 ],

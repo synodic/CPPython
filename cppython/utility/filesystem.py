@@ -1,6 +1,7 @@
 """Helpers for working with the filesystem."""
 
 import os
+import tempfile
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
@@ -10,8 +11,10 @@ from pathlib import Path
 def isolated_filesystem() -> Generator[Path]:
     """Change the current working directory to the given path for the duration of the test."""
     old_cwd = os.getcwd()
-    os.chdir(path)
+
     try:
-        yield
+        with tempfile.TemporaryDirectory() as temp_directory:
+            os.chdir(temp_directory)
+            yield Path(temp_directory)
     finally:
         os.chdir(old_cwd)
