@@ -3,9 +3,12 @@
 All examples can be run with the CPPython entry-point, and we use the examples as the test data for the CLI.
 """
 
+import shutil
 from pathlib import Path
 
-pytest_plugins = ['tests.fixtures.example']
+from cppython.utility.filesystem import isolated_filesystem
+
+pytest_plugins = ['tests.fixtures.utility']
 
 
 class TestSetup:
@@ -20,7 +23,7 @@ class TestSetup:
     @staticmethod
     def test_list(example_directory: Path) -> None:
         """Verifies that the list command functions with CPPython hooks"""
-        with runner.isolated_filesystem() as temp_directory:
+        with isolated_filesystem() as temp_directory:
             shutil.copytree(example_directory, temp_directory, dirs_exist_ok=True)
 
             result = runner.invoke(app, ['list'])
