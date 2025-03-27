@@ -8,7 +8,7 @@ from pathlib import Path
 
 from cppython.utility.filesystem import isolated_filesystem
 
-pytest_plugins = ['tests.fixtures.utility']
+pytest_plugins = ['tests.fixtures.cmake']
 
 
 class TestSetup:
