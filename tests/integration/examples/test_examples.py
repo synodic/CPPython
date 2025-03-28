@@ -8,7 +8,7 @@ from pathlib import Path
 pytest_plugins = ['tests.fixtures.example']
 
 
-class TestSetup:
+class TestExamples:
     """Verification that the example directory is setup correctly"""
 
     @staticmethod

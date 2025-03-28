@@ -1,10 +1,13 @@
-"""Example folder tests.
+"""TODO"""
 
-All examples can be run with the CPPython entry-point, and we use the examples as the test data for the CLI.
-"""
+from typer.testing import CliRunner
 
-pytest_plugins = ['tests.fixtures.cmake']
+pytest_plugins = ['tests.fixtures.example']
 
 
-class TestSetup:
-    """Verification that the example directory is setup correctly"""
+class TestPdmVcpkgCMake:
+    """TODO"""
+
+    @staticmethod
+    def test_simple(example_runner: CliRunner) -> None:
+        """Verify that the fixture is returning the right data"""
