@@ -14,25 +14,25 @@ dynamic = ["version"]
 requires-python = ">=3.13"
 
 dependencies = [
-  "typer>=0.15.0",
-  "pydantic>=2.10.3",
-  "packaging>=24.1",
+  "typer>=0.15.2",
+  "pydantic>=2.11.1",
+  "packaging>=24.2",
   "requests>=2.32.3",
-  "types-requests>=2.32.0.20241016",
+  "types-requests>=2.32.0.20250328",
 ]
 
 [project.optional-dependencies]
 pytest = [
-  "pytest>=8.3.3",
-  "pytest-mock>=3.14.0",
+    "pytest>=8.3.5",
+    "pytest-mock>=3.14.0",
 ]
 
 git = [
-  "dulwich>=0.22.5",
+    "dulwich>=0.22.8",
 ]
 
 pdm = [
-  "pdm>=2.21.0",
+    "pdm>=2.22.4",
 ]
 
 [project.urls]
@@ -57,13 +57,13 @@ cppython = "cppython.test.pytest.fixtures"
 
 [dependency-groups]
 lint = [
-  "ruff>=0.8.4",
-  "mypy>=1.14",
+    "ruff>=0.11.2",
+    "mypy>=1.15.0",
 ]
 test = [
-  "pytest>=8.3.4",
-  "pytest-cov>=6.0.0",
-  "pytest-mock>=3.14.0",
+    "pytest>=8.3.5",
+    "pytest-cov>=6.0.0",
+    "pytest-mock>=3.14.0",
 ]
 
 [project.scripts]

@@ -5,7 +5,7 @@
 groups = ["default", "git", "lint", "pdm", "pytest", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:ff3a3e1f684019924b9fd4ca01501af97e4252a34a90bb15c36394c8f0b6612c"
+content_hash = "sha256:112d28007326b039b195f5171eee3e5bffe7405f66928441cdc10bd9509ee29f"
 
 [[metadata.targets]]
 requires_python = ">=3.13"
