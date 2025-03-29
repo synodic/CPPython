@@ -1,11 +1,11 @@
 """Unit test the provider plugin"""
 
+import json
 from pathlib import Path
 from typing import Any
 
 import pytest
 
-from cppython.core.utility import write_model_json
 from cppython.plugins.cmake.builder import Builder
 from cppython.plugins.cmake.plugin import CMakeGenerator
 from cppython.plugins.cmake.schema import (
@@ -104,7 +104,10 @@ class TestCPPythonGenerator(GeneratorUnitTests[CMakeGenerator]):
 
         root_file = tmp_path / 'CMakePresets.json'
         presets = CMakePresets()
-        write_model_json(root_file, presets)
+
+        serialized = json.loads(presets.model_dump_json(exclude_none=True, by_alias=False))
+        with open(root_file, 'w', encoding='utf8') as file:
+            json.dump(serialized, file, ensure_ascii=False, indent=4)
 
         data = CMakeSyncData(provider_name=TypeName('test-provider'), top_level_includes=includes_file)
         builder.write_provider_preset(provider_directory, data)
@@ -137,7 +140,9 @@ class TestCPPythonGenerator(GeneratorUnitTests[CMakeGenerator]):
 
         root_file = relative_indirection / 'CMakePresets.json'
         presets = CMakePresets()
-        write_model_json(root_file, presets)
+        serialized = json.loads(presets.model_dump_json(exclude_none=True, by_alias=False))
+        with open(root_file, 'w', encoding='utf8') as file:
+            json.dump(serialized, file, ensure_ascii=False, indent=4)
 
         data = CMakeSyncData(provider_name=TypeName('test-provider'), top_level_includes=includes_file)
         builder.write_provider_preset(provider_directory, data)

@@ -1,9 +1,9 @@
 """Plugin builder"""
 
+import json
 from copy import deepcopy
 from pathlib import Path
 
-from cppython.core.utility import read_json, write_json, write_model_json
 from cppython.plugins.cmake.schema import CMakePresets, CMakeSyncData, ConfigurePreset
 
 
@@ -23,7 +23,9 @@ class Builder:
 
         json_path = provider_directory / f'{data.provider_name}.json'
 
-        write_model_json(json_path, presets)
+        serialized = json.loads(presets.model_dump_json(exclude_none=True, by_alias=False))
+        with open(json_path, 'w', encoding='utf8') as file:
+            json.dump(serialized, file, ensure_ascii=False, indent=4)
 
     @staticmethod
     def write_cppython_preset(
@@ -42,7 +44,10 @@ class Builder:
 
         cppython_json_path = cppython_preset_directory / 'cppython.json'
 
-        write_model_json(cppython_json_path, presets)
+        serialized = json.loads(presets.model_dump_json(exclude_none=True, by_alias=False))
+        with open(cppython_json_path, 'w', encoding='utf8') as file:
+            json.dump(serialized, file, ensure_ascii=False, indent=4)
+
         return cppython_json_path
 
     @staticmethod
@@ -57,7 +62,9 @@ class Builder:
         Args:
             preset_file: Preset file to modify
         """
-        initial_root_preset = read_json(preset_file)
+        with open(preset_file, encoding='utf-8') as file:
+            initial_root_preset = json.load(file)
 
         if (root_preset := deepcopy(initial_root_preset)) != initial_root_preset:
-            write_json(preset_file, root_preset)
+            with open(preset_file, 'w', encoding='utf-8') as file:
+                json.dump(root_preset, file, ensure_ascii=False, indent=4)
