@@ -7,12 +7,12 @@ from cppython.console.entry import app
 pytest_plugins = ['tests.fixtures.example']
 
 
-class TestPdmVcpkgCMake:
-    """TODO"""
+class TestVcpkgCMake:
+    """Test project variation of vcpkg and CMake"""
 
     @staticmethod
     def test_simple(example_runner: CliRunner) -> None:
-        """Simple setup of vcpkg and CMake via PDM"""
+        """Simple project"""
         result = example_runner.invoke(
             app,
             [
