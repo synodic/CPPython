@@ -38,7 +38,7 @@ class TestSchema:
         """
 
         data = loads(toml_str)
-        result = self.Model.model_validate(data, by_name=True)
+        result = self.Model.model_validate(data)
         assert result.aliased_variable is True
 
     @staticmethod
