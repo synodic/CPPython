@@ -4,7 +4,7 @@ from abc import abstractmethod
 from pathlib import Path
 from typing import Annotated, Any, NewType, Protocol, runtime_checkable
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from pydantic.types import DirectoryPath
 
 from cppython.utility.plugin import Plugin as SynodicPlugin
@@ -14,7 +14,7 @@ from cppython.utility.utility import TypeName
 class CPPythonModel(BaseModel):
     """The base model to use for all CPPython models"""
 
-    model_config = {'populate_by_name': False}
+    model_config = ConfigDict(validate_by_name=False, validate_by_alias=True)
 
 
 class ProjectData(CPPythonModel, extra='forbid'):
