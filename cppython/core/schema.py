@@ -91,7 +91,7 @@ class PEP621Configuration(CPPythonModel):
         Returns:
             The data
         """
-        for field in model.model_fields:
+        for field in PEP621Configuration.model_fields:
             if field == 'dynamic':
                 continue
             value = getattr(model, field)
