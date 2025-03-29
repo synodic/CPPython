@@ -13,7 +13,11 @@ class TestPdmVcpkgCMake:
     @staticmethod
     def test_simple(example_runner: CliRunner) -> None:
         """Simple setup of vcpkg and CMake via PDM"""
-        example_runner.invoke(
+        result = example_runner.invoke(
             app,
-            ['cppython', 'update', '-u'],
+            [
+                'update',
+            ],
         )
+
+        assert result.exit_code == 0, result.output
