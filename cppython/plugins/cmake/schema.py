@@ -74,4 +74,4 @@ class CMakeConfiguration(CPPythonModel):
     ] = Path('CMakePresets.json')
     configuration_name: Annotated[
         str, Field(description='The CMake configuration preset to look for and override inside the given `preset_file`')
-    ]
+    ] = 'cppython'

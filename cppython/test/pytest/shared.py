@@ -226,6 +226,17 @@ class DataPluginIntegrationTests[T: DataPlugin](BaseIntegrationTests[T], metacla
 class DataPluginUnitTests[T: DataPlugin](BaseUnitTests[T], metaclass=ABCMeta):
     """Unit testing information for all data plugin test classes"""
 
+    @staticmethod
+    def test_empty_data(
+        plugin_type: type[T],
+        plugin_group_data: DataPluginGroupData,
+        core_plugin_data: CorePluginData,
+    ) -> None:
+        """All data plugins should be able to be constructed with empty data"""
+        plugin = plugin_type(plugin_group_data, core_plugin_data, {})
+
+        assert plugin, 'The plugin should be able to be constructed with empty data'
+
 
 class ProviderTests[T: Provider](DataPluginTests[T], metaclass=ABCMeta):
     """Shared functionality between the different Provider testing categories"""

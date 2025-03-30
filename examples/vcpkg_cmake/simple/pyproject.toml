@@ -15,5 +15,7 @@ dependencies = [
   "cppython>=0.1.0",
 ]
 
+[tool.cppython]
+
 [tool.pdm]
 distribution = false
