@@ -122,7 +122,7 @@ plugins = [
 ]
 
 [tool.pdm.options]
-update = ["--update-all", "--save-compatible"]
+update = ["--update-all", "--unconstrained"]
 
 [tool.pdm.version]
 source = "scm"

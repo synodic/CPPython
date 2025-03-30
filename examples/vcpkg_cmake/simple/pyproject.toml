@@ -16,6 +16,8 @@ dependencies = [
 ]
 
 [tool.cppython]
+generator = "cmake"
+provider = "vcpkg"
 
 [tool.pdm]
 distribution = false
