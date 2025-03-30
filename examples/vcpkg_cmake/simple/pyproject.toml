@@ -19,5 +19,9 @@ dependencies = [
 generator-name = "cmake"
 provider-name = "vcpkg"
 
+[tool.cppython.generator]
+
+[tool.cppython.provider]
+
 [tool.pdm]
 distribution = false
