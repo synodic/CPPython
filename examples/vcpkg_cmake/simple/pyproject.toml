@@ -19,6 +19,8 @@ dependencies = [
 generator-name = "cmake"
 provider-name = "vcpkg"
 
+install-path = "install"
+
 [tool.cppython.generator]
 
 [tool.cppython.provider]
