@@ -104,10 +104,6 @@ class PEP621Configuration(CPPythonModel):
         return model
 
 
-def _default_install_location() -> Path:
-    return Path.home() / '.cppython'
-
-
 class CPPythonData(CPPythonModel, extra='forbid'):
     """Resolved CPPython data with local and global configuration"""
 
@@ -268,20 +264,40 @@ GeneratorData = NewType('GeneratorData', dict[str, Any])
 class CPPythonLocalConfiguration(CPPythonModel, extra='forbid'):
     """Data required by the tool"""
 
+    configuration_path: Annotated[
+        Path | None,
+        Field(
+            description='The path to the configuration override file. If present, configuration found in the given'
+            ' directory will be preferred'
+        ),
+    ] = None
+
     install_path: Annotated[
         Path,
         Field(
             alias='install-path',
-            description='The global install path for the project',
+            description='The global install path for the project. Provider and generator plugins will be'
+            ' installed here.',
         ),
-    ] = _default_install_location()
-    tool_path: Annotated[Path, Field(alias='tool-path', description='The local tooling path for the project')] = Path(
-        'tool'
-    )
+    ] = Path.home() / '.cppython'
 
-    build_path: Annotated[Path, Field(alias='build-path', description='The local build path for the project')] = Path(
-        'build'
-    )
+    tool_path: Annotated[
+        Path,
+        Field(
+            alias='tool-path',
+            description='The local tooling path for the project. If the provider or generator need additional file'
+            ' support, this directory will be used',
+        ),
+    ] = Path('tool')
+
+    build_path: Annotated[
+        Path,
+        Field(
+            alias='build-path',
+            description='The local build path for the project. This is where the artifacts of the local C++ build'
+            ' process will be generated.',
+        ),
+    ] = Path('build')
 
     provider: Annotated[ProviderData, Field(description="Provider plugin data associated with 'provider_name")] = (
         ProviderData({})
