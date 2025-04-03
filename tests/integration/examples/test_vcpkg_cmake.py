@@ -16,7 +16,7 @@ class TestVcpkgCMake:
         result = example_runner.invoke(
             app,
             [
-                'update',
+                'install',
             ],
         )
 
