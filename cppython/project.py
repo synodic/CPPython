@@ -30,7 +30,7 @@ class Project(API):
             pyproject = resolve_model(PyProject, pyproject_data)
         except ConfigException as error:
             self.logger.error(error, exc_info=True)
-            return
+            raise SystemExit(1) from None
 
         if not pyproject.tool or not pyproject.tool.cppython:
             self.logger.info("The pyproject.toml file doesn't contain the `tool.cppython` table")
