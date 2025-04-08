@@ -9,6 +9,7 @@ from cppython.core.exception import ConfigException
 from cppython.core.resolution import resolve_model
 from cppython.core.schema import Interface, ProjectConfiguration, PyProject
 from cppython.schema import API
+from cppython.utility.exception import ProcessError
 
 
 class Project(API):
@@ -29,8 +30,9 @@ class Project(API):
         try:
             pyproject = resolve_model(PyProject, pyproject_data)
         except ConfigException as error:
-            self.logger.error(error, exc_info=True)
-            raise SystemExit(1) from None
+            # Log the exception message explicitly
+            self.logger.error('Configuration error:\n%s', error, exc_info=False)
+            raise SystemExit('Error: Invalid configuration. Please check your pyproject.toml.') from None
 
         if not pyproject.tool or not pyproject.tool.cppython:
             self.logger.info("The pyproject.toml file doesn't contain the `tool.cppython` table")
@@ -69,9 +71,12 @@ class Project(API):
 
         try:
             self._data.plugins.provider.install()
+        except ProcessError as error:
+            self.logger.error('Installation failed: %s', error.error)
+            raise SystemExit('Error: Provider installation failed. Please check the logs.') from None
         except Exception as exception:
-            self.logger.error('Provider %s failed to install', self._data.plugins.provider.name())
-            raise exception
+            self.logger.error('Unexpected error during installation: %s', str(exception))
+            raise SystemExit('Error: An unexpected error occurred during installation.') from None
 
         self._data.sync()
 
@@ -93,8 +98,11 @@ class Project(API):
 
         try:
             self._data.plugins.provider.update()
+        except ProcessError as error:
+            self.logger.error('Update failed: %s', error.error)
+            raise SystemExit('Error: Provider update failed. Please check the logs.') from None
         except Exception as exception:
-            self.logger.error('Provider %s failed to update', self._data.plugins.provider.name())
-            raise exception
+            self.logger.error('Unexpected error during update: %s', str(exception))
+            raise SystemExit('Error: An unexpected error occurred during update.') from None
 
         self._data.sync()

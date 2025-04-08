@@ -1,11 +1,12 @@
 """Data conversion routines"""
 
+import logging
 from pathlib import Path
 from typing import Any, cast
 
 from pydantic import BaseModel, DirectoryPath, ValidationError
 
-from cppython.core.exception import ConfigError, ConfigException
+from cppython.core.exception import ConfigException
 from cppython.core.plugin_schema.generator import Generator, GeneratorPluginGroupData
 from cppython.core.plugin_schema.provider import Provider, ProviderPluginGroupData
 from cppython.core.plugin_schema.scm import SCM, SCMPluginGroupData
@@ -257,7 +258,12 @@ def resolve_model[T: BaseModel](model: type[T], data: dict[str, Any]) -> T:
         # BaseModel is setup to ignore extra fields
         return model(**data)
     except ValidationError as e:
-        new_errors: list[ConfigError] = []
-        for error in e.errors():
-            new_errors.append(ConfigError(message=error['msg']))
-        raise ConfigException('The input project failed', new_errors) from e
+        # Log the raw ValidationError for debugging
+        logging.getLogger('cppython').debug('ValidationError details: %s', e.errors())
+
+        if e.errors():
+            formatted_errors = '\n'.join(f"Field '{error['loc'][0]}': {error['msg']}" for error in e.errors())
+        else:
+            formatted_errors = 'An unknown validation error occurred.'
+
+        raise ConfigException(f'The input project failed validation:\n{formatted_errors}', []) from e
