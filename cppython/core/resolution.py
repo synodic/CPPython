@@ -262,7 +262,10 @@ def resolve_model[T: BaseModel](model: type[T], data: dict[str, Any]) -> T:
         logging.getLogger('cppython').debug('ValidationError details: %s', e.errors())
 
         if e.errors():
-            formatted_errors = '\n'.join(f"Field '{error['loc'][0]}': {error['msg']}" for error in e.errors())
+            formatted_errors = '\n'.join(
+                f"Field '{'.'.join(map(str, error['loc']))}': {error['msg']}"
+                for error in e.errors(include_input=True, include_context=True)
+            )
         else:
             formatted_errors = 'An unknown validation error occurred.'
 
