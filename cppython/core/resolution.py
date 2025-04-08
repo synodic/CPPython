@@ -114,6 +114,15 @@ def resolve_cppython(
     root_directory = project_data.project_root.absolute()
 
     # Add the base path to all relative paths
+    modified_configuration_path = local_configuration.configuration_path
+
+    # TODO: Grab configuration from the project, user, or system
+    if modified_configuration_path is None:
+        modified_configuration_path = root_directory / 'cppython.json'
+
+    if not modified_configuration_path.is_absolute():
+        modified_configuration_path = root_directory / modified_configuration_path
+
     modified_install_path = local_configuration.install_path
 
     if not modified_install_path.is_absolute():
@@ -141,6 +150,7 @@ def resolve_cppython(
     modified_scm_name = plugin_build_data.scm_name
 
     cppython_data = CPPythonData(
+        configuration_path=modified_configuration_path,
         install_path=modified_install_path,
         tool_path=modified_tool_path,
         build_path=modified_build_path,
@@ -166,6 +176,7 @@ def resolve_cppython_plugin(cppython_data: CPPythonData, plugin_type: type[Plugi
     modified_install_path = cppython_data.install_path / plugin_type.name()
 
     plugin_data = CPPythonData(
+        configuration_path=cppython_data.configuration_path,
         install_path=modified_install_path,
         tool_path=cppython_data.tool_path,
         build_path=cppython_data.build_path,

@@ -107,6 +107,7 @@ class PEP621Configuration(CPPythonModel):
 class CPPythonData(CPPythonModel, extra='forbid'):
     """Resolved CPPython data with local and global configuration"""
 
+    configuration_path: Path
     install_path: Path
     tool_path: Path
     build_path: Path

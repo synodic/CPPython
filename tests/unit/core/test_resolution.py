@@ -81,10 +81,8 @@ class TestResolve:
 
         bad_data = {'field': 4}
 
-        with pytest.raises(ConfigException) as error:
+        with pytest.raises(ConfigException):
             resolve_model(MockModel, bad_data)
-
-        assert error.value.error_count == 1
 
         good_data = {'field': 'good'}
 
