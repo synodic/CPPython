@@ -323,6 +323,14 @@ class CPPythonLocalConfiguration(CPPythonModel, extra='forbid'):
         ),
     ] = None
 
+    dependencies: Annotated[
+        list[str] | None,
+        Field(
+            description='A list of dependencies that will be installed. This is a list of pip compatible requirements'
+            ' strings',
+        ),
+    ] = None
+
 
 class ToolData(CPPythonModel):
     """Tool entry of pyproject.toml"""
