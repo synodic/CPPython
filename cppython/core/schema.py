@@ -116,7 +116,7 @@ class CPPythonData(CPPythonModel, extra='forbid'):
     generator_name: TypeName
     scm_name: TypeName
 
-    @field_validator('install_path', 'tool_path', 'build_path')
+    @field_validator('configuration_path', 'install_path', 'tool_path', 'build_path')
     @classmethod
     def validate_absolute_path(cls, value: Path) -> Path:
         """Enforce the input is an absolute path
