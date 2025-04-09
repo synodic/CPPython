@@ -158,6 +158,7 @@ def resolve_cppython(
         provider_name=modified_provider_name,
         generator_name=modified_generator_name,
         scm_name=modified_scm_name,
+        dependencies=[],
     )
     return cppython_data
 
@@ -184,6 +185,7 @@ def resolve_cppython_plugin(cppython_data: CPPythonData, plugin_type: type[Plugi
         provider_name=cppython_data.provider_name,
         generator_name=cppython_data.generator_name,
         scm_name=cppython_data.scm_name,
+        dependencies=[],
     )
 
     return cast(CPPythonPluginData, plugin_data)

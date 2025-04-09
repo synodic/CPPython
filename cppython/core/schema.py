@@ -4,6 +4,7 @@ from abc import abstractmethod
 from pathlib import Path
 from typing import Annotated, Any, NewType, Protocol, runtime_checkable
 
+from packaging.version import Version
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from pydantic.types import DirectoryPath
 
@@ -14,7 +15,7 @@ from cppython.utility.utility import TypeName
 class CPPythonModel(BaseModel):
     """The base model to use for all CPPython models"""
 
-    model_config = ConfigDict(validate_by_name=False, validate_by_alias=True)
+    model_config = ConfigDict(validate_by_name=False, validate_by_alias=True, arbitrary_types_allowed=True)
 
 
 class ProjectData(CPPythonModel, extra='forbid'):
@@ -115,6 +116,7 @@ class CPPythonData(CPPythonModel, extra='forbid'):
     provider_name: TypeName
     generator_name: TypeName
     scm_name: TypeName
+    dependencies: list[Version]
 
     @field_validator('configuration_path', 'install_path', 'tool_path', 'build_path')
     @classmethod
