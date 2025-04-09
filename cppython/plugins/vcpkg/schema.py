@@ -11,7 +11,32 @@ from cppython.core.schema import CPPythonModel
 class VcpkgDependency(CPPythonModel):
     """Vcpkg dependency type"""
 
-    name: str
+    name: Annotated[str, Field(description='The name of the dependency.')]
+    default_features: Annotated[
+        bool,
+        Field(
+            alias='default-features',
+            description='Whether to use the default features of the dependency. Defaults to true.',
+        ),
+    ] = True
+    features: Annotated[
+        list[str],
+        Field(description='A list of additional features to require for the dependency.'),
+    ] = []
+    version: Annotated[
+        str | None,
+        Field(
+            description='The minimum required version of the dependency, optionally with a port-version suffix.',
+        ),
+    ] = None
+    platform: Annotated[
+        str | None,
+        Field(description='A platform expression specifying the platforms where the dependency applies.'),
+    ] = None
+    host: Annotated[
+        bool,
+        Field(description='Whether the dependency is required for the host machine instead of the target.'),
+    ] = False
 
 
 class VcpkgData(CPPythonModel):
@@ -31,10 +56,6 @@ class VcpkgConfiguration(CPPythonModel):
             description='The referenced dependencies defined by the local vcpkg.json manifest file',
         ),
     ] = Path('build')
-
-    dependencies: Annotated[
-        list[VcpkgDependency], Field(description='The directory to store the manifest file, vcpkg.json')
-    ] = []
 
 
 class Manifest(CPPythonModel):

@@ -2,6 +2,9 @@
 
 from typing import Any
 
+from packaging.requirements import Requirement
+
+from cppython.core.exception import ConfigException
 from cppython.core.schema import CorePluginData
 from cppython.plugins.vcpkg.schema import (
     Manifest,
@@ -54,11 +57,44 @@ def resolve_vcpkg_data(data: dict[str, Any], core_data: CorePluginData) -> Vcpkg
     modified_install_directory.mkdir(parents=True, exist_ok=True)
 
     vcpkg_dependencies: list[VcpkgDependency] = []
-    for dependency in parsed_data.dependencies:
-        vcpkg_dependency = VcpkgDependency(name=dependency.name)
-        vcpkg_dependencies.append(vcpkg_dependency)
+    for requirement in core_data.cppython_data.dependencies:
+        resolved_dependency = resolve_vcpkg_dependency(requirement)
+        vcpkg_dependencies.append(resolved_dependency)
 
     return VcpkgData(
         install_directory=modified_install_directory,
         dependencies=vcpkg_dependencies,
+    )
+
+
+def resolve_vcpkg_dependency(requirement: Requirement) -> VcpkgDependency:
+    """Resolve a VcpkgDependency from a packaging requirement.
+
+    Args:
+        requirement: A packaging requirement object.
+
+    Returns:
+        A resolved VcpkgDependency object.
+    """
+    specifiers = requirement.specifier
+
+    # If the length of specifiers is greater than one, raise a configuration error
+    if len(specifiers) > 1:
+        raise ConfigException('Multiple specifiers are not supported. Please provide a single specifier.', [])
+
+    # Extract the version from the single specifier
+    version = None
+    if len(specifiers) == 1:
+        specifier = next(iter(specifiers))
+        if specifier.operator != '>=':
+            raise ConfigException(f"Unsupported specifier '{specifier.operator}'. Only '>=' is supported.", [])
+        version = specifier.version
+
+    return VcpkgDependency(
+        name=requirement.name,
+        default_features=True,
+        features=[],
+        version=version,
+        platform=None,
+        host=False,
     )
