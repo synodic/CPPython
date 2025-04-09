@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any, cast
 
+from packaging.requirements import InvalidRequirement, Requirement
 from pydantic import BaseModel, DirectoryPath, ValidationError
 
 from cppython.core.exception import ConfigException
@@ -149,6 +150,15 @@ def resolve_cppython(
 
     modified_scm_name = plugin_build_data.scm_name
 
+    # Construct dependencies from the local configuration only
+    dependencies: list[Requirement] = []
+    if local_configuration.dependencies:
+        for dependency in local_configuration.dependencies:
+            try:
+                dependencies.append(Requirement(dependency))
+            except InvalidRequirement as error:
+                raise ConfigException(f"Invalid requirement '{dependency}' in dependencies: {error}", []) from error
+
     cppython_data = CPPythonData(
         configuration_path=modified_configuration_path,
         install_path=modified_install_path,
@@ -158,7 +168,7 @@ def resolve_cppython(
         provider_name=modified_provider_name,
         generator_name=modified_generator_name,
         scm_name=modified_scm_name,
-        dependencies=[],
+        dependencies=dependencies,
     )
     return cppython_data
 
@@ -185,7 +195,7 @@ def resolve_cppython_plugin(cppython_data: CPPythonData, plugin_type: type[Plugi
         provider_name=cppython_data.provider_name,
         generator_name=cppython_data.generator_name,
         scm_name=cppython_data.scm_name,
-        dependencies=[],
+        dependencies=cppython_data.dependencies,
     )
 
     return cast(CPPythonPluginData, plugin_data)

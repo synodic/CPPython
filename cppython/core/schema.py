@@ -4,7 +4,7 @@ from abc import abstractmethod
 from pathlib import Path
 from typing import Annotated, Any, NewType, Protocol, runtime_checkable
 
-from packaging.version import Version
+from packaging.requirements import Requirement
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from pydantic.types import DirectoryPath
 
@@ -116,7 +116,7 @@ class CPPythonData(CPPythonModel, extra='forbid'):
     provider_name: TypeName
     generator_name: TypeName
     scm_name: TypeName
-    dependencies: list[Version]
+    dependencies: list[Requirement]
 
     @field_validator('configuration_path', 'install_path', 'tool_path', 'build_path')
     @classmethod
