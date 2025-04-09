@@ -48,9 +48,7 @@ def fixture_example_directory(
 def fixture_example_runner(
     request: pytest.FixtureRequest, typer_runner: CliRunner, tmp_path: Path
 ) -> Generator[CliRunner]:
-    """TODO"""
-    prev_cwd = os.getcwd()
-
+    """Sets up an isolated filesystem for an example test."""
     # Get the root directory of the project
     root_directory = Path(__file__).parent.parent.parent.absolute()
 
@@ -63,13 +61,8 @@ def fixture_example_runner(
     # Generate the example path from the pytest file and test name
     example_path = root_directory / 'examples' / file_name / test_name
 
-    try:
-        with typer_runner.isolated_filesystem(tmp_path) as temp_directory:
-            os.chdir(temp_directory)
+    with typer_runner.isolated_filesystem(temp_dir=tmp_path):
+        # Copy the example directory to the temporary directory
+        shutil.copytree(example_path, Path(), dirs_exist_ok=True)
 
-            # Copy the example directory to the temporary directory
-            shutil.copytree(example_path, Path(), dirs_exist_ok=True)
-
-            yield typer_runner
-    finally:
-        os.chdir(prev_cwd)
+        yield typer_runner
