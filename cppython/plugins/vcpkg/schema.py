@@ -26,6 +26,7 @@ class VcpkgDependency(CPPythonModel):
     version: Annotated[
         str | None,
         Field(
+            alias='version>=',
             description='The minimum required version of the dependency, optionally with a port-version suffix.',
         ),
     ] = None
