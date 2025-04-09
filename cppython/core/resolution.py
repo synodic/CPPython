@@ -152,12 +152,16 @@ def resolve_cppython(
 
     # Construct dependencies from the local configuration only
     dependencies: list[Requirement] = []
+    invalid_requirements: list[str] = []
     if local_configuration.dependencies:
         for dependency in local_configuration.dependencies:
             try:
                 dependencies.append(Requirement(dependency))
             except InvalidRequirement as error:
-                raise ConfigException(f"Invalid requirement '{dependency}' in dependencies: {error}", []) from error
+                invalid_requirements.append(f"Invalid requirement '{dependency}': {error}")
+
+    if invalid_requirements:
+        raise ConfigException('\n'.join(invalid_requirements), [])
 
     cppython_data = CPPythonData(
         configuration_path=modified_configuration_path,
