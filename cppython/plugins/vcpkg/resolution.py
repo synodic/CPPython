@@ -28,8 +28,10 @@ def generate_manifest(core_data: CorePluginData, data: VcpkgData) -> Manifest:
     # If builtin_baseline is None, we set it to the current commit of the cloned vcpkg repository
     if data.builtin_baseline is None:
         try:
+            cwd = core_data.cppython_data.install_path
+
             # Get the current commit hash from the vcpkg repository
-            result = check_output(['git', 'rev-parse', 'HEAD'], cwd=str(core_data.project_data.project_root))
+            result = check_output(['git', 'rev-parse', 'HEAD'], cwd=cwd)
             data.builtin_baseline = result.decode('utf-8').strip()
         except (CalledProcessError, FileNotFoundError) as e:
             raise ConfigException('Failed to get the current commit hash from the vcpkg repository.', []) from e

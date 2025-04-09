@@ -22,7 +22,7 @@ provider-name = "vcpkg"
 install-path = "install"
 
 dependencies = [
-  "fmt>=11.1.0",
+  "fmt>=11.0.2",
 ]
 
 [tool.cppython.generator]
