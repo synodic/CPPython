@@ -23,7 +23,7 @@ class VcpkgDependency(CPPythonModel):
         list[str],
         Field(description='A list of additional features to require for the dependency.'),
     ] = []
-    version: Annotated[
+    version_ge: Annotated[
         str | None,
         Field(
             alias='version>=',
@@ -45,6 +45,7 @@ class VcpkgData(CPPythonModel):
 
     install_directory: Path
     dependencies: list[VcpkgDependency]
+    builtin_baseline: str | None
 
 
 class VcpkgConfiguration(CPPythonModel):
@@ -58,14 +59,23 @@ class VcpkgConfiguration(CPPythonModel):
         ),
     ] = Path('build')
 
+    builtin_baseline: Annotated[
+        str | None,
+        Field(
+            alias='builtin-baseline',
+            description='A shortcut for specifying the baseline for version resolution in the default registry.',
+        ),
+    ] = None
+
 
 class Manifest(CPPythonModel):
     """The manifest schema"""
 
     name: Annotated[str, Field(description='The project name')]
 
-    version_string: Annotated[str, Field(alias='version-string', description='The arbitrary version string')] = ''
+    version_string: Annotated[str, Field(alias='version-string', description='The arbitrary version string')]
 
     description: Annotated[str, Field(description='The project description')] = ''
     homepage: Annotated[HttpUrl | None, Field(description='Homepage URL')] = None
     dependencies: Annotated[list[VcpkgDependency], Field(description='List of dependencies')] = []
+    builtin_baseline: Annotated[str, Field(alias='builtin-baseline', description='The arbitrary version string')]

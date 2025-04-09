@@ -15,7 +15,7 @@ from cppython.utility.utility import TypeName
 class CPPythonModel(BaseModel):
     """The base model to use for all CPPython models"""
 
-    model_config = ConfigDict(validate_by_name=False, validate_by_alias=True, arbitrary_types_allowed=True)
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True, arbitrary_types_allowed=True)
 
 
 class ProjectData(CPPythonModel, extra='forbid'):

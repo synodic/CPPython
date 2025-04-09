@@ -16,7 +16,7 @@ class TestVcpkgResolution:
         dependency = resolve_vcpkg_dependency(requirement)
 
         assert dependency.name == 'example-package'
-        assert dependency.version == '1.2.3'
+        assert dependency.version_ge == '1.2.3'
         assert dependency.default_features is True
         assert dependency.features == []
         assert dependency.platform is None

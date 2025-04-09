@@ -1,5 +1,6 @@
 """Builder to help build vcpkg state"""
 
+from subprocess import CalledProcessError, check_output
 from typing import Any
 
 from packaging.requirements import Requirement
@@ -24,13 +25,21 @@ def generate_manifest(core_data: CorePluginData, data: VcpkgData) -> Manifest:
     Returns:
         The manifest
     """
-    manifest = {
-        'name': core_data.pep621_data.name,
-        'version_string': core_data.pep621_data.version,
-        'dependencies': data.dependencies,
-    }
+    # If builtin_baseline is None, we set it to the current commit of the cloned vcpkg repository
+    if data.builtin_baseline is None:
+        try:
+            # Get the current commit hash from the vcpkg repository
+            result = check_output(['git', 'rev-parse', 'HEAD'], cwd=str(core_data.project_data.project_root))
+            data.builtin_baseline = result.decode('utf-8').strip()
+        except (CalledProcessError, FileNotFoundError) as e:
+            raise ConfigException('Failed to get the current commit hash from the vcpkg repository.', []) from e
 
-    return Manifest(**manifest)
+    return Manifest(
+        name=core_data.pep621_data.name,
+        version_string=core_data.pep621_data.version,
+        dependencies=data.dependencies,
+        builtin_baseline=data.builtin_baseline,
+    )
 
 
 def resolve_vcpkg_data(data: dict[str, Any], core_data: CorePluginData) -> VcpkgData:
@@ -64,6 +73,7 @@ def resolve_vcpkg_data(data: dict[str, Any], core_data: CorePluginData) -> Vcpkg
     return VcpkgData(
         install_directory=modified_install_directory,
         dependencies=vcpkg_dependencies,
+        builtin_baseline=parsed_data.builtin_baseline,
     )
 
 
@@ -83,18 +93,18 @@ def resolve_vcpkg_dependency(requirement: Requirement) -> VcpkgDependency:
         raise ConfigException('Multiple specifiers are not supported. Please provide a single specifier.', [])
 
     # Extract the version from the single specifier
-    version = None
+    min_version = None
     if len(specifiers) == 1:
         specifier = next(iter(specifiers))
         if specifier.operator != '>=':
             raise ConfigException(f"Unsupported specifier '{specifier.operator}'. Only '>=' is supported.", [])
-        version = specifier.version
+        min_version = specifier.version
 
     return VcpkgDependency(
         name=requirement.name,
         default_features=True,
         features=[],
-        version=version,
+        version_ge=min_version,
         platform=None,
         host=False,
     )
