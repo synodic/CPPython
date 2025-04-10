@@ -47,6 +47,10 @@ class ConfigurePreset(CPPythonModel, extra='allow'):
     """Partial Configure Preset specification to allow cache variable injection"""
 
     name: str
+    inherits: Annotated[
+        str | list[str] | None, Field(description='The inherits field allows inheriting from other presets.')
+    ] = None
+    binaryDir: Annotated[str | None, Field(description='The binary directory for the build output.')] = None
     cacheVariables: dict[str, None | bool | str | CacheVariable] | None = None
 
 
@@ -57,9 +61,10 @@ class CMakePresets(CPPythonModel, extra='allow'):
     """
 
     version: Annotated[int, Field(description='The version of the JSON schema.')] = 9
-    configurePresets: Annotated[list[ConfigurePreset], Field(description='The list of configure presets')] = [
-        ConfigurePreset(name='default')
-    ]
+    include: Annotated[
+        list[str] | None, Field(description='The include field allows inheriting from another preset.')
+    ] = None
+    configurePresets: Annotated[list[ConfigurePreset] | None, Field(description='The list of configure presets')] = None
 
 
 class CMakeSyncData(SyncData):
@@ -71,7 +76,7 @@ class CMakeSyncData(SyncData):
 class CMakeData(CPPythonModel):
     """Resolved CMake data"""
 
-    preset_file: FilePath
+    preset_file: Path
     configuration_name: str
 
 

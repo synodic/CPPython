@@ -15,7 +15,8 @@ from cppython.core.plugin_schema.provider import Provider, ProviderPluginGroupDa
 from cppython.core.schema import CorePluginData, Information, SyncData
 from cppython.plugins.cmake.plugin import CMakeGenerator
 from cppython.plugins.cmake.schema import CMakeSyncData
-from cppython.plugins.conan.resolution import resolve_conan_data
+from cppython.plugins.conan.builder import Builder
+from cppython.plugins.conan.resolution import resolve_conan_data, resolve_conan_dependency
 from cppython.plugins.conan.schema import ConanData
 from cppython.utility.exception import NotSupportedError
 from cppython.utility.utility import TypeName
@@ -33,6 +34,8 @@ class ConanProvider(Provider):
         self.group_data: ProviderPluginGroupData = group_data
         self.core_data: CorePluginData = core_data
         self.data: ConanData = resolve_conan_data(configuration_data, core_data)
+
+        self.builder = Builder()
 
     @staticmethod
     def _download_file(url: str, file: Path) -> None:
@@ -66,9 +69,19 @@ class ConanProvider(Provider):
 
     def install(self) -> None:
         """Installs the provider"""
+        resolved_dependencies = [resolve_conan_dependency(req) for req in self.core_data.cppython_data.dependencies]
+
+        self.builder.generate_conanfile(self.core_data.project_data.project_root, resolved_dependencies)
+
+        self.core_data.cppython_data.build_path.mkdir(parents=True, exist_ok=True)
 
     def update(self) -> None:
         """Updates the provider"""
+        resolved_dependencies = [resolve_conan_dependency(req) for req in self.core_data.cppython_data.dependencies]
+
+        self.builder.generate_conanfile(self.core_data.project_data.project_root, resolved_dependencies)
+
+        self.core_data.cppython_data.build_path.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
     def supported_sync_type(sync_type: type[SyncData]) -> bool:

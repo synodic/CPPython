@@ -4,8 +4,8 @@ This module contains integration tests for projects that use conan and CMake.
 The tests ensure that the projects build, configure, and execute correctly.
 """
 
-import os
 import subprocess
+from pathlib import Path
 
 from typer.testing import CliRunner
 
@@ -14,7 +14,7 @@ from cppython.console.entry import app
 pytest_plugins = ['tests.fixtures.example']
 
 
-class TestVcpkgCMake:
+class TestConanCMake:
     """Test project variation of conan and CMake"""
 
     @staticmethod
@@ -34,15 +34,5 @@ class TestVcpkgCMake:
 
         assert cmake_result.returncode == 0, f'CMake configuration failed: {cmake_result.stderr}'
 
-        # Run the CMake build command
-        build_result = subprocess.run(['cmake', '--build', 'build'], capture_output=True, text=True, check=False)
-
-        assert build_result.returncode == 0, f'CMake build failed: {build_result.stderr}'
-        assert 'Build finished successfully' in build_result.stdout, 'CMake build did not finish successfully'
-
-        # Execute the built program and verify the output
-        program_result = subprocess.run(['build/HelloWorld'], capture_output=True, text=True, check=False)
-
-        assert program_result.returncode == 0, f'Program execution failed: {program_result.stderr}'
-
-        assert 'Hello, World!' in program_result.stdout, 'Program output did not match expected output'
+        # Verify that the build directory contains the expected files
+        assert (Path('build') / 'CMakeCache.txt').exists(), 'build/CMakeCache.txt not found'

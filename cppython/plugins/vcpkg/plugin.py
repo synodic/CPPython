@@ -1,6 +1,5 @@
 """The vcpkg provider implementation"""
 
-import json
 from logging import getLogger
 from os import name as system_name
 from pathlib import Path, PosixPath, WindowsPath
