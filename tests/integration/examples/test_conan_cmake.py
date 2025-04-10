@@ -4,6 +4,7 @@ This module contains integration tests for projects that use conan and CMake.
 The tests ensure that the projects build, configure, and execute correctly.
 """
 
+import os
 import subprocess
 
 from typer.testing import CliRunner

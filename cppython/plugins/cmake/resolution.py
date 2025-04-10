@@ -28,8 +28,9 @@ def resolve_cmake_data(data: dict[str, Any], core_data: CorePluginData) -> CMake
     # If the user hasn't specified a preset file, we need to create one
     if not modified_preset_dir.exists():
         modified_preset_dir.parent.mkdir(parents=True, exist_ok=True)
+        presets_string = CMakePresets().model_dump_json(exclude_none=True, indent=4)
+
         with modified_preset_dir.open('w', encoding='utf-8') as file:
-            presets_dict = CMakePresets().model_dump_json(exclude_none=True)
-            json.dump(presets_dict, file, ensure_ascii=False, indent=4)
+            file.write(presets_string)
 
     return CMakeData(preset_file=modified_preset_dir, configuration_name=parsed_data.configuration_name)

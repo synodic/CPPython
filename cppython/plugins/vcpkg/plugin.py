@@ -193,9 +193,9 @@ class VcpkgProvider(Provider):
         manifest = generate_manifest(self.core_data, self.data)
 
         # Write out the manifest
-        serialized = json.loads(manifest.model_dump_json(exclude_none=True, by_alias=True))
+        serialized = manifest.model_dump_json(exclude_none=True, by_alias=True, indent=4)
         with open(manifest_directory / 'vcpkg.json', 'w', encoding='utf8') as file:
-            json.dump(serialized, file, ensure_ascii=False, indent=4)
+            file.write(serialized)
 
         executable = self.core_data.cppython_data.install_path / 'vcpkg'
         logger = getLogger('cppython.vcpkg')
@@ -224,9 +224,9 @@ class VcpkgProvider(Provider):
         manifest = generate_manifest(self.core_data, self.data)
 
         # Write out the manifest
-        serialized = json.loads(manifest.model_dump_json(exclude_none=True, by_alias=True))
+        serialized = manifest.model_dump_json(exclude_none=True, by_alias=True, indent=4)
         with open(manifest_directory / 'vcpkg.json', 'w', encoding='utf8') as file:
-            json.dump(serialized, file, ensure_ascii=False, indent=4)
+            file.write(serialized)
 
         executable = self.core_data.cppython_data.install_path / 'vcpkg'
         logger = getLogger('cppython.vcpkg')

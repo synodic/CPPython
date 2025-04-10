@@ -23,9 +23,9 @@ class Builder:
 
         json_path = provider_directory / f'{data.provider_name}.json'
 
-        serialized = json.loads(presets.model_dump_json(exclude_none=True, by_alias=False))
+        serialized = presets.model_dump_json(exclude_none=True, by_alias=False, indent=4)
         with open(json_path, 'w', encoding='utf8') as file:
-            json.dump(serialized, file, ensure_ascii=False, indent=4)
+            file.write(serialized)
 
     @staticmethod
     def write_cppython_preset(
@@ -44,9 +44,9 @@ class Builder:
 
         cppython_json_path = cppython_preset_directory / 'cppython.json'
 
-        serialized = json.loads(presets.model_dump_json(exclude_none=True, by_alias=False))
+        serialized = presets.model_dump_json(exclude_none=True, by_alias=False, indent=4)
         with open(cppython_json_path, 'w', encoding='utf8') as file:
-            json.dump(serialized, file, ensure_ascii=False, indent=4)
+            file.write(serialized)
 
         return cppython_json_path
 
@@ -63,8 +63,12 @@ class Builder:
             preset_file: Preset file to modify
         """
         with open(preset_file, encoding='utf-8') as file:
-            initial_root_preset = json.load(file)
+            initial_json = file.read()
 
+        initial_root_preset = CMakePresets.model_validate_json(initial_json)
+
+        # Only write the file if the contents have changed
         if (root_preset := deepcopy(initial_root_preset)) != initial_root_preset:
             with open(preset_file, 'w', encoding='utf-8') as file:
-                json.dump(root_preset, file, ensure_ascii=False, indent=4)
+                preset = root_preset.model_dump_json(exclude_none=True, indent=4)
+                file.write(preset)

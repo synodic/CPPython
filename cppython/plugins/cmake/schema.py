@@ -47,7 +47,7 @@ class ConfigurePreset(CPPythonModel, extra='allow'):
     """Partial Configure Preset specification to allow cache variable injection"""
 
     name: str
-    cacheVariables: dict[str, None | bool | str | CacheVariable] | None
+    cacheVariables: dict[str, None | bool | str | CacheVariable] | None = None
 
 
 class CMakePresets(CPPythonModel, extra='allow'):
@@ -56,7 +56,10 @@ class CMakePresets(CPPythonModel, extra='allow'):
     The only information needed is the configure preset list for cache variable injection
     """
 
-    configurePresets: Annotated[list[ConfigurePreset], Field(description='The list of configure presets')] = []
+    version: Annotated[int, Field(description='The version of the JSON schema.')] = 9
+    configurePresets: Annotated[list[ConfigurePreset], Field(description='The list of configure presets')] = [
+        ConfigurePreset(name='default')
+    ]
 
 
 class CMakeSyncData(SyncData):

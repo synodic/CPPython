@@ -98,7 +98,7 @@ class ConanProvider(Provider):
             if sync_type == CMakeSyncData:
                 return CMakeSyncData(
                     provider_name=TypeName('conan'),
-                    top_level_includes=self.core_data.cppython_data.tool_path / 'conan' / 'conan_provider.cmake',
+                    top_level_includes=self.core_data.cppython_data.install_path / 'conan_provider.cmake',
                 )
 
         raise NotSupportedError('OOF')
