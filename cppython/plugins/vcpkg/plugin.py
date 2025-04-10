@@ -47,13 +47,13 @@ class VcpkgProvider(Provider):
 
     @staticmethod
     def supported_sync_type(sync_type: type[SyncData]) -> bool:
-        """_summary_
+        """Checks if the given sync type is supported by the vcpkg provider.
 
         Args:
-            sync_type: _description_
+            sync_type: The type of synchronization data to check.
 
         Returns:
-            _description_
+            True if the sync type is supported, False otherwise.
         """
         return sync_type in CMakeGenerator.sync_types()
 

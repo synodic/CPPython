@@ -1,4 +1,8 @@
-"""TODO"""
+"""Integration tests for the vcpkg and CMake project variation.
+
+This module contains integration tests for projects that use vcpkg and CMake.
+The tests ensure that the projects build, configure, and execute correctly.
+"""
 
 import subprocess
 

@@ -1,4 +1,9 @@
-"""_summary_"""
+"""Conan Provider Plugin
+
+This module implements the Conan provider plugin for CPPython. It handles
+integration with the Conan package manager, including dependency resolution,
+installation, and synchronization with other tools.
+"""
 
 from pathlib import Path
 from typing import Any
@@ -67,24 +72,27 @@ class ConanProvider(Provider):
 
     @staticmethod
     def supported_sync_type(sync_type: type[SyncData]) -> bool:
-        """_summary_
+        """Checks if the given sync type is supported by the Conan provider.
 
         Args:
-            sync_type: _description_
+            sync_type: The type of synchronization data to check.
 
         Returns:
-            _description_
+            True if the sync type is supported, False otherwise.
         """
         return sync_type in CMakeGenerator.sync_types()
 
     def sync_data(self, consumer: SyncConsumer) -> SyncData:
-        """_summary_
+        """Generates synchronization data for the given consumer.
 
         Args:
-            consumer: _description_
+            consumer: The input consumer for which synchronization data is generated.
 
         Returns:
-            _description_
+            The synchronization data object.
+
+        Raises:
+            NotSupportedError: If the consumer's sync type is not supported.
         """
         for sync_type in consumer.sync_types():
             if sync_type == CMakeSyncData:

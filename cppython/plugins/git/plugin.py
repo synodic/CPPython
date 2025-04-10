@@ -1,4 +1,9 @@
-"""Git SCM plugin"""
+"""Git SCM Plugin
+
+This module implements the Git SCM plugin for CPPython. It provides
+functionality for interacting with Git repositories, including feature
+detection, version extraction, and project description retrieval.
+"""
 
 from pathlib import Path
 

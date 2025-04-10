@@ -51,10 +51,10 @@ class MockGenerator(Generator):
 
     @staticmethod
     def sync_types() -> list[type[SyncData]]:
-        """_summary_
+        """Returns the supported synchronization data types for the mock generator.
 
         Returns:
-            _description_
+            A list of supported synchronization data types.
         """
         return [MockSyncData]
 

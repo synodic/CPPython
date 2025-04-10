@@ -1,4 +1,4 @@
-"""_summary_"""
+"""Provides functionality to resolve Conan-specific data for the CPPython project."""
 
 from typing import Any
 

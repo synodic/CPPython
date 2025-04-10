@@ -1,4 +1,9 @@
-"""CMake data definitions"""
+"""CMake plugin schema
+
+This module defines the schema and data models for integrating the CMake
+generator with CPPython. It includes definitions for cache variables,
+configuration presets, and synchronization data.
+"""
 
 from enum import Enum, auto
 from pathlib import Path
@@ -11,10 +16,10 @@ from cppython.core.schema import CPPythonModel, SyncData
 
 
 class VariableType(Enum):
-    """_summary_
+    """Defines the types of variables that can be used in CMake cache.
 
     Args:
-        Enum: _description_
+        Enum: Base class for creating enumerations.
     """
 
     BOOL = (auto(),)  # Boolean ON/OFF value.
@@ -27,7 +32,12 @@ class VariableType(Enum):
 
 
 class CacheVariable(CPPythonModel, extra='forbid'):
-    """_summary_"""
+    """Represents a variable in the CMake cache.
+
+    Attributes:
+        type: The type of the variable (e.g., BOOL, PATH).
+        value: The value of the variable, which can be a boolean or string.
+    """
 
     type: None | VariableType
     value: bool | str

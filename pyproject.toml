@@ -32,7 +32,15 @@ git = [
 ]
 
 pdm = [
-  "pdm>=2.23.0",
+  "pdm>=2.23.1",
+]
+
+cmake = [
+  "cmake>=4.0.0",
+]
+
+conan = [
+  "conan>=2.15.0",
 ]
 
 [project.urls]
