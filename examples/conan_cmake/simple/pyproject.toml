@@ -5,15 +5,11 @@ version = "1.0.0"
 
 license = {text = "MIT"}
 
-authors = [
-  {name = "Synodic Software", email = "contact@synodic.software"},
-]
+authors = [{name = "Synodic Software", email = "contact@synodic.software"}]
 
 requires-python = ">=3.13"
 
-dependencies = [
-  "cppython>=0.1.0",
-]
+dependencies = ["cppython[conan, cmake]>=0.1.0"]
 
 [tool.cppython]
 generator-name = "cmake"
@@ -21,9 +17,7 @@ provider-name = "conan"
 
 install-path = "install"
 
-dependencies = [
-  "fmt>=11.0.1",
-]
+dependencies = ["fmt>=11.0.1"]
 
 [tool.cppython.generator]
 

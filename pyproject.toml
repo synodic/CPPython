@@ -2,11 +2,9 @@
 description = "A Python management solution for C++ dependencies"
 name = "cppython"
 
-license = {text = "MIT"}
+license = { text = "MIT" }
 
-authors = [
-  {name = "Synodic Software", email = "contact@synodic.software"},
-]
+authors = [{ name = "Synodic Software", email = "contact@synodic.software" }]
 readme = "README.md"
 
 dynamic = ["version"]
@@ -14,34 +12,23 @@ dynamic = ["version"]
 requires-python = ">=3.13"
 
 dependencies = [
-  "typer>=0.15.2",
-  "pydantic>=2.11.3",
-  "packaging>=24.2",
-  "requests>=2.32.3",
-  "types-requests>=2.32.0.20250328",
+    "typer>=0.15.2",
+    "pydantic>=2.11.3",
+    "packaging>=24.2",
+    "requests>=2.32.3",
+    "types-requests>=2.32.0.20250328",
 ]
 
 [project.optional-dependencies]
-pytest = [
-  "pytest>=8.3.5",
-  "pytest-mock>=3.14.0",
-]
+pytest = ["pytest>=8.3.5", "pytest-mock>=3.14.0"]
 
-git = [
-  "dulwich>=0.22.8",
-]
+git = ["dulwich>=0.22.8"]
 
-pdm = [
-  "pdm>=2.23.1",
-]
+pdm = ["pdm>=2.23.1"]
 
-cmake = [
-  "cmake>=4.0.0",
-]
+cmake = ["cmake>=4.0.0"]
 
-conan = [
-  "conan>=2.15.0",
-]
+conan = ["conan>=2.15.0"]
 
 [project.urls]
 homepage = "https://github.com/Synodic-Software/CPPython"
@@ -64,24 +51,16 @@ cppython = "cppython.plugins.pdm.plugin:CPPythonPlugin"
 cppython = "cppython.test.pytest.fixtures"
 
 [dependency-groups]
-lint = [
-  "ruff>=0.11.4",
-  "mypy>=1.15.0",
-]
-test = [
-  "pytest>=8.3.5",
-  "pytest-cov>=6.1.1",
-  "pytest-mock>=3.14.0",
-]
+lint = ["ruff>=0.11.5", "mypy>=1.15.0"]
+test = ["pytest>=8.3.5", "pytest-cov>=6.1.1", "pytest-mock>=3.14.0"]
 
 [project.scripts]
 cppython = "cppython.console.entry:app"
 
 [tool.pytest.ini_options]
 log_cli = true
-testpaths = [
-  "tests",
-]
+testpaths = ["tests"]
+addopts = ["--color=yes"]
 
 [tool.mypy]
 exclude = "__pypackages__"
@@ -93,24 +72,17 @@ line-length = 120
 preview = true
 
 [tool.ruff.lint]
-ignore = [
-  "D206",
-  "D300",
-  "D415",
-  "E111",
-  "E114",
-  "E117",
-]
+ignore = ["D206", "D300", "D415", "E111", "E114", "E117"]
 select = [
-  "D", # pydocstyle
-  "F", # Pyflakes
-  "I", # isort
-  "PL", # pylint
-  "UP", # pyupgrade
-  "E", # pycodestyle
-  "B", # flake8-bugbear
-  "SIM", # flake8-simplify
-  "PT", # flake8-pytest-style
+    "D",   # pydocstyle
+    "F",   # Pyflakes
+    "I",   # isort
+    "PL",  # pylint
+    "UP",  # pyupgrade
+    "E",   # pycodestyle
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+    "PT",  # flake8-pytest-style
 ]
 
 [tool.ruff.lint.pydocstyle]
@@ -125,9 +97,7 @@ quote-style = "single"
 skip_empty = true
 
 [tool.pdm]
-plugins = [
-  "-e file:///${PROJECT_ROOT}",
-]
+plugins = ["-e file:///${PROJECT_ROOT}"]
 
 [tool.pdm.options]
 update = ["--update-all", "--unconstrained"]
@@ -136,11 +106,11 @@ update = ["--update-all", "--unconstrained"]
 source = "scm"
 
 [tool.pdm.scripts]
-analyze = {shell = "ruff check cppython tests"}
-format = {shell = "ruff format"}
-lint = {composite = ["analyze", "format", "type-check"]}
-test = {shell = "pytest --cov=cppython --verbose tests"}
-type-check = {shell = "mypy ."}
+analyze = { shell = "ruff check cppython tests" }
+format = { shell = "ruff format" }
+lint = { composite = ["analyze", "format", "type-check"] }
+test = { shell = "pytest --cov=cppython --verbose tests" }
+type-check = { shell = "mypy ." }
 
 [build-system]
 build-backend = "pdm.backend"
