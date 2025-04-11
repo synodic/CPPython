@@ -1,0 +1,27 @@
+[project]
+description = "A simple project showing how to use conan with CPPython"
+name = "cppython-conan-cmake-simple"
+version = "1.0.0"
+
+license = {text = "MIT"}
+
+authors = [{name = "Synodic Software", email = "contact@synodic.software"}]
+
+requires-python = ">=3.13"
+
+dependencies = ["cppython[conan, cmake]>=0.1.0"]
+
+[tool.cppython]
+generator-name = "cmake"
+provider-name = "conan"
+
+install-path = "install"
+
+dependencies = ["fmt>=11.0.1"]
+
+[tool.cppython.generator]
+
+[tool.cppython.provider]
+
+[tool.pdm]
+distribution = false
