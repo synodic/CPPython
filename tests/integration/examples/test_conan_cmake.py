@@ -36,3 +36,23 @@ class TestConanCMake:
 
         # Verify that the build directory contains the expected files
         assert (Path('build') / 'CMakeCache.txt').exists(), 'build/CMakeCache.txt not found'
+
+    @staticmethod
+    def test_inject(example_runner: CliRunner) -> None:
+        """Inject"""
+        result = example_runner.invoke(
+            app,
+            [
+                'install',
+            ],
+        )
+
+        assert result.exit_code == 0, result.output
+
+        # Run the CMake configuration command
+        cmake_result = subprocess.run(['cmake', '--preset=default'], capture_output=True, text=True, check=False)
+
+        assert cmake_result.returncode == 0, f'CMake configuration failed: {cmake_result.stderr}'
+
+        # Verify that the build directory contains the expected files
+        assert (Path('build') / 'CMakeCache.txt').exists(), 'build/CMakeCache.txt not found'
