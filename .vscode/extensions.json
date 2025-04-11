@@ -2,6 +2,7 @@
     "recommendations": [
         "ms-python.mypy-type-checker",
         "asciidoctor.asciidoctor-vscode",
-        "charliermarsh.ruff"
+        "charliermarsh.ruff",
+        "tamasfe.even-better-toml"
     ]
 }
