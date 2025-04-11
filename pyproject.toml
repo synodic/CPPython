@@ -100,7 +100,8 @@ skip_empty = true
 plugins = ["-e file:///${PROJECT_ROOT}"]
 
 [tool.pdm.options]
-update = ["--update-all", "--unconstrained"]
+install = ["-G:all"]
+update = ["--update-all"]
 
 [tool.pdm.version]
 source = "scm"

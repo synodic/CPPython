@@ -20,8 +20,10 @@ def resolve_cmake_data(data: dict[str, Any], core_data: CorePluginData) -> CMake
 
     root_directory = core_data.project_data.project_root.absolute()
 
-    modified_preset_dir = parsed_data.preset_file
-    if not modified_preset_dir.is_absolute():
-        modified_preset_dir = root_directory / modified_preset_dir
+    modified_preset_file = parsed_data.preset_file
+    if not modified_preset_file.is_absolute():
+        modified_preset_file = root_directory / modified_preset_file
 
-    return CMakeData(preset_file=modified_preset_dir, configuration_name=parsed_data.configuration_name)
+    
+
+    return CMakeData(preset_file=modified_preset_file, configuration_name=parsed_data.configuration_name)

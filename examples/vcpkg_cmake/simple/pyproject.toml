@@ -3,13 +3,14 @@ description = "A simple project showing how to use vcpkg with CPPython"
 name = "cppython-vcpkg-cmake-simple"
 version = "1.0.0"
 
-license = {text = "MIT"}
+license = { text = "MIT" }
 
-authors = [{name = "Synodic Software", email = "contact@synodic.software"}]
+authors = [{ name = "Synodic Software", email = "contact@synodic.software" }]
 
 requires-python = ">=3.13"
 
-dependencies = ["cppython[vcpkg, cmake]>=0.1.0"]
+dependencies = ["cppython[vcpkg, cmake, git]>=0.9.0"]
+
 
 [tool.cppython]
 generator-name = "cmake"

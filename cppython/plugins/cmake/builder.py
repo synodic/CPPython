@@ -109,7 +109,7 @@ class Builder:
         else:
             # If the file doesn't exist, we need to default it for the user
 
-            # Forward the tool's build directory
+            # TODO: Forward the tool's build directory
             default_configure_preset = ConfigurePreset(name='default', inherits='cppython', binaryDir='build')
             root_preset = CMakePresets(configurePresets=[default_configure_preset])
 

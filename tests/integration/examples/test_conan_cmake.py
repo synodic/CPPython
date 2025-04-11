@@ -9,8 +9,6 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from cppython.console.entry import app
-
 pytest_plugins = ['tests.fixtures.example']
 
 
@@ -20,19 +18,15 @@ class TestConanCMake:
     @staticmethod
     def test_simple(example_runner: CliRunner) -> None:
         """Simple project"""
-        result = example_runner.invoke(
-            app,
-            [
-                'install',
-            ],
-        )
+        # By nature of running the test, we require PDM to develop the project and so it will be installed
+        result = subprocess.run(['pdm', 'install'], capture_output=True, text=True, check=False)
 
-        assert result.exit_code == 0, result.output
+        assert result.returncode == 0, f'PDM install failed: {result.stderr}'
 
         # Run the CMake configuration command
-        cmake_result = subprocess.run(['cmake', '--preset=default'], capture_output=True, text=True, check=False)
+        result = subprocess.run(['cmake', '--preset=default'], capture_output=True, text=True, check=False)
 
-        assert cmake_result.returncode == 0, f'CMake configuration failed: {cmake_result.stderr}'
+        assert result.returncode == 0, f'Cmake failed: {result.stderr}'
 
         # Verify that the build directory contains the expected files
         assert (Path('build') / 'CMakeCache.txt').exists(), 'build/CMakeCache.txt not found'
@@ -40,19 +34,15 @@ class TestConanCMake:
     @staticmethod
     def test_inject(example_runner: CliRunner) -> None:
         """Inject"""
-        result = example_runner.invoke(
-            app,
-            [
-                'install',
-            ],
-        )
+        # By nature of running the test, we require PDM to develop the project and so it will be installed
+        result = subprocess.run(['pdm', 'install'], capture_output=True, text=True, check=False)
 
-        assert result.exit_code == 0, result.output
+        assert result.returncode == 0, f'PDM install failed: {result.stderr}'
 
         # Run the CMake configuration command
-        cmake_result = subprocess.run(['cmake', '--preset=default'], capture_output=True, text=True, check=False)
+        result = subprocess.run(['cmake', '--preset=default'], capture_output=True, text=True, check=False)
 
-        assert cmake_result.returncode == 0, f'CMake configuration failed: {cmake_result.stderr}'
+        assert result.returncode == 0, f'Cmake failed: {result.stderr}'
 
         # Verify that the build directory contains the expected files
         assert (Path('build') / 'CMakeCache.txt').exists(), 'build/CMakeCache.txt not found'

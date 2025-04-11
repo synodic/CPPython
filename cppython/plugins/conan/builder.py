@@ -20,10 +20,10 @@ class RequiresTransformer(cst.CSTTransformer):
     def _create_requires_assignment(self) -> cst.Assign:
         """Create a `requires` assignment statement."""
         return cst.Assign(
-            targets=[cst.AssignTarget(cst.Name('requires'))],
-            value=cst.List([
-                cst.Element(cst.SimpleString(f'"{dependency.requires()}"')) for dependency in self.dependencies
-            ]),
+            targets=[cst.AssignTarget(cst.Name(value='requires'))],
+            value=cst.List(
+                [cst.Element(cst.SimpleString(f'"{dependency.requires()}"')) for dependency in self.dependencies]
+            ),
         )
 
     def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.BaseStatement:
@@ -56,24 +56,23 @@ class RequiresTransformer(cst.CSTTransformer):
         for body_statement_line in updated_node.body.body:
             if not isinstance(body_statement_line, cst.SimpleStatementLine):
                 continue
-
-            assignment_statement = body_statement_line.body[0]
-            if not isinstance(assignment_statement, cst.Assign):
-                continue
-
-            for target in assignment_statement.targets:
-                if not isinstance(target.target, cst.Name) or target.target.value != 'requires':
+            for assignment_statement in body_statement_line.body:
+                if not isinstance(assignment_statement, cst.Assign):
                     continue
-
-                return self._replace_requires(updated_node, body_statement_line, assignment_statement)
+                for target in assignment_statement.targets:
+                    if not isinstance(target.target, cst.Name) or target.target.value != 'requires':
+                        continue
+                    # Replace only the assignment within the SimpleStatementLine
+                    return self._replace_requires(updated_node, body_statement_line, assignment_statement)
 
         # Find the last attribute assignment before methods
         last_attribute = None
         for body_statement_line in updated_node.body.body:
             if not isinstance(body_statement_line, cst.SimpleStatementLine):
                 break
-            assignment_statement = body_statement_line.body[0]
-            if not isinstance(assignment_statement, cst.Assign):
+            if not body_statement_line.body:
+                break
+            if not isinstance(body_statement_line.body[0], cst.Assign):
                 break
             last_attribute = body_statement_line
 
@@ -89,29 +88,27 @@ class RequiresTransformer(cst.CSTTransformer):
             new_body.insert(index + 1, new_statement)
         else:
             new_body = [new_statement] + list(updated_node.body.body)
-
         return updated_node.with_changes(body=updated_node.body.with_changes(body=new_body))
 
     def _replace_requires(
         self, updated_node: cst.ClassDef, body_statement_line: cst.SimpleStatementLine, assignment_statement: cst.Assign
     ) -> cst.ClassDef:
-        """Replace the existing 'requires' assignment with a new one.
-
-        Args:
-            updated_node (cst.ClassDef): The class definition to update.
-            body_statement_line (cst.SimpleStatementLine): The body item containing the assignment.
-            assignment_statement (cst.Assign): The existing assignment statement.
-
-        Returns:
-            cst.ClassDef: The updated class definition.
-        """
-        new_value = cst.List([
-            cst.Element(cst.SimpleString(f'"{dependency.requires()}"')) for dependency in self.dependencies
-        ])
+        """Replace the existing 'requires' assignment with a new one, preserving other statements on the same line."""
+        new_value = cst.List(
+            [cst.Element(cst.SimpleString(f'"{dependency.requires()}"')) for dependency in self.dependencies]
+        )
         new_assignment = assignment_statement.with_changes(value=new_value)
+
+        # Replace only the relevant assignment in the SimpleStatementLine
+        new_body = [
+            new_assignment if statement is assignment_statement else statement for statement in body_statement_line.body
+        ]
+        new_statement_line = body_statement_line.with_changes(body=new_body)
+
+        # Replace the statement line in the class body
         return updated_node.with_changes(
             body=updated_node.body.with_changes(
-                body=[new_assignment if item is body_statement_line else item for item in updated_node.body.body]
+                body=[new_statement_line if item is body_statement_line else item for item in updated_node.body.body]
             )
         )
 
