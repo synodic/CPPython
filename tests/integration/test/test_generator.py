@@ -5,7 +5,7 @@ from typing import Any
 import pytest
 
 from cppython.test.mock.generator import MockGenerator
-from cppython.test.pytest.tests import GeneratorIntegrationTests
+from cppython.test.pytest.classes import GeneratorIntegrationTests
 
 
 class TestCPPythonGenerator(GeneratorIntegrationTests[MockGenerator]):

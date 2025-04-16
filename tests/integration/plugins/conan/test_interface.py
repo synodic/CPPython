@@ -5,7 +5,7 @@ from typing import Any
 import pytest
 
 from cppython.plugins.conan.plugin import ConanProvider
-from cppython.test.pytest.tests import ProviderIntegrationTests
+from cppython.test.pytest.classes import ProviderIntegrationTests
 
 
 class TestCPPythonProvider(ProviderIntegrationTests[ConanProvider]):

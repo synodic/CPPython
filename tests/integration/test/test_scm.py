@@ -5,7 +5,7 @@ from typing import Any
 import pytest
 
 from cppython.test.mock.scm import MockSCM
-from cppython.test.pytest.tests import SCMIntegrationTests
+from cppython.test.pytest.classes import SCMIntegrationTests
 
 
 class TestCPPythonSCM(SCMIntegrationTests[MockSCM]):

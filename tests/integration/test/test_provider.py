@@ -5,7 +5,7 @@ from typing import Any
 import pytest
 
 from cppython.test.mock.provider import MockProvider
-from cppython.test.pytest.tests import ProviderIntegrationTests
+from cppython.test.pytest.classes import ProviderIntegrationTests
 
 
 class TestMockProvider(ProviderIntegrationTests[MockProvider]):

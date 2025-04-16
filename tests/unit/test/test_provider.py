@@ -7,7 +7,7 @@ from pytest_mock import MockerFixture
 
 from cppython.test.mock.generator import MockGenerator
 from cppython.test.mock.provider import MockProvider
-from cppython.test.pytest.tests import ProviderUnitTests
+from cppython.test.pytest.classes import ProviderUnitTests
 
 
 class TestMockProvider(ProviderUnitTests[MockProvider]):

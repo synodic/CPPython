@@ -6,7 +6,7 @@ import pytest
 
 from cppython.plugins.cmake.plugin import CMakeGenerator
 from cppython.plugins.cmake.schema import CMakeConfiguration
-from cppython.test.pytest.tests import GeneratorIntegrationTests
+from cppython.test.pytest.classes import GeneratorIntegrationTests
 from cppython.test.schema import Variant
 
 pytest_plugins = ['tests.fixtures.cmake']

@@ -3,7 +3,7 @@
 import pytest
 
 from cppython.plugins.git.plugin import GitSCM
-from cppython.test.pytest.tests import SCMIntegrationTests
+from cppython.test.pytest.classes import SCMIntegrationTests
 
 
 class TestGitInterface(SCMIntegrationTests[GitSCM]):

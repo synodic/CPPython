@@ -9,7 +9,7 @@ import pytest
 from cppython.core.plugin_schema.generator import Generator
 from cppython.core.plugin_schema.provider import Provider
 from cppython.core.plugin_schema.scm import SCM
-from cppython.test.pytest.shared import (
+from cppython.test.pytest.base_classes import (
     DataPluginIntegrationTests,
     DataPluginUnitTests,
     GeneratorTests,
