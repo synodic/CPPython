@@ -12,8 +12,8 @@ class Builder:
         """Initialize the builder"""
 
     @staticmethod
-    def write_provider_preset(provider_directory: Path, provider_data: CMakeSyncData) -> None:
-        """Writes a provider preset from input sync data
+    def generate_provider_preset(provider_data: CMakeSyncData) -> CMakePresets:
+        """Generates a provider preset from input sync data
 
         Args:
             provider_directory: The base directory to place the preset files
@@ -26,7 +26,17 @@ class Builder:
             'CMAKE_PROJECT_TOP_LEVEL_INCLUDES': str(provider_data.top_level_includes.as_posix()),
         }
 
-        generated_preset = CMakePresets(configurePresets=[generated_configure_preset])
+        return CMakePresets(configurePresets=[generated_configure_preset])
+
+    @staticmethod
+    def write_provider_preset(provider_directory: Path, provider_data: CMakeSyncData) -> None:
+        """Writes a provider preset from input sync data
+
+        Args:
+            provider_directory: The base directory to place the preset files
+            provider_data: The providers synchronization data
+        """
+        generated_preset = Builder.generate_provider_preset(provider_data)
 
         provider_preset_file = provider_directory / f'{provider_data.provider_name}.json'
 
@@ -44,6 +54,31 @@ class Builder:
                 file.write(serialized)
 
     @staticmethod
+    def generate_cppython_preset(
+        cppython_preset_directory: Path, provider_directory: Path, provider_data: CMakeSyncData
+    ) -> CMakePresets:
+        """Generates the cppython preset which inherits from the provider presets
+
+        Args:
+            cppython_preset_directory: The tool directory
+            provider_directory: The base directory containing provider presets
+            provider_data: The provider's synchronization data
+
+        Returns:
+            A CMakePresets object
+        """
+        generated_configure_preset = ConfigurePreset(name='cppython', inherits=provider_data.provider_name)
+        generated_preset = CMakePresets(configurePresets=[generated_configure_preset])
+
+        # Get the relative path to the provider preset file
+        provider_preset_file = provider_directory / f'{provider_data.provider_name}.json'
+        relative_preset = provider_preset_file.relative_to(cppython_preset_directory, walk_up=True).as_posix()
+
+        # Set the data
+        generated_preset.include = [relative_preset]
+        return generated_preset
+
+    @staticmethod
     def write_cppython_preset(
         cppython_preset_directory: Path, provider_directory: Path, provider_data: CMakeSyncData
     ) -> Path:
@@ -57,16 +92,9 @@ class Builder:
         Returns:
             A file path to the written data
         """
-        generated_configure_preset = ConfigurePreset(name='cppython', inherits=provider_data.provider_name)
-        generated_preset = CMakePresets(configurePresets=[generated_configure_preset])
-
-        # Get the relative path to the provider preset file
-        provider_preset_file = provider_directory / f'{provider_data.provider_name}.json'
-        relative_preset = provider_preset_file.relative_to(cppython_preset_directory, walk_up=True).as_posix()
-
-        # Set the data
-        generated_preset.include = [relative_preset]
-
+        generated_preset = Builder.generate_cppython_preset(
+            cppython_preset_directory, provider_directory, provider_data
+        )
         cppython_preset_file = cppython_preset_directory / 'cppython.json'
 
         initial_preset = None
@@ -86,17 +114,15 @@ class Builder:
         return cppython_preset_file
 
     @staticmethod
-    def write_root_presets(preset_file: Path, cppython_preset_file: Path) -> None:
-        """Read the top level json file and insert the include reference.
-
-        Receives a relative path to the tool cmake json file
-
-        Raises:
-            ConfigError: If key files do not exists
+    def generate_root_preset(preset_file: Path, cppython_preset_file: Path) -> CMakePresets:
+        """Generates the top level root preset with the include reference.
 
         Args:
             preset_file: Preset file to modify
             cppython_preset_file: Path to the cppython preset file to include
+
+        Returns:
+            A CMakePresets object
         """
         initial_root_preset = None
 
@@ -108,7 +134,6 @@ class Builder:
             root_preset = initial_root_preset.model_copy(deep=True)
         else:
             # If the file doesn't exist, we need to default it for the user
-
             # TODO: Forward the tool's build directory
             default_configure_preset = ConfigurePreset(name='default', inherits='cppython', binaryDir='build')
             root_preset = CMakePresets(configurePresets=[default_configure_preset])
@@ -124,6 +149,30 @@ class Builder:
         # Only the included preset file if it doesn't exist. Implied by the above check
         if str(relative_preset) not in root_preset.include:
             root_preset.include.append(str(relative_preset))
+
+        return root_preset
+
+    @staticmethod
+    def write_root_presets(preset_file: Path, cppython_preset_file: Path) -> None:
+        """Read the top level json file and insert the include reference.
+
+        Receives a relative path to the tool cmake json file
+
+        Raises:
+            ConfigError: If key files do not exists
+
+        Args:
+            preset_file: Preset file to modify
+            cppython_preset_file: Path to the cppython preset file to include
+        """
+        initial_root_preset = None
+
+        if preset_file.exists():
+            with open(preset_file, encoding='utf-8') as file:
+                initial_json = file.read()
+            initial_root_preset = CMakePresets.model_validate_json(initial_json)
+
+        root_preset = Builder.generate_root_preset(preset_file, cppython_preset_file)
 
         # Only write the file if the data has changed
         if root_preset != initial_root_preset:
