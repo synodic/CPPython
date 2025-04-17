@@ -5,7 +5,7 @@ generator with CPPython. It includes definitions for cache variables,
 configuration presets, and synchronization data.
 """
 
-from enum import Enum, auto
+from enum import StrEnum
 from pathlib import Path
 from typing import Annotated
 
@@ -15,20 +15,20 @@ from pydantic.types import FilePath
 from cppython.core.schema import CPPythonModel, SyncData
 
 
-class VariableType(Enum):
+class VariableType(StrEnum):
     """Defines the types of variables that can be used in CMake cache.
 
     Args:
         Enum: Base class for creating enumerations.
     """
 
-    BOOL = (auto(),)  # Boolean ON/OFF value.
-    PATH = (auto(),)  # Path to a directory.
-    FILEPATH = (auto(),)  # Path to a file.
-    STRING = (auto(),)  # Generic string value.
-    INTERNAL = (auto(),)  # Do not present in GUI at all.
-    STATIC = (auto(),)  # Value managed by CMake, do not change.
-    UNINITIALIZED = auto()  # Type not yet specified.
+    BOOL = 'BOOL'
+    PATH = 'PATH'
+    FILEPATH = 'FILEPATH'
+    STRING = 'STRING'
+    INTERNAL = 'INTERNAL'
+    STATIC = 'STATIC'
+    UNINITIALIZED = 'UNINITIALIZED'
 
 
 class CacheVariable(CPPythonModel, extra='forbid'):
@@ -39,7 +39,7 @@ class CacheVariable(CPPythonModel, extra='forbid'):
         value: The value of the variable, which can be a boolean or string.
     """
 
-    type: None | VariableType
+    type: None | VariableType = None
     value: bool | str
 
 
