@@ -137,10 +137,6 @@ class Builder:
             def layout(self):
                 cmake_layout(self)
 
-            def generate(self):
-                tc = CMakeToolchain(self)
-                tc.generate()
-
             def build(self):
                 cmake = CMake(self)
                 cmake.configure()
