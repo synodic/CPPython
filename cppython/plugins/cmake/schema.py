@@ -50,7 +50,6 @@ class ConfigurePreset(CPPythonModel, extra='allow'):
     inherits: Annotated[
         str | list[str] | None, Field(description='The inherits field allows inheriting from other presets.')
     ] = None
-    binaryDir: Annotated[str | None, Field(description='The binary directory for the build output.')] = None
     cacheVariables: dict[str, None | bool | str | CacheVariable] | None = None
 
 
@@ -92,4 +91,4 @@ class CMakeConfiguration(CPPythonModel):
     ] = Path('CMakePresets.json')
     configuration_name: Annotated[
         str, Field(description='The CMake configuration preset to look for and override inside the given `preset_file`')
-    ] = 'cppython'
+    ] = 'default'
