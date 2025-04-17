@@ -2,7 +2,6 @@
 
 # from pathlib import Path
 from pathlib import Path
-from typing import cast
 
 import pytest
 
@@ -28,13 +27,7 @@ from cppython.core.schema import (
     PyProject,
     ToolData,
 )
-from cppython.test.data.variants import (
-    cppython_global_variants,
-    cppython_local_variants,
-    pep621_variants,
-    project_variants,
-)
-from cppython.test.schema import Variant
+from cppython.utility.utility import TypeName
 
 
 @pytest.fixture(
@@ -58,18 +51,14 @@ def fixture_install_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
 @pytest.fixture(
     name='pep621_configuration',
     scope='session',
-    params=pep621_variants.variants,
 )
-def fixture_pep621_configuration(request: pytest.FixtureRequest) -> Variant[PEP621Configuration]:
+def fixture_pep621_configuration() -> PEP621Configuration:
     """Fixture defining all testable variations of PEP621
-
-    Args:
-        request: Parameterization list
 
     Returns:
         PEP621 variant
     """
-    return cast(Variant[PEP621Configuration], request.param)
+    return PEP621Configuration(name='unnamed', version='1.0.0')
 
 
 @pytest.fixture(
@@ -77,7 +66,7 @@ def fixture_pep621_configuration(request: pytest.FixtureRequest) -> Variant[PEP6
     scope='session',
 )
 def fixture_pep621_data(
-    pep621_configuration: Variant[PEP621Configuration], project_configuration: Variant[ProjectConfiguration]
+    pep621_configuration: PEP621Configuration, project_configuration: ProjectConfiguration
 ) -> PEP621Data:
     """Resolved project table fixture
 
@@ -88,58 +77,40 @@ def fixture_pep621_data(
     Returns:
         The resolved project table
     """
-    return resolve_pep621(pep621_configuration.configuration, project_configuration.configuration, None)
+    return resolve_pep621(pep621_configuration, project_configuration, None)
 
 
 @pytest.fixture(
     name='cppython_local_configuration',
     scope='session',
-    params=cppython_local_variants.variants,
 )
-def fixture_cppython_local_configuration(
-    request: pytest.FixtureRequest, install_path: Path
-) -> Variant[CPPythonLocalConfiguration]:
+def fixture_cppython_local_configuration(install_path: Path) -> CPPythonLocalConfiguration:
     """Fixture defining all testable variations of CPPythonData
 
     Args:
-        request: Parameterization list
         install_path: The temporary install directory
 
     Returns:
         Variation of CPPython data
     """
-    cppython_local_configuration = cast(Variant[CPPythonLocalConfiguration], request.param)
+    cppython_local_configuration = CPPythonLocalConfiguration(
+        install_path=install_path, provider_name=TypeName('mock'), generator_name=TypeName('mock')
+    )
 
-    data = cppython_local_configuration.configuration.model_dump(by_alias=True)
-
-    # Pin the install location to the base temporary directory
-    data['install-path'] = install_path
-
-    # Fill the plugin names with mocked values
-    data['provider-name'] = 'mock'
-    data['generator-name'] = 'mock'
-
-    new_configuration = CPPythonLocalConfiguration(**data)
-    return Variant[CPPythonLocalConfiguration](configuration=new_configuration)
+    return cppython_local_configuration
 
 
 @pytest.fixture(
     name='cppython_global_configuration',
     scope='session',
-    params=cppython_global_variants.variants,
 )
-def fixture_cppython_global_configuration(request: pytest.FixtureRequest) -> Variant[CPPythonGlobalConfiguration]:
+def fixture_cppython_global_configuration() -> CPPythonGlobalConfiguration:
     """Fixture defining all testable variations of CPPythonData
-
-    Args:
-        request: Parameterization list
 
     Returns:
         Variation of CPPython data
     """
-    cppython_global_configuration = cast(Variant[CPPythonGlobalConfiguration], request.param)
-
-    return cppython_global_configuration
+    return CPPythonGlobalConfiguration()
 
 
 @pytest.fixture(
@@ -193,8 +164,8 @@ def fixture_plugin_cppython_data(
     scope='session',
 )
 def fixture_cppython_data(
-    cppython_local_configuration: Variant[CPPythonLocalConfiguration],
-    cppython_global_configuration: Variant[CPPythonGlobalConfiguration],
+    cppython_local_configuration: CPPythonLocalConfiguration,
+    cppython_global_configuration: CPPythonGlobalConfiguration,
     project_data: ProjectData,
     plugin_cppython_data: PluginCPPythonData,
 ) -> CPPythonData:
@@ -210,8 +181,8 @@ def fixture_cppython_data(
         The resolved CPPython table
     """
     return resolve_cppython(
-        cppython_local_configuration.configuration,
-        cppython_global_configuration.configuration,
+        cppython_local_configuration,
+        cppython_global_configuration,
         project_data,
         plugin_cppython_data,
     )
@@ -236,29 +207,23 @@ def fixture_core_data(cppython_data: CPPythonData, project_data: ProjectData) ->
 @pytest.fixture(
     name='project_configuration',
     scope='session',
-    params=project_variants.variants,
 )
-def fixture_project_configuration(request: pytest.FixtureRequest) -> Variant[ProjectConfiguration]:
+def fixture_project_configuration() -> ProjectConfiguration:
     """Project configuration fixture.
 
     Here we provide overrides on the input variants so that we can use a temporary directory for testing purposes.
 
-    Args:
-        request: Parameterized configuration data
-        tmp_path_factory: Factory for centralized temporary directories
-
     Returns:
         Configuration with temporary directory capabilities
     """
-    configuration = cast(Variant[ProjectConfiguration], request.param)
-    return configuration
+    return ProjectConfiguration(project_root=Path(), version='0.1.0')
 
 
 @pytest.fixture(
     name='project_data',
     scope='session',
 )
-def fixture_project_data(project_configuration: Variant[ProjectConfiguration]) -> ProjectData:
+def fixture_project_data(project_configuration: ProjectConfiguration) -> ProjectData:
     """Fixture that creates a project space at 'workspace/test_project/pyproject.toml'
 
     Args:
@@ -267,13 +232,13 @@ def fixture_project_data(project_configuration: Variant[ProjectConfiguration]) -
     Returns:
         A project data object that has populated a function level temporary directory
     """
-    return resolve_project_configuration(project_configuration.configuration)
+    return resolve_project_configuration(project_configuration)
 
 
 @pytest.fixture(name='project')
 def fixture_project(
-    cppython_local_configuration: Variant[CPPythonLocalConfiguration],
-    pep621_configuration: Variant[PEP621Configuration],
+    cppython_local_configuration: CPPythonLocalConfiguration,
+    pep621_configuration: PEP621Configuration,
 ) -> PyProject:
     """Parameterized construction of PyProject data
 
@@ -284,5 +249,5 @@ def fixture_project(
     Returns:
         All the data as one object
     """
-    tool = ToolData(cppython=cppython_local_configuration.configuration)
-    return PyProject(project=pep621_configuration.configuration, tool=tool)
+    tool = ToolData(cppython=cppython_local_configuration)
+    return PyProject(project=pep621_configuration, tool=tool)

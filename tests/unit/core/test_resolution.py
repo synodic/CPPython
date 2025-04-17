@@ -29,7 +29,6 @@ from cppython.core.schema import (
     ProjectConfiguration,
     ProjectData,
 )
-from cppython.test.schema import Variant
 from cppython.utility.utility import TypeName
 
 
@@ -37,10 +36,10 @@ class TestResolve:
     """Test resolution of data"""
 
     @staticmethod
-    def test_pep621_resolve(project_configuration: Variant[ProjectConfiguration]) -> None:
+    def test_pep621_resolve(project_configuration: ProjectConfiguration) -> None:
         """Test the PEP621 schema resolve function"""
         data = PEP621Configuration(name='pep621-resolve-test', dynamic=['version'])
-        resolved = resolve_pep621(data, project_configuration.configuration, None)
+        resolved = resolve_pep621(data, project_configuration, None)
 
         class_variables = vars(resolved)
 
@@ -48,17 +47,17 @@ class TestResolve:
         assert None not in class_variables.values()
 
     @staticmethod
-    def test_project_resolve(project_configuration: Variant[ProjectConfiguration]) -> None:
+    def test_project_resolve(project_configuration: ProjectConfiguration) -> None:
         """Tests project configuration resolution"""
-        assert resolve_project_configuration(project_configuration.configuration)
+        assert resolve_project_configuration(project_configuration)
 
     @staticmethod
-    def test_cppython_resolve(project_configuration: Variant[ProjectConfiguration]) -> None:
+    def test_cppython_resolve(project_configuration: ProjectConfiguration) -> None:
         """Tests cppython configuration resolution"""
         cppython_local_configuration = CPPythonLocalConfiguration()
         cppython_global_configuration = CPPythonGlobalConfiguration()
 
-        project_data = resolve_project_configuration(project_configuration.configuration)
+        project_data = resolve_project_configuration(project_configuration)
 
         plugin_build_data = PluginCPPythonData(
             generator_name=TypeName('generator'), provider_name=TypeName('provider'), scm_name=TypeName('scm')
@@ -89,13 +88,13 @@ class TestResolve:
         resolve_model(MockModel, good_data)
 
     @staticmethod
-    def test_generator_resolve(project_configuration: Variant[ProjectConfiguration]) -> None:
+    def test_generator_resolve(project_configuration: ProjectConfiguration) -> None:
         """Test generator resolution"""
         project_data = ProjectData(project_root=Path())
         cppython_local_configuration = CPPythonLocalConfiguration()
         cppython_global_configuration = CPPythonGlobalConfiguration()
 
-        project_data = resolve_project_configuration(project_configuration.configuration)
+        project_data = resolve_project_configuration(project_configuration)
 
         plugin_build_data = PluginCPPythonData(
             generator_name=TypeName('generator'), provider_name=TypeName('provider'), scm_name=TypeName('scm')
@@ -112,13 +111,13 @@ class TestResolve:
         assert resolve_generator(project_data, cppython_plugin_data)
 
     @staticmethod
-    def test_provider_resolve(project_configuration: Variant[ProjectConfiguration]) -> None:
+    def test_provider_resolve(project_configuration: ProjectConfiguration) -> None:
         """Test provider resolution"""
         project_data = ProjectData(project_root=Path())
         cppython_local_configuration = CPPythonLocalConfiguration()
         cppython_global_configuration = CPPythonGlobalConfiguration()
 
-        project_data = resolve_project_configuration(project_configuration.configuration)
+        project_data = resolve_project_configuration(project_configuration)
 
         plugin_build_data = PluginCPPythonData(
             generator_name=TypeName('generator'), provider_name=TypeName('provider'), scm_name=TypeName('scm')
@@ -135,13 +134,13 @@ class TestResolve:
         assert resolve_provider(project_data, cppython_plugin_data)
 
     @staticmethod
-    def test_scm_resolve(project_configuration: Variant[ProjectConfiguration]) -> None:
+    def test_scm_resolve(project_configuration: ProjectConfiguration) -> None:
         """Test scm resolution"""
         project_data = ProjectData(project_root=Path())
         cppython_local_configuration = CPPythonLocalConfiguration()
         cppython_global_configuration = CPPythonGlobalConfiguration()
 
-        project_data = resolve_project_configuration(project_configuration.configuration)
+        project_data = resolve_project_configuration(project_configuration)
 
         plugin_build_data = PluginCPPythonData(
             generator_name=TypeName('generator'), provider_name=TypeName('provider'), scm_name=TypeName('scm')

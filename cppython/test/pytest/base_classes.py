@@ -32,7 +32,6 @@ from cppython.test.data.mocks import (
     provider_variants,
     scm_variants,
 )
-from cppython.test.schema import Variant
 
 
 class BaseTests[T: Plugin](metaclass=ABCMeta):
@@ -131,7 +130,7 @@ class BaseUnitTests[T: Plugin](BaseTests[T], metaclass=ABCMeta):
     """Unit testing information for all plugin test classes"""
 
     @staticmethod
-    def test_feature_extraction(plugin_type: type[T], project_configuration: Variant[ProjectConfiguration]) -> None:
+    def test_feature_extraction(plugin_type: type[T], project_configuration: ProjectConfiguration) -> None:
         """Test the feature extraction of a plugin.
 
         This method tests the feature extraction functionality of a plugin by asserting that the features
@@ -141,7 +140,7 @@ class BaseUnitTests[T: Plugin](BaseTests[T], metaclass=ABCMeta):
             plugin_type: The type of plugin to test.
             project_configuration: The project configuration to use for testing.
         """
-        assert plugin_type.features(project_configuration.configuration.project_root)
+        assert plugin_type.features(project_configuration.project_root)
 
     @staticmethod
     def test_information(plugin_type: type[T]) -> None:

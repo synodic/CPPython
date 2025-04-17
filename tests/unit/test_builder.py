@@ -15,7 +15,6 @@ from cppython.core.schema import (
 from cppython.test.mock.generator import MockGenerator
 from cppython.test.mock.provider import MockProvider
 from cppython.test.mock.scm import MockSCM
-from cppython.test.schema import Variant
 
 
 class TestBuilder:
@@ -23,9 +22,9 @@ class TestBuilder:
 
     @staticmethod
     def test_build(
-        project_configuration: Variant[ProjectConfiguration],
-        pep621_configuration: Variant[PEP621Configuration],
-        cppython_local_configuration: Variant[CPPythonLocalConfiguration],
+        project_configuration: ProjectConfiguration,
+        pep621_configuration: PEP621Configuration,
+        cppython_local_configuration: CPPythonLocalConfiguration,
         mocker: MockerFixture,
     ) -> None:
         """Verifies that the builder can build a project with all test variants
@@ -37,7 +36,7 @@ class TestBuilder:
             mocker: Pytest mocker fixture
         """
         logger = logging.getLogger()
-        builder = Builder(project_configuration.configuration, logger)
+        builder = Builder(project_configuration, logger)
 
         # Insert ourself into the builder and load the mock plugins by returning them directly in the expected order
         #   they will be built
@@ -47,7 +46,7 @@ class TestBuilder:
         )
         mocker.patch.object(metadata.EntryPoint, 'load', side_effect=[MockGenerator, MockProvider, MockSCM])
 
-        assert builder.build(pep621_configuration.configuration, cppython_local_configuration.configuration)
+        assert builder.build(pep621_configuration, cppython_local_configuration)
 
 
 class TestResolver:
@@ -55,8 +54,8 @@ class TestResolver:
 
     @staticmethod
     def test_generate_plugins(
-        project_configuration: Variant[ProjectConfiguration],
-        cppython_local_configuration: Variant[CPPythonLocalConfiguration],
+        project_configuration: ProjectConfiguration,
+        cppython_local_configuration: CPPythonLocalConfiguration,
         project_data: ProjectData,
     ) -> None:
         """Verifies that the resolver can generate plugins
@@ -67,6 +66,6 @@ class TestResolver:
             project_data: Variant fixture for the project data
         """
         logger = logging.getLogger()
-        resolver = Resolver(project_configuration.configuration, logger)
+        resolver = Resolver(project_configuration, logger)
 
-        assert resolver.generate_plugins(cppython_local_configuration.configuration, project_data)
+        assert resolver.generate_plugins(cppython_local_configuration, project_data)

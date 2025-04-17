@@ -6,29 +6,21 @@ from typing import cast
 import pytest
 
 from cppython.plugins.cmake.schema import CMakeConfiguration
-from cppython.test.schema import Variant, Variants
 
 
-def _cmake_data_list() -> Variants[CMakeConfiguration]:
+def _cmake_data_list() -> list[CMakeConfiguration]:
     """Creates a list of mocked configuration types
 
     Returns:
         A list of variants to test
     """
-    data = Variants[CMakeConfiguration]()
-
     # Default
     default = CMakeConfiguration(configuration_name='default')
-    default_variant = Variant[CMakeConfiguration](configuration=default)
 
     # Non-root preset file
     config = CMakeConfiguration(preset_file=Path('inner/CMakePresets.json'), configuration_name='default')
-    config_variant = Variant[CMakeConfiguration](configuration=config, directory=Path('cmake/non-root'))
 
-    data.variants.append(default_variant)
-    data.variants.append(config_variant)
-
-    return data
+    return [default, config]
 
 
 @pytest.fixture(
@@ -36,7 +28,7 @@ def _cmake_data_list() -> Variants[CMakeConfiguration]:
     scope='session',
     params=_cmake_data_list(),
 )
-def fixture_cmake_data(request: pytest.FixtureRequest) -> Variant[CMakeConfiguration]:
+def fixture_cmake_data(request: pytest.FixtureRequest) -> CMakeConfiguration:
     """A fixture to provide a list of configuration types
 
     Args:
@@ -45,4 +37,4 @@ def fixture_cmake_data(request: pytest.FixtureRequest) -> Variant[CMakeConfigura
     Returns:
         A configuration type instance
     """
-    return cast(Variant[CMakeConfiguration], request.param)
+    return cast(CMakeConfiguration, request.param)
