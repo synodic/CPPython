@@ -24,6 +24,4 @@ def resolve_cmake_data(data: dict[str, Any], core_data: CorePluginData) -> CMake
     if not modified_preset_file.is_absolute():
         modified_preset_file = root_directory / modified_preset_file
 
-    
-
     return CMakeData(preset_file=modified_preset_file, configuration_name=parsed_data.configuration_name)

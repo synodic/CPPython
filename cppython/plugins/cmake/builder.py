@@ -120,6 +120,7 @@ class Builder:
         Args:
             preset_file: Preset file to modify
             cppython_preset_file: Path to the cppython preset file to include
+            cmake_data: The CMake data to use
 
         Returns:
             A CMakePresets object
@@ -180,6 +181,7 @@ class Builder:
         Args:
             preset_file: Preset file to modify
             cppython_preset_file: Path to the cppython preset file to include
+            cmake_data: The CMake data to use
         """
         initial_root_preset = None
 

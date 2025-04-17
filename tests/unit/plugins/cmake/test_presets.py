@@ -22,7 +22,7 @@ class TestBuilder:
         result = builder.generate_root_preset(preset_file, cppython_preset_file, cmake_data)
         assert result.configurePresets is not None
         assert any(p.name == 'test-configuration' for p in result.configurePresets)
-        
+
         preset = next(p for p in result.configurePresets if p.name == 'test-configuration')
         assert preset.inherits == 'cppython'
 
