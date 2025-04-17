@@ -1,5 +1,6 @@
 """The vcpkg provider implementation"""
 
+import subprocess
 from logging import getLogger
 from os import name as system_name
 from pathlib import Path, PosixPath, WindowsPath
@@ -16,8 +17,7 @@ from cppython.plugins.cmake.plugin import CMakeGenerator
 from cppython.plugins.cmake.schema import CMakeSyncData
 from cppython.plugins.vcpkg.resolution import generate_manifest, resolve_vcpkg_data
 from cppython.plugins.vcpkg.schema import VcpkgData
-from cppython.utility.exception import NotSupportedError, ProcessError
-from cppython.utility.subprocess import invoke as subprocess_call
+from cppython.utility.exception import NotSupportedError
 from cppython.utility.utility import TypeName
 
 
@@ -76,19 +76,25 @@ class VcpkgProvider(Provider):
 
         try:
             if system_name == 'nt':
-                subprocess_call(
-                    str(WindowsPath('bootstrap-vcpkg.bat')), ['-disableMetrics'], logger=logger, cwd=path, shell=True
-                )
-            elif system_name == 'posix':
-                subprocess_call(
-                    './' + str(PosixPath('bootstrap-vcpkg.sh')),
-                    ['-disableMetrics'],
-                    logger=logger,
+                subprocess.run(
+                    [str(WindowsPath('bootstrap-vcpkg.bat')), '-disableMetrics'],
                     cwd=path,
                     shell=True,
+                    check=True,
+                    capture_output=True,
                 )
-        except ProcessError:
-            logger.error('Unable to bootstrap the vcpkg repository', exc_info=True)
+            elif system_name == 'posix':
+                subprocess.run(
+                    ['./' + str(PosixPath('bootstrap-vcpkg.sh')), '-disableMetrics'],
+                    cwd=path,
+                    shell=True,
+                    check=True,
+                    capture_output=True,
+                )
+        except subprocess.CalledProcessError as e:
+            logger.error(
+                'Unable to bootstrap the vcpkg repository: %s', e.stderr.decode() if e.stderr else str(e), exc_info=True
+            )
             raise
 
     def sync_data(self, consumer: SyncConsumer) -> SyncData:
@@ -119,25 +125,17 @@ class VcpkgProvider(Provider):
         Args:
             path: The directory to check for downloaded tooling
 
-        Raises:
-            ProcessError: Failed vcpkg calls
-
         Returns:
             Whether the tooling has been downloaded or not
         """
-        logger = getLogger('cppython.vcpkg')
-
         try:
-            # Hide output, given an error output is a logic conditional
-            subprocess_call(
-                'git',
-                ['rev-parse', '--is-inside-work-tree'],
-                logger=logger,
-                suppress=True,
+            subprocess.run(
+                ['git', 'rev-parse', '--is-inside-work-tree'],
                 cwd=path,
+                check=True,
+                capture_output=True,
             )
-
-        except ProcessError:
+        except subprocess.CalledProcessError:
             return False
 
         return True
@@ -148,9 +146,6 @@ class VcpkgProvider(Provider):
 
         Args:
             directory: The directory to download any extra tooling to
-
-        Raises:
-            ProcessError: Failed vcpkg calls
         """
         logger = getLogger('cppython.vcpkg')
 
@@ -159,35 +154,41 @@ class VcpkgProvider(Provider):
                 logger.debug("Updating the vcpkg repository at '%s'", directory.absolute())
 
                 # The entire history is need for vcpkg 'baseline' information
-                subprocess_call('git', ['fetch', 'origin'], logger=logger, cwd=directory)
-                subprocess_call('git', ['pull'], logger=logger, cwd=directory)
-            except ProcessError:
-                logger.exception('Unable to update the vcpkg repository')
+                subprocess.run(
+                    ['git', 'fetch', 'origin'],
+                    cwd=directory,
+                    check=True,
+                    capture_output=True,
+                )
+                subprocess.run(
+                    ['git', 'pull'],
+                    cwd=directory,
+                    check=True,
+                    capture_output=True,
+                )
+            except subprocess.CalledProcessError as e:
+                logger.exception('Unable to update the vcpkg repository: %s', e.stderr.decode() if e.stderr else str(e))
                 raise
         else:
             try:
                 logger.debug("Cloning the vcpkg repository to '%s'", directory.absolute())
 
                 # The entire history is need for vcpkg 'baseline' information
-                subprocess_call(
-                    'git',
-                    ['clone', 'https://github.com/microsoft/vcpkg', '.'],
-                    logger=logger,
+                subprocess.run(
+                    ['git', 'clone', 'https://github.com/microsoft/vcpkg', '.'],
                     cwd=directory,
+                    check=True,
+                    capture_output=True,
                 )
 
-            except ProcessError:
-                logger.exception('Unable to clone the vcpkg repository')
+            except subprocess.CalledProcessError as e:
+                logger.exception('Unable to clone the vcpkg repository: %s', e.stderr.decode() if e.stderr else str(e))
                 raise
 
         cls._update_provider(directory)
 
     def install(self) -> None:
-        """Called when dependencies need to be installed from a lock file.
-
-        Raises:
-            ProcessError: Failed vcpkg calls
-        """
+        """Called when dependencies need to be installed from a lock file."""
         manifest_directory = self.core_data.project_data.project_root
         manifest = generate_manifest(self.core_data, self.data)
 
@@ -199,25 +200,18 @@ class VcpkgProvider(Provider):
         executable = self.core_data.cppython_data.install_path / 'vcpkg'
         logger = getLogger('cppython.vcpkg')
         try:
-            subprocess_call(
-                executable,
-                [
-                    'install',
-                    f'--x-install-root={self.data.install_directory}',
-                ],
-                logger=logger,
+            subprocess.run(
+                [str(executable), 'install', f'--x-install-root={self.data.install_directory}'],
                 cwd=self.core_data.cppython_data.build_path,
+                check=True,
+                capture_output=True,
             )
-        except ProcessError:
-            logger.exception('Unable to install project dependencies')
+        except subprocess.CalledProcessError as e:
+            logger.exception('Unable to install project dependencies: %s', e.stderr.decode() if e.stderr else str(e))
             raise
 
     def update(self) -> None:
-        """Called when dependencies need to be updated and written to the lock file.
-
-        Raises:
-            ProcessError: Failed vcpkg calls
-        """
+        """Called when dependencies need to be updated and written to the lock file."""
         manifest_directory = self.core_data.project_data.project_root
 
         manifest = generate_manifest(self.core_data, self.data)
@@ -230,15 +224,12 @@ class VcpkgProvider(Provider):
         executable = self.core_data.cppython_data.install_path / 'vcpkg'
         logger = getLogger('cppython.vcpkg')
         try:
-            subprocess_call(
-                executable,
-                [
-                    'install',
-                    f'--x-install-root={self.data.install_directory}',
-                ],
-                logger=logger,
+            subprocess.run(
+                [str(executable), 'install', f'--x-install-root={self.data.install_directory}'],
                 cwd=self.core_data.cppython_data.build_path,
+                check=True,
+                capture_output=True,
             )
-        except ProcessError:
-            logger.exception('Unable to install project dependencies')
+        except subprocess.CalledProcessError as e:
+            logger.exception('Unable to install project dependencies: %s', e.stderr.decode() if e.stderr else str(e))
             raise

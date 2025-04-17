@@ -9,7 +9,6 @@ from cppython.core.exception import ConfigException
 from cppython.core.resolution import resolve_model
 from cppython.core.schema import Interface, ProjectConfiguration, PyProject
 from cppython.schema import API
-from cppython.utility.exception import ProcessError
 
 
 class Project(API):
@@ -71,9 +70,6 @@ class Project(API):
 
         try:
             self._data.plugins.provider.install()
-        except ProcessError as error:
-            self.logger.error('Installation failed: %s', error.error)
-            raise SystemExit('Error: Provider installation failed. Please check the logs.') from None
         except Exception as exception:
             self.logger.error('Unexpected error during installation: %s', str(exception))
             raise SystemExit('Error: An unexpected error occurred during installation.') from None
@@ -98,9 +94,6 @@ class Project(API):
 
         try:
             self._data.plugins.provider.update()
-        except ProcessError as error:
-            self.logger.error('Update failed: %s', error.error)
-            raise SystemExit('Error: Provider update failed. Please check the logs.') from None
         except Exception as exception:
             self.logger.error('Unexpected error during update: %s', str(exception))
             raise SystemExit('Error: An unexpected error occurred during update.') from None
