@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from cppython.plugins.cmake.schema import CMakePresets, CMakeSyncData, ConfigurePreset
+from cppython.plugins.cmake.schema import CMakeData, CMakePresets, CMakeSyncData, ConfigurePreset
 
 
 class Builder:
@@ -114,7 +114,7 @@ class Builder:
         return cppython_preset_file
 
     @staticmethod
-    def generate_root_preset(preset_file: Path, cppython_preset_file: Path) -> CMakePresets:
+    def generate_root_preset(preset_file: Path, cppython_preset_file: Path, cmake_data: CMakeData) -> CMakePresets:
         """Generates the top level root preset with the include reference.
 
         Args:
@@ -124,18 +124,34 @@ class Builder:
         Returns:
             A CMakePresets object
         """
-        initial_root_preset = None
+        default_configure_preset = ConfigurePreset(
+            name=cmake_data.configuration_name,
+            inherits='cppython',
+        )
 
-        # If the file already exists, we need to compare it
         if preset_file.exists():
             with open(preset_file, encoding='utf-8') as file:
                 initial_json = file.read()
-            initial_root_preset = CMakePresets.model_validate_json(initial_json)
-            root_preset = initial_root_preset.model_copy(deep=True)
+            root_preset = CMakePresets.model_validate_json(initial_json)
+
+            if root_preset.configurePresets is None:
+                root_preset.configurePresets = [default_configure_preset]
+
+            # Set defaults
+            preset = next((p for p in root_preset.configurePresets if p.name == default_configure_preset.name), None)
+            if preset:
+                # If the name matches, we need to verify it inherits from cppython
+                if preset.inherits is None:
+                    preset.inherits = 'cppython'
+                elif isinstance(preset.inherits, str) and preset.inherits != 'cppython':
+                    preset.inherits = [preset.inherits, 'cppython']
+                elif isinstance(preset.inherits, list) and 'cppython' not in preset.inherits:
+                    preset.inherits.append('cppython')
+            else:
+                root_preset.configurePresets.append(default_configure_preset)
+
         else:
             # If the file doesn't exist, we need to default it for the user
-            # TODO: Forward the tool's build directory
-            default_configure_preset = ConfigurePreset(name='default', inherits='cppython', binaryDir='build')
             root_preset = CMakePresets(configurePresets=[default_configure_preset])
 
         # Get the relative path to the cppython preset file
@@ -153,7 +169,7 @@ class Builder:
         return root_preset
 
     @staticmethod
-    def write_root_presets(preset_file: Path, cppython_preset_file: Path) -> None:
+    def write_root_presets(preset_file: Path, cppython_preset_file: Path, cmake_data: CMakeData) -> None:
         """Read the top level json file and insert the include reference.
 
         Receives a relative path to the tool cmake json file
@@ -172,7 +188,7 @@ class Builder:
                 initial_json = file.read()
             initial_root_preset = CMakePresets.model_validate_json(initial_json)
 
-        root_preset = Builder.generate_root_preset(preset_file, cppython_preset_file)
+        root_preset = Builder.generate_root_preset(preset_file, cppython_preset_file, cmake_data)
 
         # Only write the file if the data has changed
         if root_preset != initial_root_preset:
