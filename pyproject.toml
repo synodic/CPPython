@@ -28,7 +28,7 @@ pdm = ["pdm>=2.23.1"]
 
 cmake = ["cmake>=4.0.0"]
 
-conan = ["conan>=2.15.0", "libcst>=1.7.0"]
+conan = ["conan>=2.15.1", "libcst>=1.7.0"]
 
 [project.urls]
 homepage = "https://github.com/Synodic-Software/CPPython"
