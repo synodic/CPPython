@@ -30,19 +30,3 @@ class TestConanCMake:
 
         # Verify that the build directory contains the expected files
         assert (Path('build') / 'CMakeCache.txt').exists(), 'build/CMakeCache.txt not found'
-
-    @staticmethod
-    def test_inject(example_runner: CliRunner) -> None:
-        """Inject"""
-        # By nature of running the test, we require PDM to develop the project and so it will be installed
-        result = subprocess.run(['pdm', 'install'], capture_output=True, text=True, check=False)
-
-        assert result.returncode == 0, f'PDM install failed: {result.stderr}'
-
-        # Run the CMake configuration command
-        result = subprocess.run(['cmake', '--preset=default'], capture_output=True, text=True, check=False)
-
-        assert result.returncode == 0, f'Cmake failed: {result.stderr}'
-
-        # Verify that the build directory contains the expected files
-        assert (Path('build') / 'CMakeCache.txt').exists(), 'build/CMakeCache.txt not found'
