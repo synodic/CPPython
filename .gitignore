@@ -10,10 +10,18 @@ TestResults/
 *.pyc
 dist/
 .vs/
+.venv/
+
+#Pytest
+.pytest_cache/
 
 #PDM
 .pdm-python
 __pypackages__/
+.pdm-build/
+
+#ruff
+.ruff_cache/
 
 #Coverage
 .coverage

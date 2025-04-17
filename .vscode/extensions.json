@@ -1,8 +1,8 @@
 {
     "recommendations": [
-        "ms-python.mypy-type-checker",
         "asciidoctor.asciidoctor-vscode",
         "charliermarsh.ruff",
-        "tamasfe.even-better-toml"
+        "tamasfe.even-better-toml",
+        "meta.pyrefly"
     ]
 }
