@@ -69,7 +69,6 @@ strict = true
 
 [tool.ruff]
 line-length = 120
-preview = true
 
 [tool.ruff.lint]
 ignore = ["D206", "D300", "D415", "E111", "E114", "E117"]

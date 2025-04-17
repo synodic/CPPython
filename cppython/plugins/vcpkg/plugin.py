@@ -12,7 +12,7 @@ from cppython.core.plugin_schema.provider import (
     ProviderPluginGroupData,
     SupportedProviderFeatures,
 )
-from cppython.core.schema import CorePluginData, Information, SyncData
+from cppython.core.schema import CorePluginData, Information, SupportedFeatures, SyncData
 from cppython.plugins.cmake.plugin import CMakeGenerator
 from cppython.plugins.cmake.schema import CMakeSyncData
 from cppython.plugins.vcpkg.resolution import generate_manifest, resolve_vcpkg_data
@@ -33,14 +33,14 @@ class VcpkgProvider(Provider):
         self.data: VcpkgData = resolve_vcpkg_data(configuration_data, core_data)
 
     @staticmethod
-    def features(directory: Path) -> SupportedProviderFeatures:
+    def features(directory: Path) -> SupportedFeatures:
         """Queries vcpkg support
 
         Args:
             directory: The directory to query
 
         Returns:
-            Supported features
+            Supported features - `SupportedProviderFeatures`. Cast to this type to help us avoid generic typing
         """
         return SupportedProviderFeatures()
 

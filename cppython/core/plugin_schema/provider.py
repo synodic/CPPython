@@ -11,6 +11,7 @@ from cppython.core.schema import (
     DataPlugin,
     DataPluginGroupData,
     SupportedDataFeatures,
+    SupportedFeatures,
     SyncData,
 )
 
@@ -67,14 +68,14 @@ class Provider(DataPlugin, SyncProducer, Protocol):
 
     @staticmethod
     @abstractmethod
-    def features(directory: DirectoryPath) -> SupportedProviderFeatures:
+    def features(directory: DirectoryPath) -> SupportedFeatures:
         """Broadcasts the shared features of the Provider plugin to CPPython
 
         Args:
             directory: The root directory where features are evaluated
 
         Returns:
-            The supported features
+            The supported features - `SupportedProviderFeatures`. Cast to this type to help us avoid generic typing
         """
         raise NotImplementedError
 

@@ -44,7 +44,7 @@ class ProjectConfiguration(CPPythonModel, extra='forbid'):
         bool, Field(description='Debug mode. Additional processing will happen to expose more debug information')
     ] = False
 
-    @field_validator('verbosity')
+    @field_validator('verbosity')  # type: ignore
     @classmethod
     def min_max(cls, value: int) -> int:
         """Validator that clamps the input value
@@ -118,7 +118,7 @@ class CPPythonData(CPPythonModel, extra='forbid'):
     scm_name: TypeName
     dependencies: list[Requirement]
 
-    @field_validator('configuration_path', 'install_path', 'tool_path', 'build_path')
+    @field_validator('configuration_path', 'install_path', 'tool_path', 'build_path')  # type: ignore
     @classmethod
     def validate_absolute_path(cls, value: Path) -> Path:
         """Enforce the input is an absolute path
@@ -234,14 +234,14 @@ class DataPlugin(Plugin, Protocol):
 
     @staticmethod
     @abstractmethod
-    def features(directory: DirectoryPath) -> SupportedDataFeatures:
+    def features(directory: DirectoryPath) -> SupportedFeatures:
         """Broadcasts the shared features of the data plugin to CPPython
 
         Args:
             directory: The root directory where features are evaluated
 
         Returns:
-            The supported features
+            The supported features - `SupportedDataFeatures`. Cast to this type to help us avoid generic typing
         """
         raise NotImplementedError
 

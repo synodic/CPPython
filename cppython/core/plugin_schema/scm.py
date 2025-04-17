@@ -31,14 +31,14 @@ class SCM(Plugin, Protocol):
 
     @staticmethod
     @abstractmethod
-    def features(directory: DirectoryPath) -> SupportedSCMFeatures:
+    def features(directory: DirectoryPath) -> SupportedFeatures:
         """Broadcasts the shared features of the SCM plugin to CPPython
 
         Args:
             directory: The root directory where features are evaluated
 
         Returns:
-            The supported features
+            The supported features - `SupportedSCMFeatures`. Cast to this type to help us avoid generic typing
         """
         raise NotImplementedError
 

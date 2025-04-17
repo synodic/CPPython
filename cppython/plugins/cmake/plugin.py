@@ -8,7 +8,7 @@ from cppython.core.plugin_schema.generator import (
     GeneratorPluginGroupData,
     SupportedGeneratorFeatures,
 )
-from cppython.core.schema import CorePluginData, Information, SyncData
+from cppython.core.schema import CorePluginData, Information, SupportedFeatures, SyncData
 from cppython.plugins.cmake.builder import Builder
 from cppython.plugins.cmake.resolution import resolve_cmake_data
 from cppython.plugins.cmake.schema import CMakeSyncData
@@ -28,11 +28,11 @@ class CMakeGenerator(Generator):
         self._provider_directory = self._cppython_preset_directory / 'providers'
 
     @staticmethod
-    def features(_: Path) -> SupportedGeneratorFeatures:
+    def features(directory: Path) -> SupportedFeatures:
         """Queries if CMake is supported
 
         Returns:
-            Supported?
+            The supported features - `SupportedGeneratorFeatures`. Cast to this type to help us avoid generic typing
         """
         return SupportedGeneratorFeatures()
 

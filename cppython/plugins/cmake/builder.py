@@ -19,7 +19,7 @@ class Builder:
             provider_directory: The base directory to place the preset files
             provider_data: The providers synchronization data
         """
-        generated_configure_preset = ConfigurePreset(name=provider_data.provider_name)
+        generated_configure_preset = ConfigurePreset(name=provider_data.provider_name, hidden=True)
 
         # Toss in that sync data from the provider
         generated_configure_preset.cacheVariables = {
@@ -67,7 +67,7 @@ class Builder:
         Returns:
             A CMakePresets object
         """
-        generated_configure_preset = ConfigurePreset(name='cppython', inherits=provider_data.provider_name)
+        generated_configure_preset = ConfigurePreset(name='cppython', inherits=provider_data.provider_name, hidden=True)
         generated_preset = CMakePresets(configurePresets=[generated_configure_preset])
 
         # Get the relative path to the provider preset file
@@ -120,6 +120,7 @@ class Builder:
         Args:
             preset_file: Preset file to modify
             cppython_preset_file: Path to the cppython preset file to include
+            cmake_data: The CMake data to use
 
         Returns:
             A CMakePresets object
@@ -180,6 +181,7 @@ class Builder:
         Args:
             preset_file: Preset file to modify
             cppython_preset_file: Path to the cppython preset file to include
+            cmake_data: The CMake data to use
         """
         initial_root_preset = None
 

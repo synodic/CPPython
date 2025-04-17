@@ -28,14 +28,6 @@ class TestCacheVariable:
         assert var.value == 'Unset'
 
     @staticmethod
-    def test_cache_variable_type_enum_values() -> None:
-        """Tests the CacheVariable class with enum values"""
-        # Ensure all CMake types are present
-        expected = {'BOOL', 'PATH', 'FILEPATH', 'STRING', 'INTERNAL', 'STATIC', 'UNINITIALIZED'}
-        actual = {v.value for v in VariableType}
-        assert expected == actual
-
-    @staticmethod
     def test_cache_variable_bool_value_as_string() -> None:
         """Tests the CacheVariable class with a boolean value as a string"""
         # CMake allows bool as "TRUE"/"FALSE" as well

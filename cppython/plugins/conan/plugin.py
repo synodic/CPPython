@@ -12,7 +12,7 @@ import requests
 
 from cppython.core.plugin_schema.generator import SyncConsumer
 from cppython.core.plugin_schema.provider import Provider, ProviderPluginGroupData, SupportedProviderFeatures
-from cppython.core.schema import CorePluginData, Information, SyncData
+from cppython.core.schema import CorePluginData, Information, SupportedFeatures, SyncData
 from cppython.plugins.cmake.plugin import CMakeGenerator
 from cppython.plugins.cmake.schema import CMakeSyncData
 from cppython.plugins.conan.builder import Builder
@@ -47,14 +47,14 @@ class ConanProvider(Provider):
             out_file.write(content)
 
     @staticmethod
-    def features(directory: Path) -> SupportedProviderFeatures:
+    def features(directory: Path) -> SupportedFeatures:
         """Queries conan support
 
         Args:
             directory: The directory to query
 
         Returns:
-            Supported features
+            Supported features - `SupportedProviderFeatures`. Cast to this type to help us avoid generic typing
         """
         return SupportedProviderFeatures()
 

@@ -104,7 +104,8 @@ class TestResolve:
             cppython_local_configuration, cppython_global_configuration, project_data, plugin_build_data
         )
 
-        MockGenerator = type('MockGenerator', (Generator,), {})
+        class MockGenerator(Generator):
+            """Mock generator for testing"""
 
         cppython_plugin_data = resolve_cppython_plugin(cppython_data, MockGenerator)
 
@@ -127,7 +128,8 @@ class TestResolve:
             cppython_local_configuration, cppython_global_configuration, project_data, plugin_build_data
         )
 
-        MockProvider = type('MockProvider', (Provider,), {})
+        class MockProvider(Provider):
+            """Mock provider for testing"""
 
         cppython_plugin_data = resolve_cppython_plugin(cppython_data, MockProvider)
 
@@ -150,7 +152,8 @@ class TestResolve:
             cppython_local_configuration, cppython_global_configuration, project_data, plugin_build_data
         )
 
-        MockSCM = type('MockSCM', (SCM,), {})
+        class MockSCM(SCM):
+            """Mock SCM for testing"""
 
         cppython_plugin_data = resolve_cppython_plugin(cppython_data, MockSCM)
 

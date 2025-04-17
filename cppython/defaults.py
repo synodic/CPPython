@@ -7,7 +7,7 @@ from cppython.core.plugin_schema.scm import (
     SCMPluginGroupData,
     SupportedSCMFeatures,
 )
-from cppython.core.schema import Information
+from cppython.core.schema import Information, SupportedFeatures
 
 
 class DefaultSCM(SCM):
@@ -18,11 +18,11 @@ class DefaultSCM(SCM):
         self.group_data = group_data
 
     @staticmethod
-    def features(_: DirectoryPath) -> SupportedSCMFeatures:
+    def features(directory: DirectoryPath) -> SupportedFeatures:
         """Broadcasts the shared features of the SCM plugin to CPPython
 
         Returns:
-            The supported features
+            The supported features - `SupportedGeneratorFeatures`. Cast to this type to help us avoid generic typing
         """
         return SupportedSCMFeatures(repository=True)
 
@@ -36,7 +36,7 @@ class DefaultSCM(SCM):
         return Information()
 
     @staticmethod
-    def version(_: DirectoryPath) -> str:
+    def version(directory: DirectoryPath) -> str:
         """Extracts the system's version metadata
 
         Returns:

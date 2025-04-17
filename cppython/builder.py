@@ -4,11 +4,11 @@ import logging
 from importlib.metadata import entry_points
 from inspect import getmodule
 from logging import Logger
-from typing import Any
+from typing import Any, cast
 
 from cppython.core.plugin_schema.generator import Generator
 from cppython.core.plugin_schema.provider import Provider
-from cppython.core.plugin_schema.scm import SCM
+from cppython.core.plugin_schema.scm import SCM, SupportedSCMFeatures
 from cppython.core.resolution import (
     PluginBuildData,
     PluginCPPythonData,
@@ -262,7 +262,7 @@ class Resolver:
             The selected SCM plugin type
         """
         for scm_type in scm_plugins:
-            if scm_type.features(project_data.project_root).repository:
+            if cast(SupportedSCMFeatures, scm_type.features(project_data.project_root)).repository:
                 return scm_type
 
         self._logger.info('No SCM plugin was found that supports the given path')
@@ -317,7 +317,7 @@ class Resolver:
         cppython_plugin_data = resolve_cppython_plugin(core_data.cppython_data, scm_type)
         scm_data = resolve_scm(core_data.project_data, cppython_plugin_data)
 
-        plugin = scm_type(scm_data)
+        plugin = cast(SCM, scm_type(scm_data))
 
         return plugin
 
@@ -354,7 +354,7 @@ class Resolver:
             cppython_data=cppython_plugin_data,
         )
 
-        return generator_type(generator_data, core_plugin_data, generator_configuration)
+        return cast(Generator, generator_type(generator_data, core_plugin_data, generator_configuration))
 
     def create_provider(
         self,
@@ -389,7 +389,7 @@ class Resolver:
             cppython_data=cppython_plugin_data,
         )
 
-        return provider_type(provider_data, core_plugin_data, provider_configuration)
+        return cast(Provider, provider_type(provider_data, core_plugin_data, provider_configuration))
 
 
 class Builder:

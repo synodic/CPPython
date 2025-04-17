@@ -1,9 +1,4 @@
-"""Git SCM Plugin
-
-This module implements the Git SCM plugin for CPPython. It provides
-functionality for interacting with Git repositories, including feature
-detection, version extraction, and project description retrieval.
-"""
+"""Git SCM Plugin"""
 
 from pathlib import Path
 
@@ -15,7 +10,7 @@ from cppython.core.plugin_schema.scm import (
     SCMPluginGroupData,
     SupportedSCMFeatures,
 )
-from cppython.core.schema import Information
+from cppython.core.schema import Information, SupportedFeatures
 
 
 class GitSCM(SCM):
@@ -26,14 +21,14 @@ class GitSCM(SCM):
         self.group_data = group_data
 
     @staticmethod
-    def features(directory: Path) -> SupportedSCMFeatures:
+    def features(directory: Path) -> SupportedFeatures:
         """Broadcasts the shared features of the SCM plugin to CPPython
 
         Args:
             directory: The root directory where features are evaluated
 
         Returns:
-            The supported features
+            The supported features - `SupportedSCMFeatures`. Cast to this type to help us avoid generic typing
         """
         is_repository = True
         try:
@@ -52,8 +47,7 @@ class GitSCM(SCM):
         """
         return Information()
 
-    @staticmethod
-    def version(_: Path) -> str:
+    def version(self, directory: Path) -> str:
         """Extracts the system's version metadata
 
         Returns:

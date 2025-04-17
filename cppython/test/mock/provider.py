@@ -10,7 +10,7 @@ from cppython.core.plugin_schema.provider import (
     ProviderPluginGroupData,
     SupportedProviderFeatures,
 )
-from cppython.core.schema import CorePluginData, CPPythonModel, Information, SyncData
+from cppython.core.schema import CorePluginData, CPPythonModel, Information, SupportedFeatures, SyncData
 from cppython.test.mock.generator import MockSyncData
 
 
@@ -32,11 +32,11 @@ class MockProvider(Provider):
         self.configuration_data = MockProviderData(**configuration_data)
 
     @staticmethod
-    def features(_: DirectoryPath) -> SupportedProviderFeatures:
+    def features(directory: DirectoryPath) -> SupportedFeatures:
         """Broadcasts the shared features of the Provider plugin to CPPython
 
         Returns:
-            The supported features
+            The supported features - `SupportedProviderFeatures`. Cast to this type to help us avoid generic typing
         """
         return SupportedProviderFeatures()
 

@@ -10,6 +10,7 @@ from cppython.core.schema import (
     DataPlugin,
     DataPluginGroupData,
     SupportedDataFeatures,
+    SupportedFeatures,
     SyncData,
 )
 
@@ -58,13 +59,13 @@ class Generator(DataPlugin, SyncConsumer, Protocol):
 
     @staticmethod
     @abstractmethod
-    def features(directory: DirectoryPath) -> SupportedGeneratorFeatures:
+    def features(directory: DirectoryPath) -> SupportedFeatures:
         """Broadcasts the shared features of the generator plugin to CPPython
 
         Args:
             directory: The root directory where features are evaluated
 
         Returns:
-            The supported features
+            The supported features - `SupportedGeneratorFeatures`. Cast to this type to help us avoid generic typing
         """
         raise NotImplementedError

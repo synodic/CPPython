@@ -9,7 +9,7 @@ from cppython.core.plugin_schema.generator import (
     GeneratorPluginGroupData,
     SupportedGeneratorFeatures,
 )
-from cppython.core.schema import CorePluginData, CPPythonModel, Information, SyncData
+from cppython.core.schema import CorePluginData, CPPythonModel, Information, SupportedFeatures, SyncData
 
 
 class MockSyncData(SyncData):
@@ -32,11 +32,11 @@ class MockGenerator(Generator):
         self.configuration_data = MockGeneratorData(**configuration_data)
 
     @staticmethod
-    def features(_: DirectoryPath) -> SupportedGeneratorFeatures:
+    def features(directory: DirectoryPath) -> SupportedFeatures:
         """Broadcasts the shared features of the generator plugin to CPPython
 
         Returns:
-            The supported features
+            The supported features - `SupportedGeneratorFeatures`. Cast to this type to help us avoid generic typing
         """
         return SupportedGeneratorFeatures()
 
@@ -58,5 +58,5 @@ class MockGenerator(Generator):
         """
         return [MockSyncData]
 
-    def sync(self, _: SyncData) -> None:
+    def sync(self, sync_data: SyncData) -> None:
         """Synchronizes generator files and state with the providers input"""

@@ -47,6 +47,10 @@ class ConfigurePreset(CPPythonModel, extra='allow'):
     """Partial Configure Preset specification to allow cache variable injection"""
 
     name: str
+    hidden: Annotated[bool | None, Field(description='If true, the preset is hidden and cannot be used directly.')] = (
+        None
+    )
+
     inherits: Annotated[
         str | list[str] | None, Field(description='The inherits field allows inheriting from other presets.')
     ] = None

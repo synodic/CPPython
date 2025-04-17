@@ -265,7 +265,8 @@ class ProviderTests[T: Provider](DataPluginTests[T], metaclass=ABCMeta):
         Returns:
             The plugin configuration
         """
-        project_data.project_root = tmp_path_factory.mktemp('workspace-')
+        workspace_path = tmp_path_factory.mktemp('workspace-')
+        project_data = ProjectData(project_root=workspace_path, verbosity=project_data.verbosity)
         # Install path is already pinned to a temp directory to share downloaded resources
         cppython_plugin_data.build_path = project_data.project_root / 'build'
         cppython_plugin_data.tool_path = project_data.project_root / 'tool'
@@ -355,7 +356,8 @@ class GeneratorTests[T: Generator](DataPluginTests[T], metaclass=ABCMeta):
         Returns:
             The plugin configuration
         """
-        project_data.project_root = tmp_path_factory.mktemp('workspace-')
+        workspace_path = tmp_path_factory.mktemp('workspace-')
+        project_data = ProjectData(project_root=workspace_path, verbosity=project_data.verbosity)
         # Install path is already pinned to a temp directory to share downloaded resources
         cppython_plugin_data.build_path = project_data.project_root / 'build'
         cppython_plugin_data.tool_path = project_data.project_root / 'tool'
@@ -444,7 +446,8 @@ class SCMTests[T: SCM](PluginTests[T], metaclass=ABCMeta):
         Returns:
             The plugin configuration
         """
-        project_data.project_root = tmp_path_factory.mktemp('workspace-')
+        workspace_path = tmp_path_factory.mktemp('workspace-')
+        project_data = ProjectData(project_root=workspace_path, verbosity=project_data.verbosity)
         # Install path is already pinned to a temp directory to share downloaded resources
         cppython_plugin_data.build_path = project_data.project_root / 'build'
         cppython_plugin_data.tool_path = project_data.project_root / 'tool'
