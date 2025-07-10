@@ -12,23 +12,19 @@ dynamic = ["version"]
 requires-python = ">=3.13"
 
 dependencies = [
-    "typer>=0.15.2",
-    "pydantic>=2.11.3",
-    "packaging>=24.2",
-    "requests>=2.32.3",
-    "types-requests>=2.32.0.20250328",
+    "typer>=0.16.0",
+    "pydantic>=2.11.7",
+    "packaging>=25.0",
+    "requests>=2.32.4",
+    "types-requests>=2.32.4.20250611",
 ]
 
 [project.optional-dependencies]
-pytest = ["pytest>=8.3.5", "pytest-mock>=3.14.0"]
-
-git = ["dulwich>=0.22.8"]
-
-pdm = ["pdm>=2.23.1"]
-
-cmake = ["cmake>=4.0.0"]
-
-conan = ["conan>=2.15.1", "libcst>=1.7.0"]
+pytest = ["pytest>=8.4.1", "pytest-mock>=3.14.1"]
+git = ["dulwich>=0.23.2"]
+pdm = ["pdm>=2.25.4"]
+cmake = ["cmake>=4.0.3"]
+conan = ["conan>=2.18.1", "libcst>=1.8.2"]
 
 [project.urls]
 homepage = "https://github.com/Synodic-Software/CPPython"
@@ -51,8 +47,8 @@ cppython = "cppython.plugins.pdm.plugin:CPPythonPlugin"
 cppython = "cppython.test.pytest.fixtures"
 
 [dependency-groups]
-lint = ["ruff>=0.11.5", "mypy>=1.15.0"]
-test = ["pytest>=8.3.5", "pytest-cov>=6.1.1", "pytest-mock>=3.14.0"]
+lint = ["ruff>=0.12.3", "pyrefly>=0.23.1"]
+test = ["pytest>=8.4.1", "pytest-cov>=6.2.1", "pytest-mock>=3.14.1"]
 
 [project.scripts]
 cppython = "cppython.console.entry:app"
@@ -61,11 +57,6 @@ cppython = "cppython.console.entry:app"
 addopts = ["--color=yes"]
 log_cli = true
 testpaths = ["tests"]
-
-[tool.mypy]
-exclude = "__pypackages__"
-plugins = ["pydantic.mypy"]
-strict = true
 
 [tool.ruff]
 line-length = 120
@@ -98,10 +89,6 @@ skip_empty = true
 [tool.pdm]
 plugins = ["-e file:///${PROJECT_ROOT}"]
 
-[tool.pdm.options]
-install = ["-G:all"]
-update = ["--update-all"]
-
 [tool.pdm.version]
 source = "scm"
 
@@ -110,7 +97,7 @@ analyze = { shell = "ruff check cppython tests" }
 format = { shell = "ruff format" }
 lint = { composite = ["analyze", "format", "type-check"] }
 test = { shell = "pytest --cov=cppython --verbose tests" }
-type-check = { shell = "mypy ." }
+type-check = { shell = "pyrefly check" }
 
 [build-system]
 build-backend = "pdm.backend"
