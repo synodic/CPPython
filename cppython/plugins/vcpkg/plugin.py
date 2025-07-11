@@ -198,11 +198,14 @@ class VcpkgProvider(Provider):
             file.write(serialized)
 
         executable = self.core_data.cppython_data.install_path / 'vcpkg'
+        install_directory = self.data.install_directory
+        build_path = self.core_data.cppython_data.build_path
+
         logger = getLogger('cppython.vcpkg')
         try:
             subprocess.run(
-                [str(executable), 'install', f'--x-install-root={self.data.install_directory}'],
-                cwd=self.core_data.cppython_data.build_path,
+                [str(executable), 'install', f'--x-install-root={str(install_directory)}'],
+                cwd=str(build_path),
                 check=True,
                 capture_output=True,
             )
@@ -222,11 +225,14 @@ class VcpkgProvider(Provider):
             file.write(serialized)
 
         executable = self.core_data.cppython_data.install_path / 'vcpkg'
+        install_directory = self.data.install_directory
+        build_path = self.core_data.cppython_data.build_path
+
         logger = getLogger('cppython.vcpkg')
         try:
             subprocess.run(
-                [str(executable), 'install', f'--x-install-root={self.data.install_directory}'],
-                cwd=self.core_data.cppython_data.build_path,
+                [str(executable), 'install', f'--x-install-root={str(install_directory)}'],
+                cwd=str(build_path),
                 check=True,
                 capture_output=True,
             )

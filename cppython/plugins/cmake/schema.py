@@ -54,6 +54,10 @@ class ConfigurePreset(CPPythonModel, extra='allow'):
     inherits: Annotated[
         str | list[str] | None, Field(description='The inherits field allows inheriting from other presets.')
     ] = None
+    binaryDir: Annotated[
+        str | None,
+        Field(description='The path to the output binary directory.'),
+    ] = None
     cacheVariables: dict[str, None | bool | str | CacheVariable] | None = None
 
 

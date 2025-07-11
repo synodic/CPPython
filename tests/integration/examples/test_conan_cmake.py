@@ -28,5 +28,7 @@ class TestConanCMake:
 
         assert result.returncode == 0, f'Cmake failed: {result.stderr}'
 
+        path = Path('build').absolute()
+
         # Verify that the build directory contains the expected files
-        assert (Path('build') / 'CMakeCache.txt').exists(), 'build/CMakeCache.txt not found'
+        assert (path / 'CMakeCache.txt').exists(), f'{path / "CMakeCache.txt"} not found'

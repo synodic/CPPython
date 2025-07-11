@@ -23,7 +23,6 @@ class TestData:
     @staticmethod
     @pytest.fixture(
         name='data',
-        scope='session',
     )
     def fixture_data(
         project_configuration: ProjectConfiguration,

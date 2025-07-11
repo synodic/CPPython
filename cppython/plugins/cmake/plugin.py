@@ -71,6 +71,8 @@ class CMakeGenerator(Generator):
                     self._cppython_preset_directory, self._provider_directory, sync_data
                 )
 
-                self.builder.write_root_presets(self.data.preset_file, cppython_preset_file, self.data)
+                self.builder.write_root_presets(
+                    self.data.preset_file, cppython_preset_file, self.data, self.core_data.cppython_data.build_path
+                )
             case _:
                 raise ValueError('Unsupported sync data type')

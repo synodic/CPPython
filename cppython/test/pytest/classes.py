@@ -26,12 +26,12 @@ class ProviderIntegrationTests[T: Provider](DataPluginIntegrationTests[T], Provi
 
     @staticmethod
     @pytest.fixture(autouse=True, scope='session')
-    def _fixture_install_dependency(plugin: T, install_path: Path) -> None:
+    def _fixture_install_dependency(plugin_type: type[T], install_path: Path) -> None:
         """Forces the download to only happen once per test session"""
-        path = install_path / canonicalize_type(type(plugin)).name
+        path = install_path / canonicalize_type(plugin_type).name
         path.mkdir(parents=True, exist_ok=True)
 
-        asyncio.run(plugin.download_tooling(path))
+        asyncio.run(plugin_type.download_tooling(path))
 
     @staticmethod
     def test_install(plugin: T) -> None:

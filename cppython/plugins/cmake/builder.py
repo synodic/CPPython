@@ -114,13 +114,16 @@ class Builder:
         return cppython_preset_file
 
     @staticmethod
-    def generate_root_preset(preset_file: Path, cppython_preset_file: Path, cmake_data: CMakeData) -> CMakePresets:
+    def generate_root_preset(
+        preset_file: Path, cppython_preset_file: Path, cmake_data: CMakeData, build_directory: Path
+    ) -> CMakePresets:
         """Generates the top level root preset with the include reference.
 
         Args:
             preset_file: Preset file to modify
             cppython_preset_file: Path to the cppython preset file to include
             cmake_data: The CMake data to use
+            build_directory: The build directory to use
 
         Returns:
             A CMakePresets object
@@ -128,6 +131,7 @@ class Builder:
         default_configure_preset = ConfigurePreset(
             name=cmake_data.configuration_name,
             inherits='cppython',
+            binaryDir=build_directory.as_posix(),
         )
 
         if preset_file.exists():
@@ -170,7 +174,9 @@ class Builder:
         return root_preset
 
     @staticmethod
-    def write_root_presets(preset_file: Path, cppython_preset_file: Path, cmake_data: CMakeData) -> None:
+    def write_root_presets(
+        preset_file: Path, cppython_preset_file: Path, cmake_data: CMakeData, build_directory: Path
+    ) -> None:
         """Read the top level json file and insert the include reference.
 
         Receives a relative path to the tool cmake json file
@@ -182,6 +188,7 @@ class Builder:
             preset_file: Preset file to modify
             cppython_preset_file: Path to the cppython preset file to include
             cmake_data: The CMake data to use
+            build_directory: The build directory to use
         """
         initial_root_preset = None
 
@@ -190,7 +197,7 @@ class Builder:
                 initial_json = file.read()
             initial_root_preset = CMakePresets.model_validate_json(initial_json)
 
-        root_preset = Builder.generate_root_preset(preset_file, cppython_preset_file, cmake_data)
+        root_preset = Builder.generate_root_preset(preset_file, cppython_preset_file, cmake_data, build_directory)
 
         # Only write the file if the data has changed
         if root_preset != initial_root_preset:

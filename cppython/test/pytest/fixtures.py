@@ -63,7 +63,6 @@ def fixture_pep621_configuration() -> PEP621Configuration:
 
 @pytest.fixture(
     name='pep621_data',
-    scope='session',
 )
 def fixture_pep621_data(
     pep621_configuration: PEP621Configuration, project_configuration: ProjectConfiguration
@@ -82,7 +81,6 @@ def fixture_pep621_data(
 
 @pytest.fixture(
     name='cppython_local_configuration',
-    scope='session',
 )
 def fixture_cppython_local_configuration(install_path: Path) -> CPPythonLocalConfiguration:
     """Fixture defining all testable variations of CPPythonData
@@ -102,7 +100,6 @@ def fixture_cppython_local_configuration(install_path: Path) -> CPPythonLocalCon
 
 @pytest.fixture(
     name='cppython_global_configuration',
-    scope='session',
 )
 def fixture_cppython_global_configuration() -> CPPythonGlobalConfiguration:
     """Fixture defining all testable variations of CPPythonData
@@ -161,7 +158,6 @@ def fixture_plugin_cppython_data(
 
 @pytest.fixture(
     name='cppython_data',
-    scope='session',
 )
 def fixture_cppython_data(
     cppython_local_configuration: CPPythonLocalConfiguration,
@@ -206,9 +202,8 @@ def fixture_core_data(cppython_data: CPPythonData, project_data: ProjectData) ->
 
 @pytest.fixture(
     name='project_configuration',
-    scope='session',
 )
-def fixture_project_configuration() -> ProjectConfiguration:
+def fixture_project_configuration(tmp_path_factory: pytest.TempPathFactory) -> ProjectConfiguration:
     """Project configuration fixture.
 
     Here we provide overrides on the input variants so that we can use a temporary directory for testing purposes.
@@ -216,12 +211,12 @@ def fixture_project_configuration() -> ProjectConfiguration:
     Returns:
         Configuration with temporary directory capabilities
     """
-    return ProjectConfiguration(project_root=Path(), version='0.1.0')
+    workspace_path = tmp_path_factory.mktemp('workspace-')
+    return ProjectConfiguration(project_root=workspace_path, version='0.1.0')
 
 
 @pytest.fixture(
     name='project_data',
-    scope='session',
 )
 def fixture_project_data(project_configuration: ProjectConfiguration) -> ProjectData:
     """Fixture that creates a project space at 'workspace/test_project/pyproject.toml'
