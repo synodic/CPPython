@@ -6,7 +6,7 @@ from packaging.requirements import Requirement
 
 from cppython.core.exception import ConfigException
 from cppython.core.schema import CorePluginData
-from cppython.plugins.conan.schema import ConanData, ConanDependency
+from cppython.plugins.conan.schema import ConanConfiguration, ConanData, ConanDependency
 
 
 def resolve_conan_dependency(requirement: Requirement) -> ConanDependency:
@@ -41,7 +41,6 @@ def resolve_conan_data(data: dict[str, Any], core_data: CorePluginData) -> Conan
     Returns:
         The resolved conan data
     """
-    # parsed_data = ConanConfiguration(**data)
-    # root_directory = core_data.project_data.pyproject_file.parent.absolute()
+    parsed_data = ConanConfiguration(**data)
 
-    return ConanData()
+    return ConanData(local=parsed_data.local)

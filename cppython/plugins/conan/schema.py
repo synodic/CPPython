@@ -5,6 +5,10 @@ package manager with the CPPython environment. The classes within
 provide structured configuration and data needed by the Conan Provider.
 """
 
+from typing import Annotated
+
+from pydantic import Field
+
 from cppython.core.schema import CPPythonModel
 
 
@@ -26,6 +30,12 @@ class ConanDependency(CPPythonModel):
 class ConanData(CPPythonModel):
     """Resolved conan data"""
 
+    local: bool
+
 
 class ConanConfiguration(CPPythonModel):
     """Raw conan data"""
+
+    local: Annotated[bool, Field(description='Whether to publish packages locally without uploading to a remote')] = (
+        False
+    )

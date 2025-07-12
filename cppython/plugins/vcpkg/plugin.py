@@ -239,3 +239,11 @@ class VcpkgProvider(Provider):
         except subprocess.CalledProcessError as e:
             logger.exception('Unable to install project dependencies: %s', e.stderr.decode() if e.stderr else str(e))
             raise
+
+    def publish(self) -> None:
+        """Called when the project needs to be published.
+
+        Raises:
+            NotImplementedError: vcpkg does not support publishing
+        """
+        raise NotImplementedError('vcpkg does not support publishing')

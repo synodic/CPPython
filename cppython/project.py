@@ -99,3 +99,11 @@ class Project(API):
             raise SystemExit('Error: An unexpected error occurred during update.') from None
 
         self._data.sync()
+
+    def publish(self) -> None:
+        """Publishes the project"""
+        try:
+            self._data.plugins.provider.publish()
+        except Exception as exception:
+            self.logger.error('Unexpected error during publish: %s', str(exception))
+            raise SystemExit('Error: An unexpected error occurred during publish.') from None

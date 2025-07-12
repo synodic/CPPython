@@ -88,3 +88,8 @@ class Provider(DataPlugin, SyncProducer, Protocol):
     def update(self) -> None:
         """Called when dependencies need to be updated and written to the lock file."""
         raise NotImplementedError
+
+    @abstractmethod
+    def publish(self) -> None:
+        """Called when the project needs to be published."""
+        raise NotImplementedError

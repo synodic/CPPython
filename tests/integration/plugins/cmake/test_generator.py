@@ -6,12 +6,12 @@ import pytest
 
 from cppython.plugins.cmake.plugin import CMakeGenerator
 from cppython.plugins.cmake.schema import CMakeConfiguration
-from cppython.test.pytest.classes import GeneratorIntegrationTests
+from cppython.test.pytest.contracts import GeneratorIntegrationTestContract
 
 pytest_plugins = ['tests.fixtures.cmake']
 
 
-class TestCPPythonGenerator(GeneratorIntegrationTests[CMakeGenerator]):
+class TestCPPythonGenerator(GeneratorIntegrationTestContract[CMakeGenerator]):
     """The tests for the CMake generator"""
 
     @staticmethod

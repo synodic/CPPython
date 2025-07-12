@@ -3,10 +3,10 @@
 import pytest
 
 from cppython.plugins.git.plugin import GitSCM
-from cppython.test.pytest.classes import SCMIntegrationTests
+from cppython.test.pytest.contracts import SCMIntegrationTestContract
 
 
-class TestGitInterface(SCMIntegrationTests[GitSCM]):
+class TestGitInterface(SCMIntegrationTestContract[GitSCM]):
     """Integration tests for the Git SCM plugin"""
 
     @staticmethod

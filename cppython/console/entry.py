@@ -5,12 +5,29 @@ from tomllib import loads
 from typing import Annotated
 
 import typer
+from rich import print
 
 from cppython.console.schema import ConsoleConfiguration, ConsoleInterface
 from cppython.core.schema import ProjectConfiguration
 from cppython.project import Project
 
 app = typer.Typer(no_args_is_help=True)
+
+
+def get_enabled_project(context: typer.Context) -> Project:
+    """Helper to load and validate an enabled Project from CLI context."""
+    configuration = context.find_object(ConsoleConfiguration)
+    if configuration is None:
+        raise ValueError('The configuration object is missing')
+
+    path = configuration.project_configuration.project_root / 'pyproject.toml'
+    pyproject_data = loads(path.read_text(encoding='utf-8'))
+
+    project = Project(configuration.project_configuration, configuration.interface, pyproject_data)
+    if not project.enabled:
+        print('[bold red]Error[/bold red]: Project is not enabled. Please check your pyproject.toml configuration.')
+        raise typer.Exit(code=1)
+    return project
 
 
 def _find_pyproject_file() -> Path:
@@ -75,13 +92,7 @@ def install(
     Raises:
         ValueError: If the configuration object is missing
     """
-    if (configuration := context.find_object(ConsoleConfiguration)) is None:
-        raise ValueError('The configuration object is missing')
-
-    path = configuration.project_configuration.project_root / 'pyproject.toml'
-    pyproject_data = loads(path.read_text(encoding='utf-8'))
-
-    project = Project(configuration.project_configuration, configuration.interface, pyproject_data)
+    project = get_enabled_project(context)
     project.install()
 
 
@@ -97,13 +108,7 @@ def update(
     Raises:
         ValueError: If the configuration object is missing
     """
-    if (configuration := context.find_object(ConsoleConfiguration)) is None:
-        raise ValueError('The configuration object is missing')
-
-    path = configuration.project_configuration.project_root / 'pyproject.toml'
-    pyproject_data = loads(path.read_text(encoding='utf-8'))
-
-    project = Project(configuration.project_configuration, configuration.interface, pyproject_data)
+    project = get_enabled_project(context)
     project.update()
 
 
@@ -112,3 +117,19 @@ def list_command(
     _: typer.Context,
 ) -> None:
     """Prints project information"""
+
+
+@app.command()
+def publish(
+    context: typer.Context,
+) -> None:
+    """Publish API call
+
+    Args:
+        context: The CLI configuration object
+
+    Raises:
+        ValueError: If the configuration object is missing
+    """
+    project = get_enabled_project(context)
+    project.publish()

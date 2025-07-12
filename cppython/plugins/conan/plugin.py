@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import Any
 
 import requests
+from conan.api.conan_api import ConanAPI
+from conan.api.model import ListPattern
 
 from cppython.core.plugin_schema.generator import SyncConsumer
 from cppython.core.plugin_schema.provider import Provider, ProviderPluginGroupData, SupportedProviderFeatures
@@ -120,3 +122,85 @@ class ConanProvider(Provider):
     async def download_tooling(cls, directory: Path) -> None:
         """Downloads the conan provider file"""
         cls._download_file(cls._provider_url, directory / 'conan_provider.cmake')
+
+    def publish(self) -> None:
+        """Publishes the package using conan create workflow."""
+        # Get the project root directory where conanfile.py should be located
+        project_root = self.core_data.project_data.project_root
+        conanfile_path = project_root / 'conanfile.py'
+
+        if not conanfile_path.exists():
+            raise FileNotFoundError(f'conanfile.py not found at {conanfile_path}')
+
+        # Initialize Conan API
+        conan_api = ConanAPI()
+
+        # Step 1: Export the recipe to the cache
+        # This is equivalent to the export part of `conan create`
+        ref, conanfile = conan_api.export.export(
+            path=str(conanfile_path),
+            name=None,
+            version=None,
+            user=None,
+            channel=None,
+            lockfile=None,
+            remotes=conan_api.remotes.list(),
+        )
+
+        # Step 2: Get default profiles
+        profile_host, profile_build = conan_api.profiles.get_profiles_from_args([])
+
+        # Step 3: Build dependency graph for the package
+        deps_graph = conan_api.graph.load_graph_consumer(
+            path=str(conanfile_path),
+            name=None,
+            version=None,
+            user=None,
+            channel=None,
+            profile_host=profile_host,
+            profile_build=profile_build,
+            lockfile=None,
+            remotes=conan_api.remotes.list(),
+            update=None,
+            check_updates=False,
+            is_build_require=False,
+        )
+
+        # Step 4: Analyze binaries and install/build them if needed
+        conan_api.graph.analyze_binaries(
+            graph=deps_graph,
+            build_mode=['*'],  # Build from source (equivalent to the create behavior)
+            remotes=conan_api.remotes.list(),
+            update=None,
+            lockfile=None,
+        )
+
+        # Step 5: Install all dependencies and build the package
+        conan_api.install.install_binaries(deps_graph=deps_graph, remotes=conan_api.remotes.list())
+
+        # If not local, upload the package
+        if not self.data.local:
+            # Get all packages matching the created reference
+            ref_pattern = ListPattern(f'{ref.name}/*', package_id='*', only_recipe=False)
+            package_list = conan_api.list.select(ref_pattern)
+
+            if package_list.recipes:
+                # Get the first configured remote or raise an error
+                remotes = conan_api.remotes.list()
+                if not remotes:
+                    raise RuntimeError('No remotes configured for upload')
+
+                remote = remotes[0]  # Use first remote
+
+                # Upload the package
+                conan_api.upload.upload_full(
+                    package_list=package_list,
+                    remote=remote,
+                    enabled_remotes=remotes,
+                    check_integrity=False,
+                    force=False,
+                    metadata=None,
+                    dry_run=False,
+                )
+            else:
+                raise RuntimeError('No packages found to upload')

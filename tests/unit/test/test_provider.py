@@ -1,4 +1,8 @@
-"""Test the functions related to the internal provider implementation and the 'Provider' interface itself"""
+"""Test functions related to the internal provider implementation.
+
+Test functions related to the internal provider implementation and the
+'Provider' interface itself.
+"""
 
 from typing import Any
 
@@ -7,10 +11,10 @@ from pytest_mock import MockerFixture
 
 from cppython.test.mock.generator import MockGenerator
 from cppython.test.mock.provider import MockProvider
-from cppython.test.pytest.classes import ProviderUnitTests
+from cppython.test.pytest.contracts import ProviderTestContract
 
 
-class TestMockProvider(ProviderUnitTests[MockProvider]):
+class TestMockProvider(ProviderTestContract[MockProvider]):
     """The tests for our Mock provider"""
 
     @staticmethod

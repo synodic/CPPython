@@ -5,10 +5,10 @@ from typing import Any
 import pytest
 
 from cppython.test.mock.generator import MockGenerator
-from cppython.test.pytest.classes import GeneratorUnitTests
+from cppython.test.pytest.contracts import GeneratorTestContract
 
 
-class TestCPPythonGenerator(GeneratorUnitTests[MockGenerator]):
+class TestCPPythonGenerator(GeneratorTestContract[MockGenerator]):
     """The tests for the Mock generator"""
 
     @staticmethod

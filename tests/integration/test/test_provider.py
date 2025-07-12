@@ -1,14 +1,18 @@
-"""Test the integrations related to the internal provider implementation and the 'Provider' interface itself"""
+"""Test integrations related to the internal provider implementation.
+
+Test integrations related to the internal provider implementation and the
+'Provider' interface itself.
+"""
 
 from typing import Any
 
 import pytest
 
 from cppython.test.mock.provider import MockProvider
-from cppython.test.pytest.classes import ProviderIntegrationTests
+from cppython.test.pytest.contracts import ProviderIntegrationTestContract
 
 
-class TestMockProvider(ProviderIntegrationTests[MockProvider]):
+class TestMockProvider(ProviderIntegrationTestContract[MockProvider]):
     """The tests for our Mock provider"""
 
     @staticmethod

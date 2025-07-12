@@ -90,3 +90,7 @@ class MockProvider(Provider):
     def update(self) -> None:
         """Updates the provider"""
         pass
+
+    def publish(self) -> None:
+        """Updates the provider"""
+        pass
