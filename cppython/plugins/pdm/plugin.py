@@ -1,12 +1,15 @@
 """Implementation of the PDM Interface Plugin"""
 
+from argparse import Namespace
 from logging import getLogger
 from typing import Any
 
+from pdm.cli.commands.base import BaseCommand
 from pdm.core import Core
 from pdm.project.core import Project
 from pdm.signals import post_install
 
+from cppython.console.entry import app
 from cppython.core.schema import Interface, ProjectConfiguration
 from cppython.project import Project as CPPythonProject
 
@@ -14,10 +17,13 @@ from cppython.project import Project as CPPythonProject
 class CPPythonPlugin(Interface):
     """Implementation of the PDM Interface Plugin"""
 
-    def __init__(self, _: Core) -> None:
+    def __init__(self, core: Core) -> None:
         """Initializes the plugin"""
         post_install.connect(self.on_post_install, weak=False)
         self.logger = getLogger('cppython.interface.pdm')
+
+        # Register the cpp command
+        register_commands(core)
 
     def write_pyproject(self) -> None:
         """Write to file"""
@@ -51,3 +57,43 @@ class CPPythonPlugin(Interface):
 
         if not dry_run:
             cppython_project.install()
+
+
+class CPPythonCommand(BaseCommand):
+    """PDM command to invoke CPPython directly"""
+
+    name = 'cpp'
+    description = 'Run CPPython commands'
+
+    def add_arguments(self, parser) -> None:
+        """Add command arguments - delegate to Typer for argument parsing"""
+        # Add a catch-all for remaining arguments to pass to Typer
+        parser.add_argument('args', nargs='*', help='CPPython command arguments')
+
+    def handle(self, project: Project, options: Namespace) -> None:
+        """Handle the command by delegating to the Typer app
+
+        Args:
+            project: The PDM project
+            options: Command line options
+        """
+        # Get the command arguments from options
+        args = getattr(options, 'args', [])
+
+        try:
+            # Invoke cppython directly with the provided arguments
+            app(args)
+        except SystemExit:
+            # Typer/Click uses SystemExit for normal completion, don't propagate it
+            pass
+        except Exception as e:
+            project.core.ui.echo(f'Error running CPPython command: {e}', style='error')
+
+
+def register_commands(core: Core) -> None:
+    """Register the CPPython command with PDM
+
+    Args:
+        core: The PDM core instance
+    """
+    core.register_command(CPPythonCommand)

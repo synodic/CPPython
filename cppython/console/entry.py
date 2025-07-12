@@ -10,7 +10,7 @@ from cppython.console.schema import ConsoleConfiguration, ConsoleInterface
 from cppython.core.schema import ProjectConfiguration
 from cppython.project import Project
 
-app = typer.Typer()
+app = typer.Typer(no_args_is_help=True)
 
 
 def _find_pyproject_file() -> Path:
