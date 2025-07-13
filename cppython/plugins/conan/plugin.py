@@ -202,6 +202,24 @@ class ConanProvider(Provider):
         # Initialize Conan API
         conan_api = ConanAPI()
 
+        # Get configured remotes from Conan API and filter by our configuration
+        # TODO: We want to replace the global conan remotes with the ones configured in CPPython.
+        all_remotes = conan_api.remotes.list()
+        if not self.data.local_only:
+            # Filter remotes to only include those specified in configuration
+            configured_remotes = [remote for remote in all_remotes if remote.name in self.data.remotes]
+
+            if not configured_remotes:
+                available_remotes = [remote.name for remote in all_remotes]
+                raise ProviderConfigurationError(
+                    'conan',
+                    f'No configured remotes found. Available remotes: {available_remotes}, '
+                    f'Configured remotes: {self.data.remotes}',
+                    'remotes',
+                )
+        else:
+            configured_remotes = []
+
         # Step 1: Export the recipe to the cache
         # This is equivalent to the export part of `conan create`
         ref, conanfile = conan_api.export.export(
@@ -211,7 +229,7 @@ class ConanProvider(Provider):
             user=None,
             channel=None,
             lockfile=None,
-            remotes=conan_api.remotes.list(),
+            remotes=all_remotes,  # Use all remotes for dependency resolution during export
         )
 
         # Step 2: Get default profiles
@@ -230,7 +248,7 @@ class ConanProvider(Provider):
             profile_host=profile_host,
             profile_build=profile_build,
             lockfile=None,
-            remotes=conan_api.remotes.list(),
+            remotes=all_remotes,  # Use all remotes for dependency resolution
             update=None,
             check_updates=False,
             is_build_require=False,
@@ -240,33 +258,29 @@ class ConanProvider(Provider):
         conan_api.graph.analyze_binaries(
             graph=deps_graph,
             build_mode=['*'],  # Build from source (equivalent to the create behavior)
-            remotes=conan_api.remotes.list(),
+            remotes=all_remotes,  # Use all remotes for dependency resolution
             update=None,
             lockfile=None,
         )
 
         # Step 5: Install all dependencies and build the package
-        conan_api.install.install_binaries(deps_graph=deps_graph, remotes=conan_api.remotes.list())
+        conan_api.install.install_binaries(deps_graph=deps_graph, remotes=all_remotes)
 
-        # If not local, upload the package
-        if not self.data.local:
+        # If not local only, upload the package
+        if not self.data.local_only:
             # Get all packages matching the created reference
             ref_pattern = ListPattern(f'{ref.name}/*', package_id='*', only_recipe=False)
             package_list = conan_api.list.select(ref_pattern)
 
             if package_list.recipes:
-                # Get the first configured remote or raise an error
-                remotes = conan_api.remotes.list()
-                if not remotes:
-                    raise ProviderConfigurationError('conan', 'No remotes configured for upload', 'remotes')
+                # Use the first configured remote for upload
+                remote = configured_remotes[0]
 
-                remote = remotes[0]  # Use first remote
-
-                # Upload the package
+                # Upload the package to configured remotes
                 conan_api.upload.upload_full(
                     package_list=package_list,
                     remote=remote,
-                    enabled_remotes=remotes,
+                    enabled_remotes=configured_remotes,  # Only upload to configured remotes
                     check_integrity=False,
                     force=False,
                     metadata=None,

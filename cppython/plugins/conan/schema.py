@@ -30,12 +30,18 @@ class ConanDependency(CPPythonModel):
 class ConanData(CPPythonModel):
     """Resolved conan data"""
 
-    local: bool
+    remotes: list[str]
+
+    @property
+    def local_only(self) -> bool:
+        """Check if publishing should be local-only."""
+        return len(self.remotes) == 0
 
 
 class ConanConfiguration(CPPythonModel):
     """Raw conan data"""
 
-    local: Annotated[bool, Field(description='Whether to publish packages locally without uploading to a remote')] = (
-        False
-    )
+    remotes: Annotated[
+        list[str],
+        Field(description='List of remotes to upload to. Empty list means the local conan cache will be used.'),
+    ] = ['conancenter']

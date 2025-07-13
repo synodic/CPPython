@@ -43,4 +43,4 @@ def resolve_conan_data(data: dict[str, Any], core_data: CorePluginData) -> Conan
     """
     parsed_data = ConanConfiguration(**data)
 
-    return ConanData(local=parsed_data.local)
+    return ConanData(remotes=parsed_data.remotes)

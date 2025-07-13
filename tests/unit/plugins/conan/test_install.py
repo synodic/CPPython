@@ -31,7 +31,7 @@ class TestConanInstall(ProviderPluginTestMixin[ConanProvider]):
             The constructed plugin data
         """
         return {
-            'local': True,
+            'remotes': [],
         }
 
     @staticmethod

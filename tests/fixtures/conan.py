@@ -79,7 +79,7 @@ def fixture_conan_mock_api_publish(mocker: MockerFixture) -> Mock:
 
     # Mock remotes module
     mock_remote = mocker.Mock()
-    mock_remote.name = 'origin'
+    mock_remote.name = 'conancenter'
     mock_api.remotes.list = mocker.Mock(return_value=[mock_remote])
 
     # Mock upload module

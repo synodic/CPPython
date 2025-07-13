@@ -26,7 +26,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
             The constructed plugin data
         """
         return {
-            'local': False,
+            'remotes': ['conancenter'],
         }
 
     @staticmethod
@@ -42,7 +42,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
     def test_publish_local_only(
         self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
     ) -> None:
-        """Test that publish with local=True only exports and builds locally
+        """Test that publish with remotes=[] only exports and builds locally
 
         Args:
             plugin: The plugin instance
@@ -51,7 +51,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
             mocker: Pytest mocker fixture
         """
         # Set plugin to local mode
-        plugin.data.local = True
+        plugin.data.remotes = []
 
         # Mock the necessary imports and API creation
         mocker.patch('cppython.plugins.conan.plugin.ConanAPI', return_value=conan_mock_api_publish)
@@ -87,7 +87,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
     def test_publish_with_upload(
         self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
     ) -> None:
-        """Test that publish with local=False exports, builds, and uploads
+        """Test that publish with remotes=['conancenter'] exports, builds, and uploads
 
         Args:
             plugin: The plugin instance
@@ -96,7 +96,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
             mocker: Pytest mocker fixture
         """
         # Set plugin to upload mode
-        plugin.data.local = False
+        plugin.data.remotes = ['conancenter']
 
         # Mock the necessary imports and API creation
         mocker.patch('cppython.plugins.conan.plugin.ConanAPI', return_value=conan_mock_api_publish)
@@ -130,7 +130,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
             mocker: Pytest mocker fixture
         """
         # Set plugin to upload mode
-        plugin.data.local = False
+        plugin.data.remotes = ['conancenter']
 
         # Mock the necessary imports and API creation
         mocker.patch('cppython.plugins.conan.plugin.ConanAPI', return_value=conan_mock_api_publish)
@@ -143,7 +143,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
         conan_mock_api_publish.remotes.list.return_value = []
 
         # Execute publish and expect ProviderConfigurationError
-        with pytest.raises(ProviderConfigurationError, match='No remotes configured for upload'):
+        with pytest.raises(ProviderConfigurationError, match='No configured remotes found'):
             plugin.publish()
 
     def test_publish_no_packages_found(
@@ -158,7 +158,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
             mocker: Pytest mocker fixture
         """
         # Set plugin to upload mode
-        plugin.data.local = False
+        plugin.data.remotes = ['conancenter']
 
         # Mock the necessary imports and API creation
         mocker.patch('cppython.plugins.conan.plugin.ConanAPI', return_value=conan_mock_api_publish)
@@ -188,7 +188,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
             mocker: Pytest mocker fixture
         """
         # Set plugin to local mode
-        plugin.data.local = True
+        plugin.data.remotes = []
 
         # Mock the necessary imports and API creation
         mocker.patch('cppython.plugins.conan.plugin.ConanAPI', return_value=conan_mock_api_publish)
@@ -217,7 +217,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
             mocker: Pytest mocker fixture
         """
         # Set plugin to upload mode
-        plugin.data.local = False
+        plugin.data.remotes = ['conancenter']
 
         # Mock the necessary imports and API creation
         mocker.patch('cppython.plugins.conan.plugin.ConanAPI', return_value=conan_mock_api_publish)
@@ -228,7 +228,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
 
         # Mock remotes and package list
         mock_remote = MagicMock()
-        mock_remote.name = 'origin'
+        mock_remote.name = 'conancenter'
         remotes = [mock_remote]
         conan_mock_api_publish.remotes.list.return_value = remotes
 
@@ -262,7 +262,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
             mocker: Pytest mocker fixture
         """
         # Set plugin to upload mode
-        plugin.data.local = False
+        plugin.data.remotes = ['conancenter']
 
         # Mock the necessary imports and API creation
         mocker.patch('cppython.plugins.conan.plugin.ConanAPI', return_value=conan_mock_api_publish)
