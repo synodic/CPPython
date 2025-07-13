@@ -20,7 +20,7 @@ from cppython.plugins.cmake.schema import CMakeSyncData
 from cppython.plugins.conan.builder import Builder
 from cppython.plugins.conan.resolution import resolve_conan_data, resolve_conan_dependency
 from cppython.plugins.conan.schema import ConanData
-from cppython.utility.exception import NotSupportedError
+from cppython.utility.exception import NotSupportedError, ProviderConfigurationError, ProviderInstallationError
 from cppython.utility.utility import TypeName
 
 
@@ -69,21 +69,64 @@ class ConanProvider(Provider):
         """
         return Information()
 
+    def _install_dependencies(self, *, update: bool = False) -> None:
+        """Common implementation for installing/updating dependencies.
+
+        Args:
+            update: If True, check remotes for newer versions/revisions and install those.
+                   If False, use cached versions when available.
+        """
+        try:
+            resolved_dependencies = [resolve_conan_dependency(req) for req in self.core_data.cppython_data.dependencies]
+
+            self.builder.generate_conanfile(self.core_data.project_data.project_root, resolved_dependencies)
+
+            self.core_data.cppython_data.build_path.mkdir(parents=True, exist_ok=True)
+
+            # Install/update dependencies using Conan API
+            project_root = self.core_data.project_data.project_root
+            conanfile_path = project_root / 'conanfile.py'
+
+            if conanfile_path.exists():
+                # Initialize Conan API
+                conan_api = ConanAPI()
+
+                # Get default profiles
+                profile_host_path = conan_api.profiles.get_default_host()
+                profile_build_path = conan_api.profiles.get_default_build()
+                profile_host = conan_api.profiles.get_profile([profile_host_path])
+                profile_build = conan_api.profiles.get_profile([profile_build_path])
+
+                # Build dependency graph for the package
+                deps_graph = conan_api.graph.load_graph_consumer(
+                    path=str(conanfile_path),
+                    name=None,
+                    version=None,
+                    user=None,
+                    channel=None,
+                    profile_host=profile_host,
+                    profile_build=profile_build,
+                    lockfile=None,
+                    remotes=conan_api.remotes.list(),
+                    update=update,
+                    check_updates=update,
+                    is_build_require=False,
+                )
+
+                # Install dependencies
+                conan_api.install.install_binaries(deps_graph=deps_graph, remotes=conan_api.remotes.list())
+        except Exception as e:
+            operation = 'update' if update else 'install'
+            error_msg = str(e)
+            raise ProviderInstallationError('conan', f'Failed to {operation} dependencies: {error_msg}', e) from e
+
     def install(self) -> None:
         """Installs the provider"""
-        resolved_dependencies = [resolve_conan_dependency(req) for req in self.core_data.cppython_data.dependencies]
-
-        self.builder.generate_conanfile(self.core_data.project_data.project_root, resolved_dependencies)
-
-        self.core_data.cppython_data.build_path.mkdir(parents=True, exist_ok=True)
+        self._install_dependencies(update=False)
 
     def update(self) -> None:
         """Updates the provider"""
-        resolved_dependencies = [resolve_conan_dependency(req) for req in self.core_data.cppython_data.dependencies]
-
-        self.builder.generate_conanfile(self.core_data.project_data.project_root, resolved_dependencies)
-
-        self.core_data.cppython_data.build_path.mkdir(parents=True, exist_ok=True)
+        self._install_dependencies(update=True)
 
     @staticmethod
     def supported_sync_type(sync_type: type[SyncData]) -> bool:
@@ -148,7 +191,10 @@ class ConanProvider(Provider):
         )
 
         # Step 2: Get default profiles
-        profile_host, profile_build = conan_api.profiles.get_profiles_from_args([])
+        profile_host_path = conan_api.profiles.get_default_host()
+        profile_build_path = conan_api.profiles.get_default_build()
+        profile_host = conan_api.profiles.get_profile([profile_host_path])
+        profile_build = conan_api.profiles.get_profile([profile_build_path])
 
         # Step 3: Build dependency graph for the package
         deps_graph = conan_api.graph.load_graph_consumer(
@@ -188,7 +234,7 @@ class ConanProvider(Provider):
                 # Get the first configured remote or raise an error
                 remotes = conan_api.remotes.list()
                 if not remotes:
-                    raise RuntimeError('No remotes configured for upload')
+                    raise ProviderConfigurationError('conan', 'No remotes configured for upload', 'remotes')
 
                 remote = remotes[0]  # Use first remote
 
@@ -203,4 +249,4 @@ class ConanProvider(Provider):
                     dry_run=False,
                 )
             else:
-                raise RuntimeError('No packages found to upload')
+                raise ProviderInstallationError('conan', 'No packages found to upload')

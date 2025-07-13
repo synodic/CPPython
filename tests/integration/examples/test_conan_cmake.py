@@ -6,8 +6,13 @@ The tests ensure that the projects build, configure, and execute correctly.
 
 import subprocess
 from pathlib import Path
+from tomllib import loads
 
 from typer.testing import CliRunner
+
+from cppython.console.schema import ConsoleInterface
+from cppython.core.schema import ProjectConfiguration
+from cppython.project import Project
 
 pytest_plugins = ['tests.fixtures.example']
 
@@ -18,10 +23,22 @@ class TestConanCMake:
     @staticmethod
     def test_simple(example_runner: CliRunner) -> None:
         """Simple project"""
-        # By nature of running the test, we require PDM to develop the project and so it will be installed
-        result = subprocess.run(['pdm', 'install'], capture_output=True, text=True, check=False)
+        # Create project configuration
+        project_root = Path.cwd()
+        project_configuration = ProjectConfiguration(project_root=project_root, version=None)
 
-        assert result.returncode == 0, f'PDM install failed: {result.stderr}'
+        # Create console interface
+        interface = ConsoleInterface()
+
+        # Load pyproject.toml data
+        pyproject_path = project_root / 'pyproject.toml'
+        pyproject_data = loads(pyproject_path.read_text(encoding='utf-8'))
+
+        # Create and use the project directly
+        project = Project(project_configuration, interface, pyproject_data)
+
+        # Call install directly to get structured results
+        project.install()
 
         # Run the CMake configuration command
         result = subprocess.run(['cmake', '--preset=default'], capture_output=True, text=True, check=False)

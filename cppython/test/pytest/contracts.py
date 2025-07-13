@@ -9,34 +9,31 @@ These contracts combine the core fixtures with plugin-type-specific requirements
 """
 
 import asyncio
-from abc import ABCMeta
+from abc import ABC
 from importlib.metadata import entry_points
 from pathlib import Path
 from typing import Any, LiteralString
 
 import pytest
 
-from cppython.core.plugin_schema.generator import Generator, GeneratorPluginGroupData
-from cppython.core.plugin_schema.provider import Provider, ProviderPluginGroupData
-from cppython.core.plugin_schema.scm import SCM, SCMPluginGroupData
-from cppython.core.resolution import resolve_generator, resolve_provider, resolve_scm
+from cppython.core.plugin_schema.generator import Generator
+from cppython.core.plugin_schema.provider import Provider
+from cppython.core.plugin_schema.scm import SCM
 from cppython.core.schema import (
     CorePluginData,
-    CPPythonPluginData,
     DataPluginGroupData,
     Plugin,
     ProjectConfiguration,
-    ProjectData,
 )
-from cppython.test.data.mocks import generator_variants, provider_variants, scm_variants
 from cppython.test.pytest.mixins import (
-    DataPluginTestMixin,
-    PluginTestMixin,
+    GeneratorPluginTestMixin,
+    ProviderPluginTestMixin,
+    SCMPluginTestMixin,
 )
 from cppython.utility.utility import canonicalize_type
 
 
-class PluginTestValidation:
+class _PluginValidation:
     """Common validation tests that can be applied to any plugin.
 
     These are generic tests that validate basic plugin behavior regardless
@@ -76,7 +73,7 @@ class PluginTestValidation:
         assert len(plugin_type.name())
 
 
-class DataPluginTestValidation(PluginTestValidation):
+class _DataPluginValidation(_PluginValidation):
     """Validation tests specific to data plugins.
 
     These tests validate that data plugins can handle various configuration
@@ -100,48 +97,15 @@ class DataPluginTestValidation(PluginTestValidation):
         assert plugin, 'The plugin should be able to be constructed with empty data'
 
 
-class ProviderTestContract[T: Provider](DataPluginTestMixin[T], DataPluginTestValidation, metaclass=ABCMeta):
+class ProviderUnitTestContract[T: Provider](ProviderPluginTestMixin[T], _DataPluginValidation, ABC):
     """Test contract for Provider plugins.
 
     Each Provider plugin should have exactly one test class that inherits from this
     to ensure it fulfills all Provider testing requirements.
     """
 
-    @staticmethod
-    @pytest.fixture(name='plugin_configuration_type', scope='session')
-    def fixture_plugin_configuration_type() -> type[ProviderPluginGroupData]:
-        """Required hook for Provider plugin configuration data generation"""
-        return ProviderPluginGroupData
 
-    @staticmethod
-    @pytest.fixture(name='plugin_group_data')
-    def fixture_plugin_group_data(
-        project_data: ProjectData, cppython_plugin_data: CPPythonPluginData
-    ) -> ProviderPluginGroupData:
-        """Generate Provider plugin configuration data"""
-        return resolve_provider(project_data=project_data, cppython_data=cppython_plugin_data)
-
-    # Cross-plugin testing fixtures for ensuring compatibility
-    @staticmethod
-    @pytest.fixture(name='provider_type', scope='session', params=provider_variants)
-    def fixture_provider_type(plugin_type: type[T]) -> type[T]:
-        """Return this provider type for cross-plugin testing"""
-        return plugin_type
-
-    @staticmethod
-    @pytest.fixture(name='generator_type', scope='session', params=generator_variants)
-    def fixture_generator_type(request: pytest.FixtureRequest) -> type[Generator]:
-        """Provide generator variants for cross-plugin testing"""
-        return request.param
-
-    @staticmethod
-    @pytest.fixture(name='scm_type', scope='session', params=scm_variants)
-    def fixture_scm_type(request: pytest.FixtureRequest) -> type[SCM]:
-        """Provide SCM variants for cross-plugin testing"""
-        return request.param
-
-
-class ProviderIntegrationTestContract[T: Provider](ProviderTestContract[T], metaclass=ABCMeta):
+class ProviderIntegrationTestContract[T: Provider](ProviderPluginTestMixin[T], ABC):
     """Integration test contract for Provider plugins.
 
     Providers that need integration testing should inherit from this contract.
@@ -184,48 +148,15 @@ class ProviderIntegrationTestContract[T: Provider](ProviderTestContract[T], meta
         assert canonicalize_type(plugin_type).group == 'provider'
 
 
-class GeneratorTestContract[T: Generator](DataPluginTestMixin[T], DataPluginTestValidation, metaclass=ABCMeta):
+class GeneratorUnitTestContract[T: Generator](GeneratorPluginTestMixin[T], _DataPluginValidation, ABC):
     """Test contract for Generator plugins.
 
     Each Generator plugin should have exactly one test class that inherits from this
     to ensure it fulfills all Generator testing requirements.
     """
 
-    @staticmethod
-    @pytest.fixture(name='plugin_configuration_type', scope='session')
-    def fixture_plugin_configuration_type() -> type[GeneratorPluginGroupData]:
-        """Required hook for Generator plugin configuration data generation"""
-        return GeneratorPluginGroupData
 
-    @staticmethod
-    @pytest.fixture(name='plugin_group_data')
-    def fixture_plugin_group_data(
-        project_data: ProjectData, cppython_plugin_data: CPPythonPluginData
-    ) -> GeneratorPluginGroupData:
-        """Generate Generator plugin configuration data"""
-        return resolve_generator(project_data=project_data, cppython_data=cppython_plugin_data)
-
-    # Cross-plugin testing fixtures for ensuring compatibility
-    @staticmethod
-    @pytest.fixture(name='provider_type', scope='session', params=provider_variants)
-    def fixture_provider_type(request: pytest.FixtureRequest) -> type[Provider]:
-        """Provide provider variants for cross-plugin testing"""
-        return request.param
-
-    @staticmethod
-    @pytest.fixture(name='generator_type', scope='session')
-    def fixture_generator_type(plugin_type: type[T]) -> type[T]:
-        """Return this generator type for cross-plugin testing"""
-        return plugin_type
-
-    @staticmethod
-    @pytest.fixture(name='scm_type', scope='session', params=scm_variants)
-    def fixture_scm_type(request: pytest.FixtureRequest) -> type[SCM]:
-        """Provide SCM variants for cross-plugin testing"""
-        return request.param
-
-
-class GeneratorIntegrationTestContract[T: Generator](GeneratorTestContract[T], metaclass=ABCMeta):
+class GeneratorIntegrationTestContract[T: Generator](GeneratorPluginTestMixin[T], ABC):
     """Integration test contract for Generator plugins.
 
     Generators that need integration testing should inherit from this contract.
@@ -249,48 +180,15 @@ class GeneratorIntegrationTestContract[T: Generator](GeneratorTestContract[T], m
         assert canonicalize_type(plugin_type).group == 'generator'
 
 
-class SCMTestContract[T: SCM](PluginTestMixin[T], PluginTestValidation, metaclass=ABCMeta):
+class SCMUnitTestContract[T: SCM](SCMPluginTestMixin[T], _PluginValidation, ABC):
     """Test contract for SCM plugins.
 
     Each SCM plugin should have exactly one test class that inherits from this
     to ensure it fulfills all SCM testing requirements.
     """
 
-    @staticmethod
-    @pytest.fixture(name='plugin_configuration_type', scope='session')
-    def fixture_plugin_configuration_type() -> type[SCMPluginGroupData]:
-        """Required hook for SCM plugin configuration data generation"""
-        return SCMPluginGroupData
 
-    @staticmethod
-    @pytest.fixture(name='plugin_group_data')
-    def fixture_plugin_group_data(
-        project_data: ProjectData, cppython_plugin_data: CPPythonPluginData
-    ) -> SCMPluginGroupData:
-        """Generate SCM plugin configuration data"""
-        return resolve_scm(project_data=project_data, cppython_data=cppython_plugin_data)
-
-    # Cross-plugin testing fixtures for ensuring compatibility
-    @staticmethod
-    @pytest.fixture(name='provider_type', scope='session', params=provider_variants)
-    def fixture_provider_type(request: pytest.FixtureRequest) -> type[Provider]:
-        """Provide provider variants for cross-plugin testing"""
-        return request.param
-
-    @staticmethod
-    @pytest.fixture(name='generator_type', scope='session', params=generator_variants)
-    def fixture_generator_type(request: pytest.FixtureRequest) -> type[Generator]:
-        """Provide generator variants for cross-plugin testing"""
-        return request.param
-
-    @staticmethod
-    @pytest.fixture(name='scm_type', scope='session', params=scm_variants)
-    def fixture_scm_type(plugin_type: type[T]) -> type[T]:
-        """Return this SCM type for cross-plugin testing"""
-        return plugin_type
-
-
-class SCMIntegrationTestContract[T: SCM](SCMTestContract[T], metaclass=ABCMeta):
+class SCMIntegrationTestContract[T: SCM](SCMPluginTestMixin[T], ABC):
     """Integration test contract for SCM plugins.
 
     SCM plugins that need integration testing should inherit from this contract.

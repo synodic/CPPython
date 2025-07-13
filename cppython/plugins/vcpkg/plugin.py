@@ -17,7 +17,7 @@ from cppython.plugins.cmake.plugin import CMakeGenerator
 from cppython.plugins.cmake.schema import CMakeSyncData
 from cppython.plugins.vcpkg.resolution import generate_manifest, resolve_vcpkg_data
 from cppython.plugins.vcpkg.schema import VcpkgData
-from cppython.utility.exception import NotSupportedError
+from cppython.utility.exception import NotSupportedError, ProviderInstallationError, ProviderToolingError
 from cppython.utility.utility import TypeName
 
 
@@ -92,10 +92,9 @@ class VcpkgProvider(Provider):
                     capture_output=True,
                 )
         except subprocess.CalledProcessError as e:
-            logger.error(
-                'Unable to bootstrap the vcpkg repository: %s', e.stderr.decode() if e.stderr else str(e), exc_info=True
-            )
-            raise
+            error_msg = e.stderr.decode() if e.stderr else str(e)
+            logger.error('Unable to bootstrap the vcpkg repository: %s', error_msg, exc_info=True)
+            raise ProviderToolingError('vcpkg', 'bootstrap', error_msg, e) from e
 
     def sync_data(self, consumer: SyncConsumer) -> SyncData:
         """Gathers a data object for the given generator
@@ -167,8 +166,9 @@ class VcpkgProvider(Provider):
                     capture_output=True,
                 )
             except subprocess.CalledProcessError as e:
-                logger.exception('Unable to update the vcpkg repository: %s', e.stderr.decode() if e.stderr else str(e))
-                raise
+                error_msg = e.stderr.decode() if e.stderr else str(e)
+                logger.error('Unable to update the vcpkg repository: %s', error_msg, exc_info=True)
+                raise ProviderToolingError('vcpkg', 'update', error_msg, e) from e
         else:
             try:
                 logger.debug("Cloning the vcpkg repository to '%s'", directory.absolute())
@@ -182,8 +182,9 @@ class VcpkgProvider(Provider):
                 )
 
             except subprocess.CalledProcessError as e:
-                logger.exception('Unable to clone the vcpkg repository: %s', e.stderr.decode() if e.stderr else str(e))
-                raise
+                error_msg = e.stderr.decode() if e.stderr else str(e)
+                logger.error('Unable to clone the vcpkg repository: %s', error_msg, exc_info=True)
+                raise ProviderToolingError('vcpkg', 'clone', error_msg, e) from e
 
         cls._update_provider(directory)
 
@@ -210,8 +211,9 @@ class VcpkgProvider(Provider):
                 capture_output=True,
             )
         except subprocess.CalledProcessError as e:
-            logger.exception('Unable to install project dependencies: %s', e.stderr.decode() if e.stderr else str(e))
-            raise
+            error_msg = e.stderr.decode() if e.stderr else str(e)
+            logger.error('Unable to install project dependencies: %s', error_msg, exc_info=True)
+            raise ProviderInstallationError('vcpkg', error_msg, e) from e
 
     def update(self) -> None:
         """Called when dependencies need to be updated and written to the lock file."""
@@ -237,8 +239,9 @@ class VcpkgProvider(Provider):
                 capture_output=True,
             )
         except subprocess.CalledProcessError as e:
-            logger.exception('Unable to install project dependencies: %s', e.stderr.decode() if e.stderr else str(e))
-            raise
+            error_msg = e.stderr.decode() if e.stderr else str(e)
+            logger.error('Unable to update project dependencies: %s', error_msg, exc_info=True)
+            raise ProviderInstallationError('vcpkg', error_msg, e) from e
 
     def publish(self) -> None:
         """Called when the project needs to be published.

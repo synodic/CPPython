@@ -56,7 +56,7 @@ class Project(API):
         """Installs project dependencies
 
         Raises:
-            Exception: Raised if failed
+            Exception: Provider-specific exceptions are propagated with full context
         """
         if not self._enabled:
             self.logger.info('Skipping install because the project is not enabled')
@@ -68,19 +68,15 @@ class Project(API):
         self.logger.info('Installing project')
         self.logger.info('Installing %s provider', self._data.plugins.provider.name())
 
-        try:
-            self._data.plugins.provider.install()
-        except Exception as exception:
-            self.logger.error('Unexpected error during installation: %s', str(exception))
-            raise SystemExit('Error: An unexpected error occurred during installation.') from None
-
+        # Let provider handle its own exceptions for better error context
+        self._data.plugins.provider.install()
         self._data.sync()
 
     def update(self) -> None:
         """Updates project dependencies
 
         Raises:
-            Exception: Raised if failed
+            Exception: Provider-specific exception
         """
         if not self._enabled:
             self.logger.info('Skipping update because the project is not enabled')
@@ -92,18 +88,15 @@ class Project(API):
         self.logger.info('Updating project')
         self.logger.info('Updating %s provider', self._data.plugins.provider.name())
 
-        try:
-            self._data.plugins.provider.update()
-        except Exception as exception:
-            self.logger.error('Unexpected error during update: %s', str(exception))
-            raise SystemExit('Error: An unexpected error occurred during update.') from None
-
+        # Let provider handle its own exceptions for better error context
+        self._data.plugins.provider.update()
         self._data.sync()
 
     def publish(self) -> None:
-        """Publishes the project"""
-        try:
-            self._data.plugins.provider.publish()
-        except Exception as exception:
-            self.logger.error('Unexpected error during publish: %s', str(exception))
-            raise SystemExit('Error: An unexpected error occurred during publish.') from None
+        """Publishes the project
+
+        Raises:
+            Exception: Provider-specific exception
+        """
+        # Let provider handle its own exceptions for better error context
+        self._data.plugins.provider.publish()
