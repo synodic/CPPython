@@ -18,7 +18,7 @@ provider-name = "conan"
 
 install-path = "install"
 
-dependencies = ["fmt>=11.0.1"]
+dependencies = ["fmt>=11.2.0"]
 
 [tool.cppython.generator]
 

@@ -25,7 +25,7 @@ class TestConanCMake:
         """Simple project"""
         # Create project configuration
         project_root = Path.cwd()
-        project_configuration = ProjectConfiguration(project_root=project_root, version=None)
+        project_configuration = ProjectConfiguration(project_root=project_root, version=None, verbosity=2, debug=True)
 
         # Create console interface
         interface = ConsoleInterface()

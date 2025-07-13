@@ -5,6 +5,8 @@ integration with the Conan package manager, including dependency resolution,
 installation, and synchronization with other tools.
 """
 
+import logging
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -70,51 +72,73 @@ class ConanProvider(Provider):
         return Information()
 
     def _install_dependencies(self, *, update: bool = False) -> None:
-        """Common implementation for installing/updating dependencies.
+        """Install/update dependencies using conan CLI command.
 
         Args:
             update: If True, check remotes for newer versions/revisions and install those.
                    If False, use cached versions when available.
         """
         try:
+            logger = logging.getLogger('cppython.conan')
+            logger.debug('Starting dependency installation/update (update=%s)', update)
+
             resolved_dependencies = [resolve_conan_dependency(req) for req in self.core_data.cppython_data.dependencies]
+            logger.debug(
+                'Resolved %d dependencies: %s', len(resolved_dependencies), [str(dep) for dep in resolved_dependencies]
+            )
 
+            # Generate conanfile.py
             self.builder.generate_conanfile(self.core_data.project_data.project_root, resolved_dependencies)
+            logger.debug('Generated conanfile.py at %s', self.core_data.project_data.project_root)
 
+            # Ensure build directory exists
             self.core_data.cppython_data.build_path.mkdir(parents=True, exist_ok=True)
+            logger.debug('Created build path: %s', self.core_data.cppython_data.build_path)
 
-            # Install/update dependencies using Conan API
+            # Build conan install command
             project_root = self.core_data.project_data.project_root
             conanfile_path = project_root / 'conanfile.py'
 
-            if conanfile_path.exists():
-                # Initialize Conan API
-                conan_api = ConanAPI()
+            if not conanfile_path.exists():
+                raise ProviderInstallationError('conan', 'Generated conanfile.py not found')
 
-                # Get default profiles
-                profile_host_path = conan_api.profiles.get_default_host()
-                profile_build_path = conan_api.profiles.get_default_build()
-                profile_host = conan_api.profiles.get_profile([profile_host_path])
-                profile_build = conan_api.profiles.get_profile([profile_build_path])
+            # Prepare conan install command
+            cmd = [
+                'conan',
+                'install',
+                str(conanfile_path),
+                '--output-folder',
+                str(self.core_data.cppython_data.build_path),
+                '--build',
+                'missing',
+            ]
 
-                # Build dependency graph for the package
-                deps_graph = conan_api.graph.load_graph_consumer(
-                    path=str(conanfile_path),
-                    name=None,
-                    version=None,
-                    user=None,
-                    channel=None,
-                    profile_host=profile_host,
-                    profile_build=profile_build,
-                    lockfile=None,
-                    remotes=conan_api.remotes.list(),
-                    update=update,
-                    check_updates=update,
-                    is_build_require=False,
-                )
+            if update:
+                cmd.extend(['--update'])
 
-                # Install dependencies
-                conan_api.install.install_binaries(deps_graph=deps_graph, remotes=conan_api.remotes.list())
+            logger.debug('Running conan command: %s', ' '.join(cmd))
+
+            # Execute conan install command
+            result = subprocess.run(cmd, cwd=str(project_root), capture_output=True, text=True, check=False)
+
+            # Log output for debugging
+            if result.stdout:
+                logger.debug('Conan stdout:\n%s', result.stdout)
+            if result.stderr:
+                logger.debug('Conan stderr:\n%s', result.stderr)
+
+            # Check for success
+            if result.returncode != 0:
+                error_msg = f'Conan install failed with return code {result.returncode}'
+                if result.stderr:
+                    error_msg += f': {result.stderr}'
+                raise ProviderInstallationError('conan', error_msg)
+
+            logger.debug('Successfully installed dependencies using conan CLI')
+
+        except subprocess.SubprocessError as e:
+            operation = 'update' if update else 'install'
+            raise ProviderInstallationError('conan', f'Failed to {operation} dependencies: {e}', e) from e
         except Exception as e:
             operation = 'update' if update else 'install'
             error_msg = str(e)
