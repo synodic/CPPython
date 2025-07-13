@@ -5,10 +5,10 @@ from typing import Any
 import pytest
 
 from cppython.test.mock.scm import MockSCM
-from cppython.test.pytest.contracts import SCMTestContract
+from cppython.test.pytest.contracts import SCMUnitTestContract
 
 
-class TestCPPythonSCM(SCMTestContract[MockSCM]):
+class TestCPPythonSCM(SCMUnitTestContract[MockSCM]):
     """The tests for the Mock version control"""
 
     @staticmethod

@@ -11,10 +11,10 @@ from pytest_mock import MockerFixture
 
 from cppython.test.mock.generator import MockGenerator
 from cppython.test.mock.provider import MockProvider
-from cppython.test.pytest.contracts import ProviderTestContract
+from cppython.test.pytest.contracts import ProviderUnitTestContract
 
 
-class TestMockProvider(ProviderTestContract[MockProvider]):
+class TestMockProvider(ProviderUnitTestContract[MockProvider]):
     """The tests for our Mock provider"""
 
     @staticmethod

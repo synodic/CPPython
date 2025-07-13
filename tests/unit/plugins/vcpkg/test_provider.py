@@ -5,10 +5,10 @@ from typing import Any
 import pytest
 
 from cppython.plugins.vcpkg.plugin import VcpkgProvider
-from cppython.test.pytest.contracts import ProviderTestContract
+from cppython.test.pytest.contracts import ProviderUnitTestContract
 
 
-class TestCPPythonProvider(ProviderTestContract[VcpkgProvider]):
+class TestCPPythonProvider(ProviderUnitTestContract[VcpkgProvider]):
     """The tests for the vcpkg Provider"""
 
     @staticmethod
