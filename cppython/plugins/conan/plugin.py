@@ -6,7 +6,6 @@ installation, and synchronization with other tools.
 """
 
 import logging
-import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -72,7 +71,7 @@ class ConanProvider(Provider):
         return Information()
 
     def _install_dependencies(self, *, update: bool = False) -> None:
-        """Install/update dependencies using conan CLI command.
+        """Install/update dependencies using Conan API.
 
         Args:
             update: If True, check remotes for newer versions/revisions and install those.
@@ -95,50 +94,85 @@ class ConanProvider(Provider):
             self.core_data.cppython_data.build_path.mkdir(parents=True, exist_ok=True)
             logger.debug('Created build path: %s', self.core_data.cppython_data.build_path)
 
-            # Build conan install command
+            # Initialize Conan API
+            conan_api = ConanAPI()
+
+            # Get project paths
             project_root = self.core_data.project_data.project_root
             conanfile_path = project_root / 'conanfile.py'
 
             if not conanfile_path.exists():
                 raise ProviderInstallationError('conan', 'Generated conanfile.py not found')
 
-            # Prepare conan install command
-            cmd = [
-                'conan',
-                'install',
-                str(conanfile_path),
-                '--output-folder',
-                str(self.core_data.cppython_data.build_path),
-                '--build',
-                'missing',
-            ]
+            # Get all remotes
+            all_remotes = conan_api.remotes.list()
+            logger.debug('Available remotes: %s', [remote.name for remote in all_remotes])
 
-            if update:
-                cmd.extend(['--update'])
+            # Get default profiles, handle case when no default profile exists
+            try:
+                profile_host_path = conan_api.profiles.get_default_host()
+                profile_build_path = conan_api.profiles.get_default_build()
 
-            logger.debug('Running conan command: %s', ' '.join(cmd))
+                # Ensure we have valid profile paths
+                if profile_host_path is None:
+                    # Create a minimal default profile if none exists
+                    profile_host = conan_api.profiles.get_profile([])
+                else:
+                    profile_host = conan_api.profiles.get_profile([profile_host_path])
 
-            # Execute conan install command
-            result = subprocess.run(cmd, cwd=str(project_root), capture_output=True, text=True, check=False)
+                if profile_build_path is None:
+                    # Create a minimal default profile if none exists
+                    profile_build = conan_api.profiles.get_profile([])
+                else:
+                    profile_build = conan_api.profiles.get_profile([profile_build_path])
 
-            # Log output for debugging
-            if result.stdout:
-                logger.debug('Conan stdout:\n%s', result.stdout)
-            if result.stderr:
-                logger.debug('Conan stderr:\n%s', result.stderr)
+            except Exception:
+                # If profile operations fail, create minimal default profiles
+                profile_host = conan_api.profiles.get_profile([])
+                profile_build = conan_api.profiles.get_profile([])
 
-            # Check for success
-            if result.returncode != 0:
-                error_msg = f'Conan install failed with return code {result.returncode}'
-                if result.stderr:
-                    error_msg += f': {result.stderr}'
-                raise ProviderInstallationError('conan', error_msg)
+            logger.debug('Using profiles: host=%s, build=%s', profile_host, profile_build)
 
-            logger.debug('Successfully installed dependencies using conan CLI')
+            # Build dependency graph
+            deps_graph = conan_api.graph.load_graph_consumer(
+                path=str(conanfile_path),
+                name=None,
+                version=None,
+                user=None,
+                channel=None,
+                profile_host=profile_host,
+                profile_build=profile_build,
+                lockfile=None,
+                remotes=all_remotes,
+                update=None if not update else True,
+                check_updates=update,
+                is_build_require=False,
+            )
 
-        except subprocess.SubprocessError as e:
-            operation = 'update' if update else 'install'
-            raise ProviderInstallationError('conan', f'Failed to {operation} dependencies: {e}', e) from e
+            logger.debug('Dependency graph loaded with %d nodes', len(deps_graph.nodes))
+
+            # Analyze binaries to determine what needs to be built/downloaded
+            conan_api.graph.analyze_binaries(
+                graph=deps_graph,
+                build_mode=['missing'],  # Only build what's missing
+                remotes=all_remotes,
+                update=None if not update else True,
+                lockfile=None,
+            )
+
+            # Install all dependencies
+            conan_api.install.install_binaries(deps_graph=deps_graph, remotes=all_remotes)
+
+            # Generate files for the consumer (conandata.yml, conan_toolchain.cmake, etc.)
+            conan_api.install.install_consumer(
+                deps_graph=deps_graph,
+                generators=['CMakeToolchain', 'CMakeDeps'],
+                source_folder=str(project_root),
+                output_folder=str(self.core_data.cppython_data.build_path),
+            )
+
+            logger.debug('Successfully installed dependencies using Conan API')
+
         except Exception as e:
             operation = 'update' if update else 'install'
             error_msg = str(e)
@@ -232,11 +266,28 @@ class ConanProvider(Provider):
             remotes=all_remotes,  # Use all remotes for dependency resolution during export
         )
 
-        # Step 2: Get default profiles
-        profile_host_path = conan_api.profiles.get_default_host()
-        profile_build_path = conan_api.profiles.get_default_build()
-        profile_host = conan_api.profiles.get_profile([profile_host_path])
-        profile_build = conan_api.profiles.get_profile([profile_build_path])
+        # Step 2: Get default profiles, handle case when no default profile exists
+        try:
+            profile_host_path = conan_api.profiles.get_default_host()
+            profile_build_path = conan_api.profiles.get_default_build()
+
+            # Ensure we have valid profile paths
+            if profile_host_path is None:
+                # Create a minimal default profile if none exists
+                profile_host = conan_api.profiles.get_profile([])
+            else:
+                profile_host = conan_api.profiles.get_profile([profile_host_path])
+
+            if profile_build_path is None:
+                # Create a minimal default profile if none exists
+                profile_build = conan_api.profiles.get_profile([])
+            else:
+                profile_build = conan_api.profiles.get_profile([profile_build_path])
+
+        except Exception:
+            # If profile operations fail, create minimal default profiles
+            profile_host = conan_api.profiles.get_profile([])
+            profile_build = conan_api.profiles.get_profile([])
 
         # Step 3: Build dependency graph for the package
         deps_graph = conan_api.graph.load_graph_consumer(

@@ -25,24 +25,24 @@ def fixture_conan_mock_api(mocker: MockerFixture) -> Mock:
 
     # Mock graph module
     mock_deps_graph = mocker.Mock()
+    mock_deps_graph.nodes = []
     mock_api.graph.load_graph_consumer = mocker.Mock(return_value=mock_deps_graph)
+    mock_api.graph.analyze_binaries = mocker.Mock()
 
     # Mock install module
     mock_api.install.install_binaries = mocker.Mock()
+    mock_api.install.install_consumer = mocker.Mock()
 
     # Mock remotes module
     mock_remote = mocker.Mock()
     mock_remote.name = 'conancenter'
     mock_api.remotes.list = mocker.Mock(return_value=[mock_remote])
 
-    # Mock profiles module
-    mock_profile_host = mocker.Mock()
-    mock_profile_build = mocker.Mock()
-    mock_api.profiles.get_default_host = mocker.Mock(return_value='/path/to/default/host')
-    mock_api.profiles.get_default_build = mocker.Mock(return_value='/path/to/default/build')
-    mock_api.profiles.get_profile = mocker.Mock(
-        side_effect=lambda paths: mock_profile_host if 'host' in paths[0] else mock_profile_build
-    )
+    # Mock profiles module - simulate no default profile by default
+    mock_profile = mocker.Mock()
+    mock_api.profiles.get_default_host = mocker.Mock(return_value=None)
+    mock_api.profiles.get_default_build = mocker.Mock(return_value=None)
+    mock_api.profiles.get_profile = mocker.Mock(return_value=mock_profile)
 
     return mock_api
 
