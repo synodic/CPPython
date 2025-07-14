@@ -132,6 +132,9 @@ class Builder:
             name=cmake_data.configuration_name,
             inherits='cppython',
             binaryDir=build_directory.as_posix(),
+            cacheVariables={
+                'CMAKE_BUILD_TYPE': 'Release'  # Ensure compatibility for single-config and multi-config generators
+            },
         )
 
         if preset_file.exists():
