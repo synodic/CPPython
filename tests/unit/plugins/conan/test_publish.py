@@ -13,6 +13,9 @@ from cppython.utility.exception import ProviderConfigurationError, ProviderInsta
 # Use shared fixtures
 pytest_plugins = ['tests.fixtures.conan']
 
+# Constants for test assertions
+EXPECTED_PROFILE_CALLS = 2
+
 
 class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
     """Tests for the Conan provider publish functionality"""

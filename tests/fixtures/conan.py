@@ -43,6 +43,7 @@ def fixture_conan_mock_api(mocker: MockerFixture) -> Mock:
     mock_api.profiles.get_default_host = mocker.Mock(return_value=None)
     mock_api.profiles.get_default_build = mocker.Mock(return_value=None)
     mock_api.profiles.get_profile = mocker.Mock(return_value=mock_profile)
+    mock_api.profiles.detect = mocker.Mock(return_value=mock_profile)
 
     return mock_api
 
@@ -90,6 +91,7 @@ def fixture_conan_mock_api_publish(mocker: MockerFixture) -> Mock:
     mock_api.profiles.get_default_host = mocker.Mock(return_value='/path/to/default/host')
     mock_api.profiles.get_default_build = mocker.Mock(return_value='/path/to/default/build')
     mock_api.profiles.get_profile = mocker.Mock(return_value=mock_profile)
+    mock_api.profiles.detect = mocker.Mock(return_value=mock_profile)
 
     return mock_api
 
