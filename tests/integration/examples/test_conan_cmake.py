@@ -50,4 +50,12 @@ class TestConanCMake:
         # Verify that the build directory contains the expected files
         assert (path / 'CMakeCache.txt').exists(), f'{path / "CMakeCache.txt"} not found'
 
+        # --- Setup for Publish with modified config ---
+        # Modify the in-memory representation of the pyproject data
+        pyproject_data['tool']['cppython']['provider']['remotes'] = []
+
+        # Create a new project instance with the modified configuration for the 'publish' step
+        publish_project = Project(project_configuration, interface, pyproject_data)
+
         # Publish the project to the local cache
+        publish_project.publish()
