@@ -14,7 +14,7 @@ from cppython.console.schema import ConsoleInterface
 from cppython.core.schema import ProjectConfiguration
 from cppython.project import Project
 
-pytest_plugins = ['tests.fixtures.example']
+pytest_plugins = ['tests.fixtures.example', 'tests.fixtures.conan']
 
 
 class TestConanCMake:
@@ -49,3 +49,5 @@ class TestConanCMake:
 
         # Verify that the build directory contains the expected files
         assert (path / 'CMakeCache.txt').exists(), f'{path / "CMakeCache.txt"} not found'
+
+        # Publish the project to the local cache
