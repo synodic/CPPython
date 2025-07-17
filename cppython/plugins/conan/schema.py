@@ -7,6 +7,7 @@ provide structured configuration and data needed by the Conan Provider.
 
 from typing import Annotated
 
+from conan.internal.model.profile import Profile
 from pydantic import Field
 
 from cppython.core.schema import CPPythonModel
@@ -31,6 +32,8 @@ class ConanData(CPPythonModel):
     """Resolved conan data"""
 
     remotes: list[str]
+    host_profile: Profile
+    build_profile: Profile
 
     @property
     def local_only(self) -> bool:
@@ -45,3 +48,17 @@ class ConanConfiguration(CPPythonModel):
         list[str],
         Field(description='List of remotes to upload to. Empty list means the local conan cache will be used.'),
     ] = ['conancenter']
+    host_profile: Annotated[
+        str | None,
+        Field(
+            description='Conan host profile defining the target platform where the built software will run. '
+            'Used for cross-compilation scenarios.'
+        ),
+    ] = 'default'
+    build_profile: Annotated[
+        str | None,
+        Field(
+            description='Conan build profile defining the platform where the compilation process executes. '
+            'Typically matches the development machine.'
+        ),
+    ] = 'default'

@@ -12,7 +12,6 @@ from typing import Any
 import requests
 from conan.api.conan_api import ConanAPI
 from conan.api.model import ListPattern
-from conan.internal.model.profile import Profile
 
 from cppython.core.plugin_schema.generator import SyncConsumer
 from cppython.core.plugin_schema.provider import Provider, ProviderPluginGroupData, SupportedProviderFeatures
@@ -109,8 +108,8 @@ class ConanProvider(Provider):
             all_remotes = conan_api.remotes.list()
             logger.debug('Available remotes: %s', [remote.name for remote in all_remotes])
 
-            # Get profiles with fallback to auto-detection
-            profile_host, profile_build = self._get_profiles(conan_api)
+            # Get profiles from resolved data
+            profile_host, profile_build = self.data.host_profile, self.data.build_profile
 
             path = str(conanfile_path)
             remotes = all_remotes
@@ -249,8 +248,8 @@ class ConanProvider(Provider):
             remotes=all_remotes,  # Use all remotes for dependency resolution during export
         )
 
-        # Step 2: Get profiles with fallback to auto-detection
-        profile_host, profile_build = self._get_profiles(conan_api)
+        # Step 2: Get profiles from resolved data
+        profile_host, profile_build = self.data.host_profile, self.data.build_profile
 
         # Step 3: Build dependency graph for the package - prepare parameters
         path = str(conanfile_path)
@@ -305,68 +304,3 @@ class ConanProvider(Provider):
                 )
             else:
                 raise ProviderInstallationError('conan', 'No packages found to upload')
-
-    def _apply_profile_processing(self, profiles: list[Profile], conan_api: ConanAPI, cache_settings: Any) -> None:
-        """Apply profile plugin and settings processing to a list of profiles.
-
-        Args:
-            profiles: List of profiles to process
-            conan_api: The Conan API instance
-            cache_settings: The settings configuration
-        """
-        logger = logging.getLogger('cppython.conan')
-
-        # Apply profile plugin processing
-        try:
-            profile_plugin = conan_api.profiles._load_profile_plugin()
-            if profile_plugin is not None:
-                for profile in profiles:
-                    try:
-                        profile_plugin(profile)
-                    except Exception as plugin_error:
-                        logger.warning('Profile plugin failed for profile: %s', str(plugin_error))
-        except (AttributeError, Exception):
-            logger.debug('Profile plugin not available or failed to load')
-
-        # Process settings to initialize processed_settings
-        for profile in profiles:
-            try:
-                profile.process_settings(cache_settings)
-            except (AttributeError, Exception) as settings_error:
-                logger.debug('Settings processing failed for profile: %s', str(settings_error))
-
-    def _get_profiles(self, conan_api: ConanAPI) -> tuple[Profile, Profile]:
-        """Get Conan profiles with fallback to auto-detection.
-
-        Args:
-            conan_api: The Conan API instance
-
-        Returns:
-            A tuple of (profile_host, profile_build) objects
-        """
-        logger = logging.getLogger('cppython.conan')
-
-        try:
-            # Gather default profile paths, these can raise exceptions if not available
-            profile_host_path = conan_api.profiles.get_default_host()
-            profile_build_path = conan_api.profiles.get_default_build()
-
-            # Load the actual profile objects, can raise if data is invalid
-            profile_host = conan_api.profiles.get_profile([profile_host_path])
-            profile_build = conan_api.profiles.get_profile([profile_build_path])
-
-            logger.debug('Using existing default profiles')
-            return profile_host, profile_build
-
-        except Exception as e:
-            logger.warning('Default profiles not available, using auto-detection. Conan message: %s', str(e))
-
-            # Create auto-detected profiles
-            profiles = [conan_api.profiles.detect(), conan_api.profiles.detect()]
-            cache_settings = conan_api.config.settings_yml
-
-            # Apply profile plugin processing to both profiles
-            self._apply_profile_processing(profiles, conan_api, cache_settings)
-
-            logger.debug('Auto-detected profiles with plugin processing applied')
-            return profiles[0], profiles[1]

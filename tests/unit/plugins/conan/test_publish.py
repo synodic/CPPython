@@ -179,10 +179,10 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
         with pytest.raises(ProviderInstallationError, match='No packages found to upload'):
             plugin.publish()
 
-    def test_publish_uses_default_profiles(
+    def test_publish_with_default_profiles(
         self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
     ) -> None:
-        """Test that publish uses default profiles from API
+        """Test that publish uses pre-resolved profiles from plugin construction
 
         Args:
             plugin: The plugin instance
@@ -203,10 +203,11 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
         # Execute publish
         plugin.publish()
 
-        # Verify profiles were obtained from API
-        conan_mock_api_publish.profiles.get_default_host.assert_called_once()
-        conan_mock_api_publish.profiles.get_default_build.assert_called_once()
-        conan_mock_api_publish.profiles.get_profile.assert_called()
+        # Verify that the resolved profiles were used in the graph loading
+        conan_mock_api_publish.graph.load_graph_consumer.assert_called_once()
+        call_args = conan_mock_api_publish.graph.load_graph_consumer.call_args
+        assert call_args.kwargs['profile_host'] == plugin.data.host_profile
+        assert call_args.kwargs['profile_build'] == plugin.data.build_profile
 
     def test_publish_upload_parameters(
         self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture

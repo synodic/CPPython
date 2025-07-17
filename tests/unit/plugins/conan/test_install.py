@@ -136,7 +136,7 @@ class TestConanInstall(ProviderPluginTestMixin[ConanProvider]):
         # Verify Conan API was attempted
         mock_conan_api_constructor.assert_called_once()
 
-    def test_install_with_profile_exception(
+    def test_install_with_default_profiles(
         self,
         plugin: ConanProvider,
         conan_temp_conanfile: Path,
@@ -144,7 +144,7 @@ class TestConanInstall(ProviderPluginTestMixin[ConanProvider]):
         conan_setup_mocks: dict[str, Mock],
         conan_mock_api: Mock,
     ) -> None:
-        """Test install method when profile operations throw exceptions but detect() works
+        """Test install method uses pre-resolved profiles from plugin construction
 
         Args:
             plugin: The plugin instance
@@ -153,23 +153,21 @@ class TestConanInstall(ProviderPluginTestMixin[ConanProvider]):
             conan_setup_mocks: Dictionary containing all mocks
             conan_mock_api: Mock ConanAPI instance
         """
-        # Configure the API mock to throw exception on profile calls but detect() works
-        conan_mock_api.profiles.get_default_host.side_effect = Exception('Profile not found')
-
         # Setup dependencies
         plugin.core_data.cppython_data.dependencies = conan_mock_dependencies
 
-        # Execute - should succeed using fallback detect profiles
+        # Execute - should use the profiles resolved during plugin construction
         plugin.install()
 
-        # Verify that the fallback was used
+        # Verify that the API was used for installation
         conan_setup_mocks['conan_api_constructor'].assert_called_once()
-        conan_mock_api.profiles.get_default_host.assert_called_once()
 
-        # Verify detect was called for fallback (should be called twice for fallback)
-        assert conan_mock_api.profiles.detect.call_count >= EXPECTED_PROFILE_CALLS
-
-        # Verify the rest of the process continued
+        # Verify the rest of the process continued with resolved profiles
         conan_mock_api.graph.load_graph_consumer.assert_called_once()
         conan_mock_api.install.install_binaries.assert_called_once()
         conan_mock_api.install.install_consumer.assert_called_once()
+
+        # Verify that the resolved profiles were used in the graph loading
+        call_args = conan_mock_api.graph.load_graph_consumer.call_args
+        assert call_args.kwargs['profile_host'] == plugin.data.host_profile
+        assert call_args.kwargs['profile_build'] == plugin.data.build_profile
