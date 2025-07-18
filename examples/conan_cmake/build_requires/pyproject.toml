@@ -18,7 +18,7 @@ provider-name = "conan"
 
 install-path = "install"
 
-dependencies = ["abseil/20240116.2"]
+dependencies = ["abseil==20240116.2"]
 
 # Future tool_requires support (not yet implemented in CPPython):
 # [tool.cppython.provider.tool_requires]
