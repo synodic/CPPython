@@ -125,7 +125,7 @@ class Builder:
         """Creates a conanfile.py file with the necessary content."""
         template_string = """
         from conan import ConanFile
-        from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+        from conan.tools.cmake import CMake, cmake_layout
 
         class MyProject(ConanFile):
             name = "myproject" 
