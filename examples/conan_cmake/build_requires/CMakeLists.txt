@@ -1,10 +1,19 @@
 cmake_minimum_required(VERSION 3.24)
 
-project(FormatOutput LANGUAGES CXX C)
+project(BuildRequiresExample LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(fmt REQUIRED)
+# Find the abseil package (provided by CMakeDeps generator)
+find_package(absl REQUIRED)
 
+# Create the executable
 add_executable(main main.cpp)
-target_link_libraries(main PRIVATE fmt::fmt)
+
+# Link against abseil libraries
+target_link_libraries(main PRIVATE
+    absl::strings
+    absl::str_format
+    absl::base
+)

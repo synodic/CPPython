@@ -1,6 +1,6 @@
 [project]
-description = "A simple project showing how to use conan with CPPython"
-name = "cppython-conan-cmake-simple"
+description = "Example showing tool_requires with CMake and abseil dependency"
+name = "cppython-conan-cmake-build-requires"
 version = "1.0.0"
 
 license = { text = "MIT" }
@@ -18,7 +18,11 @@ provider-name = "conan"
 
 install-path = "install"
 
-dependencies = ["fmt>=11.2.0"]
+dependencies = ["abseil/20240116.2"]
+
+# Future tool_requires support (not yet implemented in CPPython):
+# [tool.cppython.provider.tool_requires]
+# cmake = ">=3.20"
 
 [tool.cppython.generator]
 
