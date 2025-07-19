@@ -9,7 +9,7 @@ class TestVcpkgResolution:
     """Test the resolution of Vcpkg dependencies"""
 
     @staticmethod
-    def test_resolve_vcpkg_dependency() -> None:
+    def test_dependency_resolution() -> None:
         """Test resolving a VcpkgDependency from a packaging requirement."""
         requirement = Requirement('example-package>=1.2.3')
 

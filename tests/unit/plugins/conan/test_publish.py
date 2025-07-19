@@ -42,7 +42,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
         """
         return ConanProvider
 
-    def test_publish_local_only(
+    def test_local_only(
         self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
     ) -> None:
         """Test that publish with remotes=[] only exports and builds locally
@@ -87,7 +87,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
         # Verify upload was NOT called for local mode
         conan_mock_api_publish.upload.upload_full.assert_not_called()
 
-    def test_publish_with_upload(
+    def test_with_upload(
         self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
     ) -> None:
         """Test that publish with remotes=['conancenter'] exports, builds, and uploads
@@ -121,7 +121,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
         conan_mock_api_publish.list.select.assert_called_once()
         conan_mock_api_publish.upload.upload_full.assert_called_once()
 
-    def test_publish_no_remotes_configured(
+    def test_no_remotes_configured(
         self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
     ) -> None:
         """Test that publish raises error when no remotes are configured for upload
@@ -149,7 +149,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
         with pytest.raises(ProviderConfigurationError, match='No configured remotes found'):
             plugin.publish()
 
-    def test_publish_no_packages_found(
+    def test_no_packages_found(
         self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
     ) -> None:
         """Test that publish raises error when no packages are found to upload
@@ -179,7 +179,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
         with pytest.raises(ProviderInstallationError, match='No packages found to upload'):
             plugin.publish()
 
-    def test_publish_with_default_profiles(
+    def test_with_default_profiles(
         self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
     ) -> None:
         """Test that publish uses pre-resolved profiles from plugin construction
@@ -209,7 +209,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
         assert call_args.kwargs['profile_host'] == plugin.data.host_profile
         assert call_args.kwargs['profile_build'] == plugin.data.build_profile
 
-    def test_publish_upload_parameters(
+    def test_upload_parameters(
         self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
     ) -> None:
         """Test that publish upload is called with correct parameters
@@ -254,7 +254,7 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
             dry_run=False,
         )
 
-    def test_publish_list_pattern_creation(
+    def test_list_pattern_creation(
         self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
     ) -> None:
         """Test that publish creates correct ListPattern for package selection

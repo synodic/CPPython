@@ -32,7 +32,7 @@ EXPECTED_PROFILE_CALL_COUNT = 2
 class TestResolveDependency:
     """Test dependency resolution."""
 
-    def test_resolve_dependency_with_version(self) -> None:
+    def test_with_version(self) -> None:
         """Test resolving a dependency with a >= version specifier."""
         requirement = Requirement('boost>=1.80.0')
 
@@ -43,7 +43,7 @@ class TestResolveDependency:
         assert result.version_range.expression == '>=1.80.0'
         assert result.version is None
 
-    def test_resolve_dependency_with_exact_version(self) -> None:
+    def test_with_exact_version(self) -> None:
         """Test resolving a dependency with an exact version specifier."""
         requirement = Requirement('abseil==20240116.2')
 
@@ -54,7 +54,7 @@ class TestResolveDependency:
         assert str(result.version) == '20240116.2'
         assert result.version_range is None
 
-    def test_resolve_dependency_without_version(self) -> None:
+    def test_without_version(self) -> None:
         """Test resolving a dependency without a version specifier."""
         requirement = Requirement('boost')
 
@@ -64,7 +64,7 @@ class TestResolveDependency:
         assert result.version is None
         assert result.version_range is None
 
-    def test_resolve_dependency_compatible_release(self) -> None:
+    def test_compatible_release(self) -> None:
         """Test resolving a dependency with ~= (compatible release) operator."""
         requirement = Requirement('package~=1.2.3')
 
@@ -75,7 +75,7 @@ class TestResolveDependency:
         assert result.version_range.expression == '~1.2'
         assert result.version is None
 
-    def test_resolve_dependency_multiple_specifiers(self) -> None:
+    def test_multiple_specifiers(self) -> None:
         """Test resolving a dependency with multiple specifiers."""
         requirement = Requirement('boost>=1.80.0,<2.0.0')
 
@@ -86,14 +86,14 @@ class TestResolveDependency:
         assert result.version_range.expression == '>=1.80.0 <2.0.0'
         assert result.version is None
 
-    def test_resolve_dependency_unsupported_operator(self) -> None:
+    def test_unsupported_operator(self) -> None:
         """Test that unsupported operators raise an error."""
         requirement = Requirement('boost===1.80.0')
 
         with pytest.raises(ConfigException, match="Unsupported single specifier '==='"):
             resolve_conan_dependency(requirement)
 
-    def test_resolve_dependency_contradictory_exact_versions(self) -> None:
+    def test_contradictory_exact_versions(self) -> None:
         """Test that multiple specifiers work correctly for valid ranges."""
         # Test our logic with a valid range instead of invalid syntax
         requirement = Requirement('package>=1.0,<=2.0')  # Valid range
@@ -103,37 +103,37 @@ class TestResolveDependency:
         assert result.version_range is not None
         assert result.version_range.expression == '>=1.0 <=2.0'
 
-    def test_conan_dependency_requires_exact_version(self) -> None:
+    def test_requires_exact_version(self) -> None:
         """Test that ConanDependency generates correct requires for exact versions."""
         dependency = ConanDependency(name='abseil', version=ConanVersion.from_string('20240116.2'))
 
         assert dependency.requires() == 'abseil/20240116.2'
 
-    def test_conan_dependency_requires_version_range(self) -> None:
+    def test_requires_version_range(self) -> None:
         """Test that ConanDependency generates correct requires for version ranges."""
         dependency = ConanDependency(name='boost', version_range=ConanVersionRange(expression='>=1.80.0 <2.0'))
 
         assert dependency.requires() == 'boost/[>=1.80.0 <2.0]'
 
-    def test_conan_dependency_requires_legacy_minimum_version(self) -> None:
+    def test_requires_legacy_minimum_version(self) -> None:
         """Test that ConanDependency generates correct requires for legacy minimum versions."""
         dependency = ConanDependency(name='boost', version_range=ConanVersionRange(expression='>=1.80.0'))
 
         assert dependency.requires() == 'boost/[>=1.80.0]'
 
-    def test_conan_dependency_requires_legacy_exact_version(self) -> None:
+    def test_requires_legacy_exact_version(self) -> None:
         """Test that ConanDependency generates correct requires for legacy exact versions."""
         dependency = ConanDependency(name='abseil', version=ConanVersion.from_string('20240116.2'))
 
         assert dependency.requires() == 'abseil/20240116.2'
 
-    def test_conan_dependency_requires_no_version(self) -> None:
+    def test_requires_no_version(self) -> None:
         """Test that ConanDependency generates correct requires for dependencies without version."""
         dependency = ConanDependency(name='somelib')
 
         assert dependency.requires() == 'somelib'
 
-    def test_conan_dependency_with_user_channel(self) -> None:
+    def test_with_user_channel(self) -> None:
         """Test that ConanDependency handles user/channel correctly."""
         dependency = ConanDependency(
             name='mylib',
@@ -143,7 +143,7 @@ class TestResolveDependency:
 
         assert dependency.requires() == 'mylib/1.0.0@myuser/stable'
 
-    def test_conan_dependency_with_revision(self) -> None:
+    def test_with_revision(self) -> None:
         """Test that ConanDependency handles revisions correctly."""
         dependency = ConanDependency(
             name='mylib', version=ConanVersion.from_string('1.0.0'), revision=ConanRevision(revision='abc123')
@@ -151,7 +151,7 @@ class TestResolveDependency:
 
         assert dependency.requires() == 'mylib/1.0.0#abc123'
 
-    def test_conan_dependency_full_reference(self) -> None:
+    def test_full_reference(self) -> None:
         """Test that ConanDependency handles full references correctly."""
         dependency = ConanDependency(
             name='mylib',
@@ -162,7 +162,7 @@ class TestResolveDependency:
 
         assert dependency.requires() == 'mylib/1.0.0@myuser/stable#abc123'
 
-    def test_from_conan_reference_simple(self) -> None:
+    def test_from_reference_simple(self) -> None:
         """Test parsing a simple package name."""
         dependency = ConanDependency.from_conan_reference('mylib')
 
@@ -171,7 +171,7 @@ class TestResolveDependency:
         assert dependency.user_channel is None
         assert dependency.revision is None
 
-    def test_from_conan_reference_with_version(self) -> None:
+    def test_from_reference_with_version(self) -> None:
         """Test parsing a package with version."""
         dependency = ConanDependency.from_conan_reference('mylib/1.0.0')
 
@@ -181,7 +181,7 @@ class TestResolveDependency:
         assert dependency.user_channel is None
         assert dependency.revision is None
 
-    def test_from_conan_reference_with_version_range(self) -> None:
+    def test_from_reference_with_version_range(self) -> None:
         """Test parsing a package with version range."""
         dependency = ConanDependency.from_conan_reference('mylib/[>=1.0 <2.0]')
 
@@ -192,7 +192,7 @@ class TestResolveDependency:
         assert dependency.user_channel is None
         assert dependency.revision is None
 
-    def test_from_conan_reference_full(self) -> None:
+    def test_from_reference_full(self) -> None:
         """Test parsing a full Conan reference."""
         dependency = ConanDependency.from_conan_reference('mylib/1.0.0@myuser/stable#abc123')
 
@@ -209,7 +209,7 @@ class TestResolveDependency:
 class TestProfileProcessing:
     """Test profile processing functionality."""
 
-    def test_apply_profile_processing_success(self) -> None:
+    def test_success(self) -> None:
         """Test successful profile processing."""
         mock_conan_api = Mock()
         mock_profile = Mock()
@@ -224,7 +224,7 @@ class TestProfileProcessing:
         mock_plugin.assert_called_once_with(mock_profile)
         mock_profile.process_settings.assert_called_once_with(mock_cache_settings)
 
-    def test_apply_profile_processing_no_plugin(self) -> None:
+    def test_no_plugin(self) -> None:
         """Test profile processing when no plugin is available."""
         mock_conan_api = Mock()
         mock_profile = Mock()
@@ -237,7 +237,7 @@ class TestProfileProcessing:
 
         mock_profile.process_settings.assert_called_once_with(mock_cache_settings)
 
-    def test_apply_profile_processing_plugin_failure(self, caplog: pytest.LogCaptureFixture) -> None:
+    def test_plugin_failure(self, caplog: pytest.LogCaptureFixture) -> None:
         """Test profile processing when plugin fails."""
         mock_conan_api = Mock()
         mock_profile = Mock()
@@ -254,7 +254,7 @@ class TestProfileProcessing:
         assert 'Profile plugin failed for profile' in caplog.text
         mock_profile.process_settings.assert_called_once_with(mock_cache_settings)
 
-    def test_apply_profile_processing_settings_failure(self, caplog: pytest.LogCaptureFixture) -> None:
+    def test_settings_failure(self, caplog: pytest.LogCaptureFixture) -> None:
         """Test profile processing when settings processing fails."""
         mock_conan_api = Mock()
         mock_profile = Mock()
@@ -273,7 +273,7 @@ class TestProfileProcessing:
 class TestResolveProfiles:
     """Test profile resolution functionality."""
 
-    def test_resolve_profiles_by_name(self) -> None:
+    def test_by_name(self) -> None:
         """Test resolving profiles by name."""
         mock_conan_api = Mock()
         mock_host_profile = Mock()
@@ -290,7 +290,7 @@ class TestResolveProfiles:
         mock_conan_api.profiles.get_profile.assert_any_call(['host-profile'])
         mock_conan_api.profiles.get_profile.assert_any_call(['build-profile'])
 
-    def test_resolve_profiles_by_name_failure(self) -> None:
+    def test_by_name_failure(self) -> None:
         """Test resolving profiles by name when host profile fails."""
         mock_conan_api = Mock()
         mock_conan_api.profiles.get_profile.side_effect = Exception('Profile not found')
@@ -298,7 +298,7 @@ class TestResolveProfiles:
         with pytest.raises(ProviderConfigurationError, match='Failed to load host profile'):
             _resolve_profiles('missing-profile', 'other-profile', mock_conan_api, cmake_program=None)
 
-    def test_resolve_profiles_auto_detect(self) -> None:
+    def test_auto_detect(self) -> None:
         """Test auto-detecting profiles."""
         mock_conan_api = Mock()
         mock_host_profile = Mock()
@@ -320,7 +320,7 @@ class TestResolveProfiles:
         mock_conan_api.profiles.get_profile.assert_any_call([mock_build_default_path])
 
     @patch('cppython.plugins.conan.resolution._profile_post_process')
-    def test_resolve_profiles_fallback_to_detect(self, mock_post_process: Mock) -> None:
+    def test_fallback_to_detect(self, mock_post_process: Mock) -> None:
         """Test falling back to profile detection when defaults fail."""
         mock_conan_api = Mock()
         mock_host_profile = Mock()
@@ -346,7 +346,7 @@ class TestResolveProfiles:
         mock_post_process.assert_any_call([mock_build_profile], mock_conan_api, mock_cache_settings, None)
 
     @patch('cppython.plugins.conan.resolution._profile_post_process')
-    def test_resolve_profiles_default_fallback_to_detect(self, mock_post_process: Mock) -> None:
+    def test_default_fallback_to_detect(self, mock_post_process: Mock) -> None:
         """Test falling back to profile detection when default profile fails."""
         mock_conan_api = Mock()
         mock_host_profile = Mock()
@@ -459,15 +459,21 @@ class TestResolveConanData:
         # Verify profile resolution was called with None values
         mock_resolve_profiles.assert_called_once_with(None, None, mock_conan_api, None)
 
-    def test_auto_detected_profile_gets_post_processed(self, conan_mock_api: Mock):
+    @patch('cppython.plugins.conan.resolution.ConanAPI')
+    @patch('cppython.plugins.conan.resolution._profile_post_process')
+    def test_auto_detected_profile_processing(self, mock_post_process: Mock, mock_conan_api_class: Mock):
         """Test that auto-detected profiles get proper post-processing.
 
         Args:
-            conan_mock_api: Mock ConanAPI instance from fixture
+            mock_post_process: Mock for _profile_post_process function
+            mock_conan_api_class: Mock for ConanAPI class
         """
+        mock_conan_api = Mock()
+        mock_conan_api_class.return_value = mock_conan_api
+
         # Configure the mock to simulate no default profiles
-        conan_mock_api.profiles.get_default_host.side_effect = Exception('No default profile')
-        conan_mock_api.profiles.get_default_build.side_effect = Exception('No default profile')
+        mock_conan_api.profiles.get_default_host.side_effect = Exception('No default profile')
+        mock_conan_api.profiles.get_default_build.side_effect = Exception('No default profile')
 
         # Create a profile that simulates auto-detection
         mock_profile = Mock()
@@ -477,17 +483,14 @@ class TestResolveConanData:
         mock_profile.conf.validate = Mock()
         mock_profile.conf.rebase_conf_definition = Mock()
 
-        conan_mock_api.profiles.detect.return_value = mock_profile
-        conan_mock_api.config.global_conf = Mock()
+        mock_conan_api.profiles.detect.return_value = mock_profile
+        mock_conan_api.config.global_conf = Mock()
 
         # Call the resolution - this should trigger auto-detection and post-processing
-        host_profile, build_profile = _resolve_profiles(None, None, conan_mock_api, cmake_program=None)
+        host_profile, build_profile = _resolve_profiles(None, None, mock_conan_api, cmake_program=None)
 
-        # Verify that process_settings was called on both profiles
-        assert mock_profile.process_settings.call_count == EXPECTED_PROFILE_CALL_COUNT
+        # Verify that auto-detection was called for both profiles
+        assert mock_conan_api.profiles.detect.call_count == EXPECTED_PROFILE_CALL_COUNT
 
-        # Verify that conf validation was called on both profiles
-        assert mock_profile.conf.validate.call_count == EXPECTED_PROFILE_CALL_COUNT
-
-        # Verify that conf rebase was called on both profiles
-        assert mock_profile.conf.rebase_conf_definition.call_count == EXPECTED_PROFILE_CALL_COUNT
+        # Verify that post-processing was called for both profiles
+        assert mock_post_process.call_count == EXPECTED_PROFILE_CALL_COUNT

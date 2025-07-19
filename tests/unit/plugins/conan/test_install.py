@@ -49,7 +49,7 @@ class TestConanInstall(ProviderPluginTestMixin[ConanProvider]):
         """
         return ConanProvider
 
-    def test_install_with_dependencies(
+    def test_with_dependencies(
         self,
         plugin: ConanProvider,
         conan_temp_conanfile: Path,
@@ -87,7 +87,7 @@ class TestConanInstall(ProviderPluginTestMixin[ConanProvider]):
         # Verify ConanAPI constructor was called
         conan_setup_mocks['conan_api_constructor'].assert_called_once()
 
-    def test_install_conan_command_failure(
+    def test_conan_command_failure(
         self,
         plugin: ConanProvider,
         conan_temp_conanfile: Path,
@@ -117,7 +117,7 @@ class TestConanInstall(ProviderPluginTestMixin[ConanProvider]):
 
         # Mock resolve_conan_dependency
         def mock_resolve(requirement: Requirement) -> ConanDependency:
-            return ConanDependency(name=requirement.name, version_ge=None)
+            return ConanDependency(name=requirement.name)
 
         mocker.patch('cppython.plugins.conan.plugin.resolve_conan_dependency', side_effect=mock_resolve)
 
@@ -136,7 +136,7 @@ class TestConanInstall(ProviderPluginTestMixin[ConanProvider]):
         # Verify Conan API was attempted
         mock_conan_api_constructor.assert_called_once()
 
-    def test_install_with_default_profiles(
+    def test_with_default_profiles(
         self,
         plugin: ConanProvider,
         conan_temp_conanfile: Path,
