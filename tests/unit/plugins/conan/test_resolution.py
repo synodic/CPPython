@@ -280,7 +280,9 @@ class TestResolveProfiles:
         mock_build_profile = Mock()
         mock_conan_api.profiles.get_profile.side_effect = [mock_host_profile, mock_build_profile]
 
-        host_result, build_result = _resolve_profiles('host-profile', 'build-profile', mock_conan_api)
+        host_result, build_result = _resolve_profiles(
+            'host-profile', 'build-profile', mock_conan_api, cmake_program=None
+        )
 
         assert host_result == mock_host_profile
         assert build_result == mock_build_profile
@@ -294,7 +296,7 @@ class TestResolveProfiles:
         mock_conan_api.profiles.get_profile.side_effect = Exception('Profile not found')
 
         with pytest.raises(ProviderConfigurationError, match='Failed to load host profile'):
-            _resolve_profiles('missing-profile', 'other-profile', mock_conan_api)
+            _resolve_profiles('missing-profile', 'other-profile', mock_conan_api, cmake_program=None)
 
     def test_resolve_profiles_auto_detect(self) -> None:
         """Test auto-detecting profiles."""
@@ -308,7 +310,7 @@ class TestResolveProfiles:
         mock_conan_api.profiles.get_default_build.return_value = mock_build_default_path
         mock_conan_api.profiles.get_profile.side_effect = [mock_host_profile, mock_build_profile]
 
-        host_result, build_result = _resolve_profiles(None, None, mock_conan_api)
+        host_result, build_result = _resolve_profiles(None, None, mock_conan_api, cmake_program=None)
 
         assert host_result == mock_host_profile
         assert build_result == mock_build_profile
@@ -334,14 +336,14 @@ class TestResolveProfiles:
         mock_conan_api.profiles.detect.side_effect = [mock_host_profile, mock_build_profile]
         mock_conan_api.config.settings_yml = mock_cache_settings
 
-        host_result, build_result = _resolve_profiles(None, None, mock_conan_api)
+        host_result, build_result = _resolve_profiles(None, None, mock_conan_api, cmake_program=None)
 
         assert host_result == mock_host_profile
         assert build_result == mock_build_profile
         assert mock_conan_api.profiles.detect.call_count == 2
         assert mock_post_process.call_count == 2
-        mock_post_process.assert_any_call([mock_host_profile], mock_conan_api, mock_cache_settings)
-        mock_post_process.assert_any_call([mock_build_profile], mock_conan_api, mock_cache_settings)
+        mock_post_process.assert_any_call([mock_host_profile], mock_conan_api, mock_cache_settings, None)
+        mock_post_process.assert_any_call([mock_build_profile], mock_conan_api, mock_cache_settings, None)
 
     @patch('cppython.plugins.conan.resolution._profile_post_process')
     def test_resolve_profiles_default_fallback_to_detect(self, mock_post_process: Mock) -> None:
@@ -360,14 +362,14 @@ class TestResolveProfiles:
         mock_conan_api.profiles.detect.side_effect = [mock_host_profile, mock_build_profile]
         mock_conan_api.config.settings_yml = mock_cache_settings
 
-        host_result, build_result = _resolve_profiles('default', 'default', mock_conan_api)
+        host_result, build_result = _resolve_profiles('default', 'default', mock_conan_api, cmake_program=None)
 
         assert host_result == mock_host_profile
         assert build_result == mock_build_profile
         assert mock_conan_api.profiles.detect.call_count == 2
         assert mock_post_process.call_count == 2
-        mock_post_process.assert_any_call([mock_host_profile], mock_conan_api, mock_cache_settings)
-        mock_post_process.assert_any_call([mock_build_profile], mock_conan_api, mock_cache_settings)
+        mock_post_process.assert_any_call([mock_host_profile], mock_conan_api, mock_cache_settings, None)
+        mock_post_process.assert_any_call([mock_build_profile], mock_conan_api, mock_cache_settings, None)
 
 
 class TestResolveConanData:
@@ -375,8 +377,12 @@ class TestResolveConanData:
 
     @patch('cppython.plugins.conan.resolution.ConanAPI')
     @patch('cppython.plugins.conan.resolution._resolve_profiles')
-    def test_resolve_conan_data_with_profiles(self, mock_resolve_profiles: Mock, mock_conan_api_class: Mock) -> None:
+    @patch('cppython.plugins.conan.resolution._detect_cmake_program')
+    def test_resolve_conan_data_with_profiles(
+        self, mock_detect_cmake: Mock, mock_resolve_profiles: Mock, mock_conan_api_class: Mock
+    ) -> None:
         """Test resolving ConanData with profile configuration."""
+        mock_detect_cmake.return_value = None  # No cmake detected for test
         mock_conan_api = Mock()
         mock_conan_api_class.return_value = mock_conan_api
 
@@ -395,12 +401,16 @@ class TestResolveConanData:
         assert result.remotes == ['conancenter']
 
         # Verify profile resolution was called correctly
-        mock_resolve_profiles.assert_called_once_with('linux-x64', 'linux-gcc11', mock_conan_api)
+        mock_resolve_profiles.assert_called_once_with('linux-x64', 'linux-gcc11', mock_conan_api, None)
 
     @patch('cppython.plugins.conan.resolution.ConanAPI')
     @patch('cppython.plugins.conan.resolution._resolve_profiles')
-    def test_resolve_conan_data_default_profiles(self, mock_resolve_profiles: Mock, mock_conan_api_class: Mock) -> None:
+    @patch('cppython.plugins.conan.resolution._detect_cmake_program')
+    def test_resolve_conan_data_default_profiles(
+        self, mock_detect_cmake: Mock, mock_resolve_profiles: Mock, mock_conan_api_class: Mock
+    ) -> None:
         """Test resolving ConanData with default profile configuration."""
+        mock_detect_cmake.return_value = None  # No cmake detected for test
         mock_conan_api = Mock()
         mock_conan_api_class.return_value = mock_conan_api
 
@@ -419,12 +429,16 @@ class TestResolveConanData:
         assert result.remotes == ['conancenter']  # Default remote
 
         # Verify profile resolution was called with default values
-        mock_resolve_profiles.assert_called_once_with('default', 'default', mock_conan_api)
+        mock_resolve_profiles.assert_called_once_with('default', 'default', mock_conan_api, None)
 
     @patch('cppython.plugins.conan.resolution.ConanAPI')
     @patch('cppython.plugins.conan.resolution._resolve_profiles')
-    def test_resolve_conan_data_null_profiles(self, mock_resolve_profiles: Mock, mock_conan_api_class: Mock) -> None:
+    @patch('cppython.plugins.conan.resolution._detect_cmake_program')
+    def test_resolve_conan_data_null_profiles(
+        self, mock_detect_cmake: Mock, mock_resolve_profiles: Mock, mock_conan_api_class: Mock
+    ) -> None:
         """Test resolving ConanData with null profile configuration."""
+        mock_detect_cmake.return_value = None  # No cmake detected for test
         mock_conan_api = Mock()
         mock_conan_api_class.return_value = mock_conan_api
 
@@ -443,7 +457,7 @@ class TestResolveConanData:
         assert result.remotes == []
 
         # Verify profile resolution was called with None values
-        mock_resolve_profiles.assert_called_once_with(None, None, mock_conan_api)
+        mock_resolve_profiles.assert_called_once_with(None, None, mock_conan_api, None)
 
     def test_auto_detected_profile_gets_post_processed(self, conan_mock_api: Mock):
         """Test that auto-detected profiles get proper post-processing.
@@ -467,7 +481,7 @@ class TestResolveConanData:
         conan_mock_api.config.global_conf = Mock()
 
         # Call the resolution - this should trigger auto-detection and post-processing
-        host_profile, build_profile = _resolve_profiles(None, None, conan_mock_api)
+        host_profile, build_profile = _resolve_profiles(None, None, conan_mock_api, cmake_program=None)
 
         # Verify that process_settings was called on both profiles
         assert mock_profile.process_settings.call_count == EXPECTED_PROFILE_CALL_COUNT

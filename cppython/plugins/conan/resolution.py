@@ -1,6 +1,8 @@
 """Provides functionality to resolve Conan-specific data for the CPPython project."""
 
+import importlib
 import logging
+from pathlib import Path
 from typing import Any
 
 from conan.api.conan_api import ConanAPI
@@ -19,13 +21,44 @@ from cppython.plugins.conan.schema import (
 from cppython.utility.exception import ProviderConfigurationError
 
 
-def _profile_post_process(profiles: list[Profile], conan_api: ConanAPI, cache_settings: Any) -> None:
+def _detect_cmake_program() -> str | None:
+    """Detect CMake program path from the cmake module if available.
+
+    Returns:
+        Path to cmake executable, or None if not found
+    """
+    try:
+        # Try to import cmake module and get its executable path
+        # Note: cmake is an optional dependency, so we import it conditionally
+        cmake = importlib.import_module('cmake')
+
+        cmake_bin_dir = Path(cmake.CMAKE_BIN_DIR)
+
+        # Try common cmake executable names (pathlib handles platform differences)
+        for cmake_name in ['cmake.exe', 'cmake']:
+            cmake_exe = cmake_bin_dir / cmake_name
+            if cmake_exe.exists():
+                return str(cmake_exe)
+
+        return None
+    except ImportError:
+        # cmake module not available
+        return None
+    except (AttributeError, Exception):
+        # If cmake module doesn't have expected attributes
+        return None
+
+
+def _profile_post_process(
+    profiles: list[Profile], conan_api: ConanAPI, cache_settings: Any, cmake_program: str | None = None
+) -> None:
     """Apply profile plugin and settings processing to a list of profiles.
 
     Args:
         profiles: List of profiles to process
         conan_api: The Conan API instance
         cache_settings: The settings configuration
+        cmake_program: Optional path to cmake program to configure in profiles
     """
     logger = logging.getLogger('cppython.conan')
 
@@ -46,6 +79,15 @@ def _profile_post_process(profiles: list[Profile], conan_api: ConanAPI, cache_se
 
     # Apply the full profile processing pipeline for each profile
     for profile in profiles:
+        # Set cmake program configuration if provided
+        if cmake_program is not None:
+            try:
+                # Set the tools.cmake:cmake_program configuration in the profile
+                profile.conf.update('tools.cmake:cmake_program', cmake_program)
+                logger.debug('Set tools.cmake:cmake_program=%s in profile', cmake_program)
+            except (AttributeError, Exception) as cmake_error:
+                logger.debug('Failed to set cmake program configuration: %s', str(cmake_error))
+
         # Process settings to initialize processed_settings
         try:
             profile.process_settings(cache_settings)
@@ -66,8 +108,25 @@ def _profile_post_process(profiles: list[Profile], conan_api: ConanAPI, cache_se
             logger.debug('Configuration rebase failed for profile: %s', str(rebase_error))
 
 
+def _apply_cmake_config_to_profile(profile: Profile, cmake_program: str | None, profile_type: str) -> None:
+    """Apply cmake program configuration to a profile.
+
+    Args:
+        profile: The profile to configure
+        cmake_program: Path to cmake program to configure
+        profile_type: Type of profile (for logging)
+    """
+    if cmake_program is not None:
+        logger = logging.getLogger('cppython.conan')
+        try:
+            profile.conf.update('tools.cmake:cmake_program', cmake_program)
+            logger.debug('Set tools.cmake:cmake_program=%s in %s profile', cmake_program, profile_type)
+        except (AttributeError, Exception) as cmake_error:
+            logger.debug('Failed to set cmake program in %s profile: %s', profile_type, str(cmake_error))
+
+
 def _resolve_profiles(
-    host_profile_name: str | None, build_profile_name: str | None, conan_api: ConanAPI
+    host_profile_name: str | None, build_profile_name: str | None, conan_api: ConanAPI, cmake_program: str | None = None
 ) -> tuple[Profile, Profile]:
     """Resolve host and build profiles, with fallback to auto-detection.
 
@@ -75,6 +134,7 @@ def _resolve_profiles(
         host_profile_name: The host profile name to resolve, or None for auto-detection
         build_profile_name: The build profile name to resolve, or None for auto-detection
         conan_api: The Conan API instance
+        cmake_program: Optional path to cmake program to configure in profiles
 
     Returns:
         A tuple of (host_profile, build_profile)
@@ -91,6 +151,7 @@ def _resolve_profiles(
                 logger.debug('Loading %s profile: %s', profile_type, profile_name)
                 profile = conan_api.profiles.get_profile([profile_name])
                 logger.debug('Successfully loaded %s profile: %s', profile_type, profile_name)
+                _apply_cmake_config_to_profile(profile, cmake_program, profile_type)
                 return profile
             except Exception as e:
                 logger.error('Failed to load %s profile %s: %s', profile_type, profile_name, str(e))
@@ -105,6 +166,7 @@ def _resolve_profiles(
                 logger.debug('Loading %s profile: %s', profile_type, profile_name)
                 profile = conan_api.profiles.get_profile([profile_name])
                 logger.debug('Successfully loaded %s profile: %s', profile_type, profile_name)
+                _apply_cmake_config_to_profile(profile, cmake_program, profile_type)
                 return profile
             except Exception as e:
                 logger.debug(
@@ -123,6 +185,7 @@ def _resolve_profiles(
 
             profile = conan_api.profiles.get_profile([default_profile_path])
             logger.debug('Using default %s profile', profile_type)
+            _apply_cmake_config_to_profile(profile, cmake_program, profile_type)
             return profile
         except Exception as e:
             logger.warning('Default %s profile not available, using auto-detection: %s', profile_type, str(e))
@@ -132,7 +195,7 @@ def _resolve_profiles(
             cache_settings = conan_api.config.settings_yml
 
             # Apply profile plugin processing
-            _profile_post_process([profile], conan_api, cache_settings)
+            _profile_post_process([profile], conan_api, cache_settings, cmake_program)
 
             logger.debug('Auto-detected %s profile with plugin processing applied', profile_type)
             return profile
@@ -245,8 +308,13 @@ def resolve_conan_data(data: dict[str, Any], core_data: CorePluginData) -> Conan
     # Initialize Conan API for profile resolution
     conan_api = ConanAPI()
 
+    # Try to detect cmake program path from current virtual environment
+    cmake_program = _detect_cmake_program()
+
     # Resolve profiles
-    host_profile, build_profile = _resolve_profiles(parsed_data.host_profile, parsed_data.build_profile, conan_api)
+    host_profile, build_profile = _resolve_profiles(
+        parsed_data.host_profile, parsed_data.build_profile, conan_api, cmake_program
+    )
 
     return ConanData(
         remotes=parsed_data.remotes,
