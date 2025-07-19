@@ -5,7 +5,6 @@ integration with the Conan package manager, including dependency resolution,
 installation, and synchronization with other tools.
 """
 
-import logging
 from pathlib import Path
 from typing import Any
 
@@ -78,128 +77,62 @@ class ConanProvider(Provider):
                    If False, use cached versions when available.
         """
         try:
-            logger = logging.getLogger('cppython.conan')
-            logger.debug('Starting dependency installation/update (update=%s)', update)
-
+            # Resolve dependencies and generate conanfile.py
             resolved_dependencies = [resolve_conan_dependency(req) for req in self.core_data.cppython_data.dependencies]
-            logger.debug(
-                'Resolved %d dependencies: %s', len(resolved_dependencies), [str(dep) for dep in resolved_dependencies]
-            )
-
-            # Generate conanfile.py
             self.builder.generate_conanfile(self.core_data.project_data.project_root, resolved_dependencies)
-            logger.debug('Generated conanfile.py at %s', self.core_data.project_data.project_root)
 
             # Ensure build directory exists
             self.core_data.cppython_data.build_path.mkdir(parents=True, exist_ok=True)
-            logger.debug('Created build path: %s', self.core_data.cppython_data.build_path)
 
-            # Initialize Conan API
+            # Setup paths and API
             conan_api = ConanAPI()
-            logger.debug('Conan API initialized successfully')
-
-            # Get project paths
             project_root = self.core_data.project_data.project_root
             conanfile_path = project_root / 'conanfile.py'
-            logger.debug('Project root: %s, Conanfile path: %s', project_root, conanfile_path)
 
             if not conanfile_path.exists():
                 raise ProviderInstallationError('conan', 'Generated conanfile.py not found')
 
-            # Get all remotes
-            try:
-                all_remotes = conan_api.remotes.list()
-                logger.debug('Available remotes: %s', [remote.name for remote in all_remotes])
-            except Exception as e:
-                logger.error('Failed to list remotes: %s', e)
-                raise
-
-            # Get profiles from resolved data
+            all_remotes = conan_api.remotes.list()
             profile_host, profile_build = self.data.host_profile, self.data.build_profile
-            logger.debug('Using profiles - host: %s, build: %s', profile_host, profile_build)
 
-            path = str(conanfile_path)
-            remotes = all_remotes
-            update_flag = None if not update else True
-            check_updates_flag = update
-
-            logger.debug(
-                'Loading dependency graph with parameters: path=%s, remotes=%d, update=%s, check_updates=%s',
-                path,
-                len(remotes),
-                update_flag,
-                check_updates_flag,
+            # Load dependency graph
+            deps_graph = conan_api.graph.load_graph_consumer(
+                path=str(conanfile_path),
+                name=None,
+                version=None,
+                user=None,
+                channel=None,
+                lockfile=None,
+                remotes=all_remotes,
+                update=update or None,
+                check_updates=update,
+                is_build_require=False,
+                profile_host=profile_host,
+                profile_build=profile_build,
             )
 
-            try:
-                deps_graph = conan_api.graph.load_graph_consumer(
-                    path=path,
-                    name=None,
-                    version=None,
-                    user=None,
-                    channel=None,
-                    lockfile=None,
-                    remotes=remotes,
-                    update=update_flag,
-                    check_updates=check_updates_flag,
-                    is_build_require=False,
-                    profile_host=profile_host,
-                    profile_build=profile_build,
-                )
-                logger.debug('Dependency graph loaded successfully, type: %s', type(deps_graph))
-                if hasattr(deps_graph, 'nodes'):
-                    logger.debug('Graph has %d nodes', len(deps_graph.nodes))
-                else:
-                    logger.warning('Dependency graph does not have nodes attribute')
-            except Exception as e:
-                logger.error('Failed to load dependency graph: %s', e)
-                raise
+            # Analyze and install binaries
+            conan_api.graph.analyze_binaries(
+                graph=deps_graph,
+                build_mode=['missing'],
+                remotes=all_remotes,
+                update=update or None,
+                lockfile=None,
+            )
 
-            # Analyze binaries to determine what needs to be built/downloaded
-            logger.debug('Starting binary analysis with build_mode=["missing"], update=%s', update)
-            try:
-                conan_api.graph.analyze_binaries(
-                    graph=deps_graph,
-                    build_mode=['missing'],  # Only build what's missing
-                    remotes=all_remotes,
-                    update=None if not update else True,
-                    lockfile=None,
-                )
-                logger.debug('Binary analysis completed successfully')
-            except Exception as e:
-                logger.error('Failed to analyze binaries: %s', e)
-                raise
+            conan_api.install.install_binaries(deps_graph=deps_graph, remotes=all_remotes)
 
-            # Install all dependencies
-            logger.debug('Starting binary installation')
-            try:
-                conan_api.install.install_binaries(deps_graph=deps_graph, remotes=all_remotes)
-                logger.debug('Binary installation completed successfully')
-            except Exception as e:
-                logger.error('Failed to install binaries: %s', e)
-                raise
-
-            # Generate files for the consumer (conandata.yml, conan_toolchain.cmake, etc.)
-            logger.debug('Generating consumer files with generators=["CMakeToolchain", "CMakeDeps"]')
-            logger.debug('Source folder: %s, Output folder: %s', project_root, self.core_data.cppython_data.build_path)
-            try:
-                conan_api.install.install_consumer(
-                    deps_graph=deps_graph,
-                    generators=['CMakeToolchain', 'CMakeDeps'],
-                    source_folder=str(project_root),
-                    output_folder=str(self.core_data.cppython_data.build_path),
-                )
-                logger.debug('Consumer file generation completed successfully')
-            except Exception as e:
-                logger.error('Failed to install consumer files: %s', e)
-                raise
-
-            logger.debug('Successfully installed dependencies using Conan API')
+            # Generate consumer files
+            conan_api.install.install_consumer(
+                deps_graph=deps_graph,
+                generators=['CMakeToolchain', 'CMakeDeps'],
+                source_folder=str(project_root),
+                output_folder=str(self.core_data.cppython_data.build_path),
+            )
 
         except Exception as e:
             operation = 'update' if update else 'install'
-            error_msg = str(e)
-            raise ProviderInstallationError('conan', f'Failed to {operation} dependencies: {error_msg}', e) from e
+            raise ProviderInstallationError('conan', f'Failed to {operation} dependencies: {e}', e) from e
 
     def install(self) -> None:
         """Installs the provider"""
@@ -240,7 +173,7 @@ class ConanProvider(Provider):
                     top_level_includes=self.core_data.cppython_data.install_path / 'conan_provider.cmake',
                 )
 
-        raise NotSupportedError('OOF')
+        raise NotSupportedError(f'Unsupported sync types: {consumer.sync_types()}')
 
     @classmethod
     async def download_tooling(cls, directory: Path) -> None:
@@ -249,165 +182,93 @@ class ConanProvider(Provider):
 
     def publish(self) -> None:
         """Publishes the package using conan create workflow."""
-        logger = logging.getLogger('cppython.conan')
-        logger.debug('Starting package publish workflow')
-
-        # Get the project root directory where conanfile.py should be located
         project_root = self.core_data.project_data.project_root
         conanfile_path = project_root / 'conanfile.py'
-        logger.debug('Project root: %s, Conanfile path: %s', project_root, conanfile_path)
 
         if not conanfile_path.exists():
             raise FileNotFoundError(f'conanfile.py not found at {conanfile_path}')
 
-        # Initialize Conan API
-        try:
-            conan_api = ConanAPI()
-            logger.debug('Conan API initialized successfully for publish')
-        except Exception as e:
-            logger.error('Failed to initialize Conan API for publish: %s', e)
-            raise
+        conan_api = ConanAPI()
+        all_remotes = conan_api.remotes.list()
 
-        # Get configured remotes from Conan API and filter by our configuration
-        # TODO: We want to replace the global conan remotes with the ones configured in CPPython.
-        try:
-            all_remotes = conan_api.remotes.list()
-            logger.debug('Retrieved %d remotes for publish', len(all_remotes))
-        except Exception as e:
-            logger.error('Failed to list remotes for publish: %s', e)
-            raise
+        # Configure remotes for upload
+        configured_remotes = self._get_configured_remotes(all_remotes)
 
-        if not self.data.local_only:
-            # Filter remotes to only include those specified in configuration
-            configured_remotes = [remote for remote in all_remotes if remote.name in self.data.remotes]
-            logger.debug('Configured remotes: %s', [r.name for r in configured_remotes])
+        # Export the recipe to cache
+        ref, _ = conan_api.export.export(
+            path=str(conanfile_path),
+            name=None,
+            version=None,
+            user=None,
+            channel=None,
+            lockfile=None,
+            remotes=all_remotes,
+        )
 
-            if not configured_remotes:
-                available_remotes = [remote.name for remote in all_remotes]
-                raise ProviderConfigurationError(
-                    'conan',
-                    f'No configured remotes found. Available remotes: {available_remotes}, '
-                    f'Configured remotes: {self.data.remotes}',
-                    'remotes',
-                )
-        else:
-            configured_remotes = []
-            logger.debug('Local only mode - no remotes configured')
-
-        # Step 1: Export the recipe to the cache
-        # This is equivalent to the export part of `conan create`
-        logger.debug('Starting export step with path: %s', conanfile_path)
-        try:
-            ref, conanfile = conan_api.export.export(
-                path=str(conanfile_path),
-                name=None,
-                version=None,
-                user=None,
-                channel=None,
-                lockfile=None,
-                remotes=all_remotes,  # Use all remotes for dependency resolution during export
-            )
-            logger.debug('Export completed successfully. Ref: %s, Conanfile type: %s', ref, type(conanfile))
-            if conanfile is None:
-                logger.error('Export returned None for conanfile!')
-            else:
-                conanfile_attrs = dir(conanfile) if hasattr(conanfile, '__dict__') else 'No attributes'
-                logger.debug('Conanfile attributes: %s', conanfile_attrs)
-        except Exception as e:
-            logger.error('Export failed: %s', e)
-            raise
-
-        # Step 2: Get profiles from resolved data
+        # Build dependency graph and install
         profile_host, profile_build = self.data.host_profile, self.data.build_profile
-        logger.debug('Using profiles for publish - host: %s, build: %s', profile_host, profile_build)
+        deps_graph = conan_api.graph.load_graph_consumer(
+            path=str(conanfile_path),
+            name=None,
+            version=None,
+            user=None,
+            channel=None,
+            lockfile=None,
+            remotes=all_remotes,
+            update=None,
+            check_updates=False,
+            is_build_require=False,
+            profile_host=profile_host,
+            profile_build=profile_build,
+        )
 
-        # Step 3: Build dependency graph for the package - prepare parameters
-        path = str(conanfile_path)
-        remotes = all_remotes  # Use all remotes for dependency resolution
-        logger.debug('Loading dependency graph for publish with path: %s', path)
+        # Analyze and build binaries
+        conan_api.graph.analyze_binaries(
+            graph=deps_graph,
+            build_mode=['*'],
+            remotes=all_remotes,
+            update=None,
+            lockfile=None,
+        )
 
-        try:
-            deps_graph = conan_api.graph.load_graph_consumer(
-                path=path,
-                name=None,
-                version=None,
-                user=None,
-                channel=None,
-                lockfile=None,
-                remotes=remotes,
-                update=None,
-                check_updates=False,
-                is_build_require=False,
-                profile_host=profile_host,
-                profile_build=profile_build,
-            )
-            logger.debug('Dependency graph loaded successfully for publish')
-        except Exception as e:
-            logger.error('Failed to load dependency graph for publish: %s', e)
-            raise
+        conan_api.install.install_binaries(deps_graph=deps_graph, remotes=all_remotes)
 
-        # Step 4: Analyze binaries and install/build them if needed
-        logger.debug('Starting binary analysis for publish')
-        try:
-            conan_api.graph.analyze_binaries(
-                graph=deps_graph,
-                build_mode=['*'],  # Build from source (equivalent to the create behavior)
-                remotes=all_remotes,  # Use all remotes for dependency resolution
-                update=None,
-                lockfile=None,
-            )
-            logger.debug('Binary analysis completed for publish')
-        except Exception as e:
-            logger.error('Failed to analyze binaries for publish: %s', e)
-            raise
-
-        # Step 5: Install all dependencies and build the package
-        logger.debug('Starting binary installation for publish')
-        try:
-            conan_api.install.install_binaries(deps_graph=deps_graph, remotes=all_remotes)
-            logger.debug('Binary installation completed for publish')
-        except Exception as e:
-            logger.error('Failed to install binaries for publish: %s', e)
-            raise
-
-        # If not local only, upload the package
+        # Upload if not local only
         if not self.data.local_only:
-            logger.debug('Starting package upload (not local only)')
-            # Get all packages matching the created reference
-            try:
-                logger.debug('Creating ref pattern with ref.name: %s (ref type: %s)', ref.name, type(ref))
-                ref_pattern = ListPattern(f'{ref.name}/*', package_id='*', only_recipe=False)
-                package_list = conan_api.list.select(ref_pattern)
-                recipe_count = len(package_list.recipes) if package_list.recipes else 0
-                logger.debug('Package list retrieved: %s recipes found', recipe_count)
-            except AttributeError as e:
-                logger.error('Failed to access ref.name - ref object: %s, error: %s', ref, e)
-                raise
-            except Exception as e:
-                logger.error('Failed to get package list for upload: %s', e)
-                raise
+            self._upload_package(conan_api, ref, configured_remotes)
 
-            if package_list.recipes:
-                # Use the first configured remote for upload
-                remote = configured_remotes[0]
-                logger.debug('Uploading to remote: %s', remote.name)
+    def _get_configured_remotes(self, all_remotes):
+        """Get and validate configured remotes for upload."""
+        if self.data.local_only:
+            return []
 
-                try:
-                    # Upload the package to configured remotes
-                    conan_api.upload.upload_full(
-                        package_list=package_list,
-                        remote=remote,
-                        enabled_remotes=configured_remotes,  # Only upload to configured remotes
-                        check_integrity=False,
-                        force=False,
-                        metadata=None,
-                        dry_run=False,
-                    )
-                    logger.debug('Package upload completed successfully')
-                except Exception as e:
-                    logger.error('Failed to upload package: %s', e)
-                    raise
-            else:
-                raise ProviderInstallationError('conan', 'No packages found to upload')
-        else:
-            logger.debug('Local only mode - skipping upload')
+        configured_remotes = [remote for remote in all_remotes if remote.name in self.data.remotes]
+
+        if not configured_remotes:
+            available_remotes = [remote.name for remote in all_remotes]
+            raise ProviderConfigurationError(
+                'conan',
+                f'No configured remotes found. Available: {available_remotes}, Configured: {self.data.remotes}',
+                'remotes',
+            )
+
+        return configured_remotes
+
+    def _upload_package(self, conan_api, ref, configured_remotes):
+        """Upload the package to configured remotes."""
+        ref_pattern = ListPattern(f'{ref.name}/*', package_id='*', only_recipe=False)
+        package_list = conan_api.list.select(ref_pattern)
+
+        if not package_list.recipes:
+            raise ProviderInstallationError('conan', 'No packages found to upload')
+
+        remote = configured_remotes[0]
+        conan_api.upload.upload_full(
+            package_list=package_list,
+            remote=remote,
+            enabled_remotes=configured_remotes,
+            check_integrity=False,
+            force=False,
+            metadata=None,
+            dry_run=False,
+        )
