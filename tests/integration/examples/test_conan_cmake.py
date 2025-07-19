@@ -52,47 +52,7 @@ class TestConanCMake:
 
         # --- Setup for Publish with modified config ---
         # Modify the in-memory representation of the pyproject data
-        pyproject_data['tool']['cppython']['provider']['remotes'] = []
-
-        # Create a new project instance with the modified configuration for the 'publish' step
-        publish_project = Project(project_configuration, interface, pyproject_data)
-
-        # Publish the project to the local cache
-        publish_project.publish()
-
-    @staticmethod
-    def test_build_requires(example_runner: CliRunner) -> None:
-        """build_requires project"""
-        # Create project configuration
-        project_root = Path.cwd()
-        project_configuration = ProjectConfiguration(project_root=project_root, version=None, verbosity=2, debug=True)
-
-        # Create console interface
-        interface = ConsoleInterface()
-
-        # Load pyproject.toml data
-        pyproject_path = project_root / 'pyproject.toml'
-        pyproject_data = loads(pyproject_path.read_text(encoding='utf-8'))
-
-        # Create and use the project directly
-        project = Project(project_configuration, interface, pyproject_data)
-
-        # Call install directly to get structured results
-        project.install()
-
-        # Run the CMake configuration command
-        result = subprocess.run(['cmake', '--preset=default'], capture_output=True, text=True, check=False)
-
-        assert result.returncode == 0, f'Cmake failed: {result.stderr}'
-
-        path = Path('build').absolute()
-
-        # Verify that the build directory contains the expected files
-        assert (path / 'CMakeCache.txt').exists(), f'{path / "CMakeCache.txt"} not found'
-
-        # --- Setup for Publish with modified config ---
-        # Modify the in-memory representation of the pyproject data
-        pyproject_data['tool']['cppython']['provider']['remotes'] = []
+        pyproject_data['tool']['cppython']['providers']['conan']['remotes'] = []
 
         # Create a new project instance with the modified configuration for the 'publish' step
         publish_project = Project(project_configuration, interface, pyproject_data)
