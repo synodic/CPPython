@@ -77,7 +77,7 @@ class ConanProvider(Provider):
                    If False, use cached versions when available.
         """
         operation = 'update' if update else 'install'
-        
+
         try:
             # Setup environment and generate conanfile
             conan_api, conanfile_path = self._prepare_installation()
