@@ -378,7 +378,7 @@ class TestResolveConanData:
     @patch('cppython.plugins.conan.resolution.ConanAPI')
     @patch('cppython.plugins.conan.resolution._resolve_profiles')
     @patch('cppython.plugins.conan.resolution._detect_cmake_program')
-    def test_resolve_conan_data_with_profiles(
+    def test_with_profiles(
         self, mock_detect_cmake: Mock, mock_resolve_profiles: Mock, mock_conan_api_class: Mock
     ) -> None:
         """Test resolving ConanData with profile configuration."""
@@ -406,7 +406,7 @@ class TestResolveConanData:
     @patch('cppython.plugins.conan.resolution.ConanAPI')
     @patch('cppython.plugins.conan.resolution._resolve_profiles')
     @patch('cppython.plugins.conan.resolution._detect_cmake_program')
-    def test_resolve_conan_data_default_profiles(
+    def test_default_profiles(
         self, mock_detect_cmake: Mock, mock_resolve_profiles: Mock, mock_conan_api_class: Mock
     ) -> None:
         """Test resolving ConanData with default profile configuration."""
@@ -434,7 +434,7 @@ class TestResolveConanData:
     @patch('cppython.plugins.conan.resolution.ConanAPI')
     @patch('cppython.plugins.conan.resolution._resolve_profiles')
     @patch('cppython.plugins.conan.resolution._detect_cmake_program')
-    def test_resolve_conan_data_null_profiles(
+    def test_null_profiles(
         self, mock_detect_cmake: Mock, mock_resolve_profiles: Mock, mock_conan_api_class: Mock
     ) -> None:
         """Test resolving ConanData with null profile configuration."""
