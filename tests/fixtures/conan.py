@@ -171,7 +171,7 @@ def fixture_conan_setup_mocks(
 
     # Mock resolve_conan_dependency
     def mock_resolve(requirement: Requirement) -> ConanDependency:
-        return ConanDependency(name=requirement.name, version_ge=None)
+        return ConanDependency(name=requirement.name)
 
     mock_resolve_conan_dependency = mocker.patch(
         'cppython.plugins.conan.plugin.resolve_conan_dependency', side_effect=mock_resolve
