@@ -29,6 +29,9 @@ def _profile_post_process(profiles: list[Profile], conan_api: ConanAPI, cache_se
     """
     logger = logging.getLogger('cppython.conan')
 
+    # Get global configuration
+    global_conf = conan_api.config.global_conf
+
     # Apply profile plugin processing
     try:
         profile_plugin = conan_api.profiles._load_profile_plugin()
@@ -41,12 +44,26 @@ def _profile_post_process(profiles: list[Profile], conan_api: ConanAPI, cache_se
     except (AttributeError, Exception):
         logger.debug('Profile plugin not available or failed to load')
 
-    # Process settings to initialize processed_settings
+    # Apply the full profile processing pipeline for each profile
     for profile in profiles:
+        # Process settings to initialize processed_settings
         try:
             profile.process_settings(cache_settings)
         except (AttributeError, Exception) as settings_error:
             logger.debug('Settings processing failed for profile: %s', str(settings_error))
+
+        # Validate configuration
+        try:
+            profile.conf.validate()
+        except (AttributeError, Exception) as conf_error:
+            logger.debug('Configuration validation failed for profile: %s', str(conf_error))
+
+        # Apply global configuration to the profile
+        try:
+            if global_conf is not None:
+                profile.conf.rebase_conf_definition(global_conf)
+        except (AttributeError, Exception) as rebase_error:
+            logger.debug('Configuration rebase failed for profile: %s', str(rebase_error))
 
 
 def _resolve_profiles(

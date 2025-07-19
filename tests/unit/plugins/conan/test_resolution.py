@@ -444,3 +444,36 @@ class TestResolveConanData:
 
         # Verify profile resolution was called with None values
         mock_resolve_profiles.assert_called_once_with(None, None, mock_conan_api)
+
+    def test_auto_detected_profile_gets_post_processed(self, conan_mock_api: Mock):
+        """Test that auto-detected profiles get proper post-processing.
+
+        Args:
+            conan_mock_api: Mock ConanAPI instance from fixture
+        """
+        # Configure the mock to simulate no default profiles
+        conan_mock_api.profiles.get_default_host.side_effect = Exception('No default profile')
+        conan_mock_api.profiles.get_default_build.side_effect = Exception('No default profile')
+
+        # Create a profile that simulates auto-detection
+        mock_profile = Mock()
+        mock_profile.settings = {'os': 'Windows', 'arch': 'x86_64'}
+        mock_profile.process_settings = Mock()
+        mock_profile.conf = Mock()
+        mock_profile.conf.validate = Mock()
+        mock_profile.conf.rebase_conf_definition = Mock()
+
+        conan_mock_api.profiles.detect.return_value = mock_profile
+        conan_mock_api.config.global_conf = Mock()
+
+        # Call the resolution - this should trigger auto-detection and post-processing
+        host_profile, build_profile = _resolve_profiles(None, None, conan_mock_api)
+
+        # Verify that process_settings was called on both profiles
+        assert mock_profile.process_settings.call_count == EXPECTED_PROFILE_CALL_COUNT
+
+        # Verify that conf validation was called on both profiles
+        assert mock_profile.conf.validate.call_count == EXPECTED_PROFILE_CALL_COUNT
+
+        # Verify that conf rebase was called on both profiles
+        assert mock_profile.conf.rebase_conf_definition.call_count == EXPECTED_PROFILE_CALL_COUNT
