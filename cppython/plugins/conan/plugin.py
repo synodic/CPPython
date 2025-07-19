@@ -123,8 +123,13 @@ class ConanProvider(Provider):
             update_flag = None if not update else True
             check_updates_flag = update
 
-            logger.debug('Loading dependency graph with parameters: path=%s, remotes=%d, update=%s, check_updates=%s', 
-                        path, len(remotes), update_flag, check_updates_flag)
+            logger.debug(
+                'Loading dependency graph with parameters: path=%s, remotes=%d, update=%s, check_updates=%s',
+                path,
+                len(remotes),
+                update_flag,
+                check_updates_flag,
+            )
 
             try:
                 deps_graph = conan_api.graph.load_graph_consumer(
@@ -246,7 +251,7 @@ class ConanProvider(Provider):
         """Publishes the package using conan create workflow."""
         logger = logging.getLogger('cppython.conan')
         logger.debug('Starting package publish workflow')
-        
+
         # Get the project root directory where conanfile.py should be located
         project_root = self.core_data.project_data.project_root
         conanfile_path = project_root / 'conanfile.py'
@@ -271,7 +276,7 @@ class ConanProvider(Provider):
         except Exception as e:
             logger.error('Failed to list remotes for publish: %s', e)
             raise
-            
+
         if not self.data.local_only:
             # Filter remotes to only include those specified in configuration
             configured_remotes = [remote for remote in all_remotes if remote.name in self.data.remotes]
