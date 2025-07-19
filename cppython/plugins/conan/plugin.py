@@ -76,52 +76,54 @@ class ConanProvider(Provider):
             update: If True, check remotes for newer versions/revisions and install those.
                    If False, use cached versions when available.
         """
+        operation = 'update' if update else 'install'
+        
         try:
             # Setup environment and generate conanfile
             conan_api, conanfile_path = self._prepare_installation()
+        except Exception as e:
+            raise ProviderInstallationError('conan', f'Failed to prepare {operation} environment: {e}', e) from e
 
+        try:
             # Load dependency graph
             deps_graph = self._load_dependency_graph(conan_api, conanfile_path, update)
+        except Exception as e:
+            raise ProviderInstallationError('conan', f'Failed to load dependency graph: {e}', e) from e
 
+        try:
             # Install dependencies
             self._install_binaries(conan_api, deps_graph, update)
+        except Exception as e:
+            raise ProviderInstallationError('conan', f'Failed to install binary dependencies: {e}', e) from e
 
+        try:
             # Generate consumer files
             self._generate_consumer_files(conan_api, deps_graph)
-
         except Exception as e:
-            operation = 'update' if update else 'install'
-            raise ProviderInstallationError('conan', f'Failed to {operation} dependencies: {e}', e) from e
+            raise ProviderInstallationError('conan', f'Failed to generate consumer files: {e}', e) from e
 
     def _prepare_installation(self) -> tuple[ConanAPI, Path]:
         """Prepare the installation environment and generate conanfile.
 
         Returns:
             Tuple of (ConanAPI instance, conanfile path)
-
-        Raises:
-            ProviderInstallationError: If conanfile generation or setup fails
         """
-        try:
-            # Resolve dependencies and generate conanfile.py
-            resolved_dependencies = [resolve_conan_dependency(req) for req in self.core_data.cppython_data.dependencies]
-            self.builder.generate_conanfile(self.core_data.project_data.project_root, resolved_dependencies)
+        # Resolve dependencies and generate conanfile.py
+        resolved_dependencies = [resolve_conan_dependency(req) for req in self.core_data.cppython_data.dependencies]
+        self.builder.generate_conanfile(self.core_data.project_data.project_root, resolved_dependencies)
 
-            # Ensure build directory exists
-            self.core_data.cppython_data.build_path.mkdir(parents=True, exist_ok=True)
+        # Ensure build directory exists
+        self.core_data.cppython_data.build_path.mkdir(parents=True, exist_ok=True)
 
-            # Setup paths and API
-            conan_api = ConanAPI()
-            project_root = self.core_data.project_data.project_root
-            conanfile_path = project_root / 'conanfile.py'
+        # Setup paths and API
+        conan_api = ConanAPI()
+        project_root = self.core_data.project_data.project_root
+        conanfile_path = project_root / 'conanfile.py'
 
-            if not conanfile_path.exists():
-                raise ProviderInstallationError('conan', 'Generated conanfile.py not found')
+        if not conanfile_path.exists():
+            raise FileNotFoundError('Generated conanfile.py not found')
 
-            return conan_api, conanfile_path
-
-        except Exception as e:
-            raise ProviderInstallationError('conan', f'Failed to prepare installation environment: {e}', e) from e
+        return conan_api, conanfile_path
 
     def _load_dependency_graph(self, conan_api: ConanAPI, conanfile_path: Path, update: bool):
         """Load and build the dependency graph.
@@ -133,31 +135,24 @@ class ConanProvider(Provider):
 
         Returns:
             The loaded dependency graph
-
-        Raises:
-            ProviderInstallationError: If dependency graph loading fails
         """
-        try:
-            all_remotes = conan_api.remotes.list()
-            profile_host, profile_build = self.data.host_profile, self.data.build_profile
+        all_remotes = conan_api.remotes.list()
+        profile_host, profile_build = self.data.host_profile, self.data.build_profile
 
-            return conan_api.graph.load_graph_consumer(
-                path=str(conanfile_path),
-                name=None,
-                version=None,
-                user=None,
-                channel=None,
-                lockfile=None,
-                remotes=all_remotes,
-                update=update or None,
-                check_updates=update,
-                is_build_require=False,
-                profile_host=profile_host,
-                profile_build=profile_build,
-            )
-
-        except Exception as e:
-            raise ProviderInstallationError('conan', f'Failed to load dependency graph: {e}', e) from e
+        return conan_api.graph.load_graph_consumer(
+            path=str(conanfile_path),
+            name=None,
+            version=None,
+            user=None,
+            channel=None,
+            lockfile=None,
+            remotes=all_remotes,
+            update=update or None,
+            check_updates=update,
+            is_build_require=False,
+            profile_host=profile_host,
+            profile_build=profile_build,
+        )
 
     def _install_binaries(self, conan_api: ConanAPI, deps_graph, update: bool) -> None:
         """Analyze and install binary dependencies.
@@ -166,27 +161,20 @@ class ConanProvider(Provider):
             conan_api: The Conan API instance
             deps_graph: The dependency graph
             update: Whether to check for updates
-
-        Raises:
-            ProviderInstallationError: If binary analysis or installation fails
         """
-        try:
-            all_remotes = conan_api.remotes.list()
+        all_remotes = conan_api.remotes.list()
 
-            # Analyze binaries to determine what needs to be built/downloaded
-            conan_api.graph.analyze_binaries(
-                graph=deps_graph,
-                build_mode=['missing'],
-                remotes=all_remotes,
-                update=update or None,
-                lockfile=None,
-            )
+        # Analyze binaries to determine what needs to be built/downloaded
+        conan_api.graph.analyze_binaries(
+            graph=deps_graph,
+            build_mode=['missing'],
+            remotes=all_remotes,
+            update=update or None,
+            lockfile=None,
+        )
 
-            # Install all dependencies
-            conan_api.install.install_binaries(deps_graph=deps_graph, remotes=all_remotes)
-
-        except Exception as e:
-            raise ProviderInstallationError('conan', f'Failed to install binary dependencies: {e}', e) from e
+        # Install all dependencies
+        conan_api.install.install_binaries(deps_graph=deps_graph, remotes=all_remotes)
 
     def _generate_consumer_files(self, conan_api: ConanAPI, deps_graph) -> None:
         """Generate consumer files (CMake toolchain, deps, etc.).
@@ -194,22 +182,15 @@ class ConanProvider(Provider):
         Args:
             conan_api: The Conan API instance
             deps_graph: The dependency graph
-
-        Raises:
-            ProviderInstallationError: If consumer file generation fails
         """
-        try:
-            project_root = self.core_data.project_data.project_root
+        project_root = self.core_data.project_data.project_root
 
-            conan_api.install.install_consumer(
-                deps_graph=deps_graph,
-                generators=['CMakeToolchain', 'CMakeDeps'],
-                source_folder=str(project_root),
-                output_folder=str(self.core_data.cppython_data.build_path),
-            )
-
-        except Exception as e:
-            raise ProviderInstallationError('conan', f'Failed to generate consumer files: {e}', e) from e
+        conan_api.install.install_consumer(
+            deps_graph=deps_graph,
+            generators=['CMakeToolchain', 'CMakeDeps'],
+            source_folder=str(project_root),
+            output_folder=str(self.core_data.cppython_data.build_path),
+        )
 
     def install(self) -> None:
         """Installs the provider"""

@@ -126,7 +126,8 @@ class TestConanInstall(ProviderPluginTestMixin[ConanProvider]):
 
         # Execute and verify exception is raised
         with pytest.raises(
-            ProviderInstallationError, match='Failed to install dependencies: Conan API error: package not found'
+            ProviderInstallationError,
+            match='Failed to load dependency graph: Conan API error: package not found',
         ):
             plugin.install()
 
