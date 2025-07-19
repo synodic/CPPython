@@ -34,6 +34,7 @@ from cppython.core.schema import (
 from cppython.data import Data, Plugins
 from cppython.defaults import DefaultSCM
 from cppython.utility.exception import PluginError
+from cppython.utility.utility import TypeName
 
 
 class Resolver:
@@ -59,14 +60,14 @@ class Resolver:
         raw_generator_plugins = self.find_generators()
         generator_plugins = self.filter_plugins(
             raw_generator_plugins,
-            cppython_local_configuration.generator_name,
+            self._get_effective_generator_name(cppython_local_configuration),
             'Generator',
         )
 
         raw_provider_plugins = self.find_providers()
         provider_plugins = self.filter_plugins(
             raw_provider_plugins,
-            cppython_local_configuration.provider_name,
+            self._get_effective_provider_name(cppython_local_configuration),
             'Provider',
         )
 
@@ -78,6 +79,74 @@ class Resolver:
         generator_type, provider_type = self.solve(generator_plugins, provider_plugins)
 
         return PluginBuildData(generator_type=generator_type, provider_type=provider_type, scm_type=scm_type)
+
+    def _get_effective_generator_name(self, config: CPPythonLocalConfiguration) -> str | None:
+        """Get the effective generator name from configuration
+
+        Args:
+            config: The local configuration
+
+        Returns:
+            The generator name to use, or None for auto-detection
+        """
+        if config.generators:
+            # For now, pick the first generator (in future, could support selection logic)
+            return list(config.generators.keys())[0]
+
+        # No generators specified, use auto-detection
+        return None
+
+    def _get_effective_provider_name(self, config: CPPythonLocalConfiguration) -> str | None:
+        """Get the effective provider name from configuration
+
+        Args:
+            config: The local configuration
+
+        Returns:
+            The provider name to use, or None for auto-detection
+        """
+        if config.providers:
+            # For now, pick the first provider (in future, could support selection logic)
+            return list(config.providers.keys())[0]
+
+        # No providers specified, use auto-detection
+        return None
+
+    def _get_effective_generator_config(
+        self, config: CPPythonLocalConfiguration, generator_name: str
+    ) -> dict[str, Any]:
+        """Get the effective generator configuration
+
+        Args:
+            config: The local configuration
+            generator_name: The name of the generator being used
+
+        Returns:
+            The configuration dict for the generator
+        """
+        generator_type_name = TypeName(generator_name)
+        if config.generators and generator_type_name in config.generators:
+            return config.generators[generator_type_name]
+
+        # Return empty config if not found
+        return {}
+
+    def _get_effective_provider_config(self, config: CPPythonLocalConfiguration, provider_name: str) -> dict[str, Any]:
+        """Get the effective provider configuration
+
+        Args:
+            config: The local configuration
+            provider_name: The name of the provider being used
+
+        Returns:
+            The configuration dict for the provider
+        """
+        provider_type_name = TypeName(provider_name)
+        if config.providers and provider_type_name in config.providers:
+            return config.providers[provider_type_name]
+
+        # Return empty config if not found
+        return {}
 
     @staticmethod
     def generate_cppython_plugin_data(plugin_build_data: PluginBuildData) -> PluginCPPythonData:
@@ -447,11 +516,18 @@ class Builder:
         pep621_data = self._resolver.generate_pep621_data(pep621_configuration, self._project_configuration, scm)
 
         # Create the chosen plugins
+        generator_config = self._resolver._get_effective_generator_config(
+            cppython_local_configuration, plugin_build_data.generator_type.name()
+        )
         generator = self._resolver.create_generator(
-            core_data, pep621_data, cppython_local_configuration.generator, plugin_build_data.generator_type
+            core_data, pep621_data, generator_config, plugin_build_data.generator_type
+        )
+
+        provider_config = self._resolver._get_effective_provider_config(
+            cppython_local_configuration, plugin_build_data.provider_type.name()
         )
         provider = self._resolver.create_provider(
-            core_data, pep621_data, cppython_local_configuration.provider, plugin_build_data.provider_type
+            core_data, pep621_data, provider_config, plugin_build_data.provider_type
         )
 
         plugins = Plugins(generator=generator, provider=provider, scm=scm)

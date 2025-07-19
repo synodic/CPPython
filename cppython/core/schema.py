@@ -118,6 +118,9 @@ class CPPythonData(CPPythonModel, extra='forbid'):
     scm_name: TypeName
     dependencies: list[Requirement]
 
+    provider_data: Annotated[dict[str, Any], Field(description='Resolved provider configuration data')]
+    generator_data: Annotated[dict[str, Any], Field(description='Resolved generator configuration data')]
+
     @field_validator('configuration_path', 'install_path', 'tool_path', 'build_path')  # type: ignore
     @classmethod
     def validate_absolute_path(cls, value: Path) -> Path:
@@ -302,29 +305,21 @@ class CPPythonLocalConfiguration(CPPythonModel, extra='forbid'):
         ),
     ] = Path('build')
 
-    provider: Annotated[ProviderData, Field(description="Provider plugin data associated with 'provider_name")] = (
-        ProviderData({})
-    )
-
-    provider_name: Annotated[
-        TypeName | None,
+    providers: Annotated[
+        dict[TypeName, ProviderData],
         Field(
-            alias='provider-name',
-            description='If empty, the provider will be automatically deduced.',
+            description='Named provider configurations. Key is the provider name, value is the provider configuration.'
         ),
-    ] = None
+    ] = {}
 
-    generator: Annotated[GeneratorData, Field(description="Generator plugin data associated with 'generator_name'")] = (
-        GeneratorData({})
-    )
-
-    generator_name: Annotated[
-        TypeName | None,
+    generators: Annotated[
+        dict[TypeName, GeneratorData],
         Field(
-            alias='generator-name',
-            description='If empty, the generator will be automatically deduced.',
+            description=(
+                'Named generator configurations. Key is the generator name, value is the generator configuration.'
+            )
         ),
-    ] = None
+    ] = {}
 
     dependencies: Annotated[
         list[str] | None,

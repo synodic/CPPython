@@ -13,16 +13,13 @@ dependencies = ["cppython[vcpkg, cmake, git]>=0.9.0"]
 
 
 [tool.cppython]
-generator-name = "cmake"
-provider-name = "vcpkg"
-
 install-path = "install"
 
 dependencies = ["fmt>=11.0.2"]
 
-[tool.cppython.generator]
+[tool.cppython.generators.cmake]
 
-[tool.cppython.provider]
+[tool.cppython.providers.vcpkg]
 
 [tool.pdm]
 distribution = false

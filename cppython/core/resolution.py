@@ -139,16 +139,22 @@ def resolve_cppython(
     if not modified_build_path.is_absolute():
         modified_build_path = root_directory / modified_build_path
 
-    modified_provider_name = local_configuration.provider_name
-    modified_generator_name = local_configuration.generator_name
-
-    if modified_provider_name is None:
-        modified_provider_name = plugin_build_data.provider_name
-
-    if modified_generator_name is None:
-        modified_generator_name = plugin_build_data.generator_name
+    modified_provider_name = plugin_build_data.provider_name
+    modified_generator_name = plugin_build_data.generator_name
 
     modified_scm_name = plugin_build_data.scm_name
+
+    # Extract provider and generator configuration data
+    provider_type_name = TypeName(modified_provider_name)
+    generator_type_name = TypeName(modified_generator_name)
+
+    provider_data = {}
+    if local_configuration.providers and provider_type_name in local_configuration.providers:
+        provider_data = local_configuration.providers[provider_type_name]
+
+    generator_data = {}
+    if local_configuration.generators and generator_type_name in local_configuration.generators:
+        generator_data = local_configuration.generators[generator_type_name]
 
     # Construct dependencies from the local configuration only
     dependencies: list[Requirement] = []
@@ -173,6 +179,8 @@ def resolve_cppython(
         generator_name=modified_generator_name,
         scm_name=modified_scm_name,
         dependencies=dependencies,
+        provider_data=provider_data,
+        generator_data=generator_data,
     )
     return cppython_data
 
@@ -200,6 +208,8 @@ def resolve_cppython_plugin(cppython_data: CPPythonData, plugin_type: type[Plugi
         generator_name=cppython_data.generator_name,
         scm_name=cppython_data.scm_name,
         dependencies=cppython_data.dependencies,
+        provider_data=cppython_data.provider_data,
+        generator_data=cppython_data.generator_data,
     )
 
     return cast(CPPythonPluginData, plugin_data)

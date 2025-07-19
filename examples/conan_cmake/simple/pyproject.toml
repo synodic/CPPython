@@ -13,16 +13,13 @@ dependencies = ["cppython[conan, cmake, git]>=0.9.0"]
 
 
 [tool.cppython]
-generator-name = "cmake"
-provider-name = "conan"
-
 install-path = "install"
 
 dependencies = ["fmt>=11.2.0"]
 
-[tool.cppython.generator]
+[tool.cppython.generators.cmake]
 
-[tool.cppython.provider]
+[tool.cppython.providers.conan]
 
 [tool.pdm]
 distribution = false

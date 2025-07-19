@@ -8,13 +8,16 @@ from cppython.builder import Builder
 from cppython.core.resolution import PluginBuildData
 from cppython.core.schema import (
     CPPythonLocalConfiguration,
+    GeneratorData,
     PEP621Configuration,
     ProjectConfiguration,
+    ProviderData,
 )
 from cppython.data import Data
 from cppython.test.mock.generator import MockGenerator
 from cppython.test.mock.provider import MockProvider
 from cppython.test.mock.scm import MockSCM
+from cppython.utility.utility import TypeName
 
 
 class TestData:
@@ -58,3 +61,19 @@ class TestData:
             data: Fixture for the mocked data class
         """
         data.sync()
+
+    @staticmethod
+    def test_named_plugin_configuration() -> None:
+        """Test that named plugin configuration is properly validated"""
+        # Test valid named configuration
+        config = CPPythonLocalConfiguration(
+            providers={TypeName('conan'): ProviderData({'some_setting': 'value'})},
+            generators={TypeName('cmake'): GeneratorData({'another_setting': True})},
+        )
+        assert config.providers == {TypeName('conan'): {'some_setting': 'value'}}
+        assert config.generators == {TypeName('cmake'): {'another_setting': True}}
+
+        # Test empty configuration is valid
+        config_empty = CPPythonLocalConfiguration()
+        assert config_empty.providers == {}
+        assert config_empty.generators == {}
