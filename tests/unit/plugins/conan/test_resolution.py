@@ -286,7 +286,7 @@ class TestResolveProfiles:
 
         assert host_result == mock_host_profile
         assert build_result == mock_build_profile
-        assert mock_conan_api.profiles.get_profile.call_count == 2
+        assert mock_conan_api.profiles.get_profile.call_count == EXPECTED_PROFILE_CALL_COUNT
         mock_conan_api.profiles.get_profile.assert_any_call(['host-profile'])
         mock_conan_api.profiles.get_profile.assert_any_call(['build-profile'])
 
@@ -340,8 +340,8 @@ class TestResolveProfiles:
 
         assert host_result == mock_host_profile
         assert build_result == mock_build_profile
-        assert mock_conan_api.profiles.detect.call_count == 2
-        assert mock_post_process.call_count == 2
+        assert mock_conan_api.profiles.detect.call_count == EXPECTED_PROFILE_CALL_COUNT
+        assert mock_post_process.call_count == EXPECTED_PROFILE_CALL_COUNT
         mock_post_process.assert_any_call([mock_host_profile], mock_conan_api, mock_cache_settings, None)
         mock_post_process.assert_any_call([mock_build_profile], mock_conan_api, mock_cache_settings, None)
 
@@ -366,8 +366,8 @@ class TestResolveProfiles:
 
         assert host_result == mock_host_profile
         assert build_result == mock_build_profile
-        assert mock_conan_api.profiles.detect.call_count == 2
-        assert mock_post_process.call_count == 2
+        assert mock_conan_api.profiles.detect.call_count == EXPECTED_PROFILE_CALL_COUNT
+        assert mock_post_process.call_count == EXPECTED_PROFILE_CALL_COUNT
         mock_post_process.assert_any_call([mock_host_profile], mock_conan_api, mock_cache_settings, None)
         mock_post_process.assert_any_call([mock_build_profile], mock_conan_api, mock_cache_settings, None)
 

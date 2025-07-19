@@ -20,13 +20,16 @@ from cppython.core.schema import (
     CPPythonData,
     CPPythonGlobalConfiguration,
     CPPythonLocalConfiguration,
+    GeneratorData,
     PEP621Configuration,
     PEP621Data,
     ProjectConfiguration,
     ProjectData,
+    ProviderData,
     PyProject,
     ToolData,
 )
+from cppython.utility.utility import TypeName
 
 
 @pytest.fixture(
@@ -91,7 +94,9 @@ def fixture_cppython_local_configuration(install_path: Path) -> CPPythonLocalCon
         Variation of CPPython data
     """
     cppython_local_configuration = CPPythonLocalConfiguration(
-        install_path=install_path, providers={'mock': {}}, generators={'mock': {}}
+        install_path=install_path,
+        providers={TypeName('mock'): ProviderData({})},
+        generators={TypeName('mock'): GeneratorData({})},
     )
 
     return cppython_local_configuration
