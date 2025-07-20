@@ -125,14 +125,13 @@ class Builder:
         """Creates a conanfile.py file with the necessary content."""
         template_string = """
         from conan import ConanFile
-        from conan.tools.cmake import CMake, cmake_layout
+        from conan.tools.cmake import CMake, CMakeDeps, cmake_layout
 
         class AutoPackage(ConanFile):
             name = "${name}"
             version = "${version}"
             settings = "os", "compiler", "build_type", "arch"
             requires = ${dependencies}
-            generators = "CMakeDeps"
 
             def layout(self):
                 cmake_layout(self)

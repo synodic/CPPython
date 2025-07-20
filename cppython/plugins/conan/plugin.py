@@ -192,7 +192,7 @@ class ConanProvider(Provider):
 
         conan_api.install.install_consumer(
             deps_graph=deps_graph,
-            generators=['CMakeToolchain', 'CMakeDeps'],
+            generators=[],  # Our conanfile.py template defines this
             source_folder=str(project_root),
             output_folder=str(self.core_data.cppython_data.build_path),
         )
