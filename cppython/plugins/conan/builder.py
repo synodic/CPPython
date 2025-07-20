@@ -121,15 +121,15 @@ class Builder:
         self._filename = 'conanfile.py'
 
     @staticmethod
-    def _create_conanfile(conan_file: Path, dependencies: list[ConanDependency]) -> None:
+    def _create_conanfile(conan_file: Path, dependencies: list[ConanDependency], name: str, version: str) -> None:
         """Creates a conanfile.py file with the necessary content."""
         template_string = """
         from conan import ConanFile
         from conan.tools.cmake import CMake, cmake_layout
 
-        class MyProject(ConanFile):
-            name = "myproject" 
-            version = "1.0"
+        class AutoPackage(ConanFile):
+            name = "${name}"
+            version = "${version}"
             settings = "os", "compiler", "build_type", "arch"
             requires = ${dependencies}
             generators = "CMakeDeps"
@@ -137,14 +137,25 @@ class Builder:
             def layout(self):
                 cmake_layout(self)
 
+            def generate(self):
+                deps = CMakeDeps(self)
+                deps.generate()
+
             def build(self):
                 cmake = CMake(self)
                 cmake.configure()
-                cmake.build()"""
+                cmake.build()
+
+            def package(self):
+                cmake = CMake(self)
+                cmake.install()
+            """
 
         template = Template(dedent(template_string))
 
         values = {
+            'name': name,
+            'version': version,
             'dependencies': [dependency.requires() for dependency in dependencies],
         }
 
@@ -153,7 +164,9 @@ class Builder:
         with open(conan_file, 'w', encoding='utf-8') as file:
             file.write(result)
 
-    def generate_conanfile(self, directory: DirectoryPath, dependencies: list[ConanDependency]) -> None:
+    def generate_conanfile(
+        self, directory: DirectoryPath, dependencies: list[ConanDependency], name: str, version: str
+    ) -> None:
         """Generate a conanfile.py file for the project."""
         conan_file = directory / self._filename
 
@@ -167,4 +180,4 @@ class Builder:
             conan_file.write_text(modified.code, encoding='utf-8')
         else:
             directory.mkdir(parents=True, exist_ok=True)
-            self._create_conanfile(conan_file, dependencies)
+            self._create_conanfile(conan_file, dependencies, name, version)

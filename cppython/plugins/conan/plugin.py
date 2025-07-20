@@ -110,7 +110,12 @@ class ConanProvider(Provider):
         """
         # Resolve dependencies and generate conanfile.py
         resolved_dependencies = [resolve_conan_dependency(req) for req in self.core_data.cppython_data.dependencies]
-        self.builder.generate_conanfile(self.core_data.project_data.project_root, resolved_dependencies)
+        self.builder.generate_conanfile(
+            self.core_data.project_data.project_root,
+            resolved_dependencies,
+            self.core_data.pep621_data.name,
+            self.core_data.pep621_data.version,
+        )
 
         # Ensure build directory exists
         self.core_data.cppython_data.build_path.mkdir(parents=True, exist_ok=True)
