@@ -98,5 +98,14 @@ class Project(API):
         Raises:
             Exception: Provider-specific exception
         """
+        if not self._enabled:
+            self.logger.info('Skipping publish because the project is not enabled')
+            return
+
+        self.logger.info('Publishing project')
+
+        # Ensure sync is performed before publishing to generate necessary files
+        self._data.sync()
+
         # Let provider handle its own exceptions for better error context
         self._data.plugins.provider.publish()
