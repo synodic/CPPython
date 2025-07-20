@@ -446,7 +446,7 @@ class TestResolveConanData:
         mock_build_profile = Mock(spec=Profile)
         mock_resolve_profiles.return_value = (mock_host_profile, mock_build_profile)
 
-        data = {'host_profile': None, 'build_profile': None, 'remotes': []}
+        data = {'host_profile': None, 'build_profile': None, 'remotes': [], 'skip_upload': False}
         core_data = Mock(spec=CorePluginData)
 
         result = resolve_conan_data(data, core_data)
@@ -455,6 +455,7 @@ class TestResolveConanData:
         assert result.host_profile == mock_host_profile
         assert result.build_profile == mock_build_profile
         assert result.remotes == []
+        assert result.skip_upload is False
 
         # Verify profile resolution was called with None values
         mock_resolve_profiles.assert_called_once_with(None, None, mock_conan_api, None)

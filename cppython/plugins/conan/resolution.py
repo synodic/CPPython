@@ -318,6 +318,7 @@ def resolve_conan_data(data: dict[str, Any], core_data: CorePluginData) -> Conan
 
     return ConanData(
         remotes=parsed_data.remotes,
+        skip_upload=parsed_data.skip_upload,
         host_profile=host_profile,
         build_profile=build_profile,
     )

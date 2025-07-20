@@ -293,13 +293,9 @@ class ConanData(CPPythonModel):
     """Resolved conan data"""
 
     remotes: list[str]
+    skip_upload: bool
     host_profile: Profile
     build_profile: Profile
-
-    @property
-    def local_only(self) -> bool:
-        """Check if publishing should be local-only."""
-        return len(self.remotes) == 0
 
 
 class ConanConfiguration(CPPythonModel):
@@ -307,8 +303,12 @@ class ConanConfiguration(CPPythonModel):
 
     remotes: Annotated[
         list[str],
-        Field(description='List of remotes to upload to. Empty list means the local conan cache will be used.'),
+        Field(description='List of remotes to upload to. If empty, uploads to all available remotes.'),
     ] = ['conancenter']
+    skip_upload: Annotated[
+        bool,
+        Field(description='If true, skip uploading packages during publish (local-only mode).'),
+    ] = False
     host_profile: Annotated[
         str | None,
         Field(

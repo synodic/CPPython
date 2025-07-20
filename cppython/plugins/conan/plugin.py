@@ -247,6 +247,7 @@ class ConanProvider(Provider):
             raise FileNotFoundError(f'conanfile.py not found at {conanfile_path}')
 
         conan_api = ConanAPI()
+
         all_remotes = conan_api.remotes.list()
 
         # Configure remotes for upload
@@ -272,7 +273,7 @@ class ConanProvider(Provider):
             user=None,
             channel=None,
             lockfile=None,
-            remotes=all_remotes,
+            remotes=all_remotes,  # Use all remotes for dependency resolution
             update=None,
             check_updates=False,
             is_build_require=False,
@@ -284,22 +285,31 @@ class ConanProvider(Provider):
         conan_api.graph.analyze_binaries(
             graph=deps_graph,
             build_mode=['*'],
-            remotes=all_remotes,
+            remotes=all_remotes,  # Use all remotes for dependency resolution
             update=None,
             lockfile=None,
         )
 
         conan_api.install.install_binaries(deps_graph=deps_graph, remotes=all_remotes)
 
-        # Upload if not local only
-        if not self.data.local_only:
+        if not self.data.skip_upload:
             self._upload_package(conan_api, ref, configured_remotes)
 
     def _get_configured_remotes(self, all_remotes):
-        """Get and validate configured remotes for upload."""
-        if self.data.local_only:
+        """Get and validate configured remotes for upload.
+
+        Note: This only affects upload behavior. For dependency resolution,
+        we always use all available system remotes regardless of this config.
+        """
+        # If skip_upload is True, don't upload anywhere
+        if self.data.skip_upload:
             return []
 
+        # If no remotes specified, upload to all available remotes
+        if not self.data.remotes:
+            return all_remotes
+
+        # Otherwise, upload only to specified remotes
         configured_remotes = [remote for remote in all_remotes if remote.name in self.data.remotes]
 
         if not configured_remotes:

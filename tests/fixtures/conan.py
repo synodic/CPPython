@@ -1,6 +1,7 @@
 """Shared fixtures for Conan plugin tests"""
 
 from pathlib import Path
+from typing import Any
 from unittest.mock import Mock
 
 import pytest
@@ -9,6 +10,24 @@ from pytest_mock import MockerFixture
 
 from cppython.plugins.conan.plugin import ConanProvider
 from cppython.plugins.conan.schema import ConanDependency
+
+# Shared parameterization for plugin data across all conan tests
+CONAN_PLUGIN_DATA_PARAMS = [
+    {'remotes': ['conancenter'], 'skip_upload': False},  # Default behavior
+    {'remotes': [], 'skip_upload': False},  # Empty remotes (upload to all)
+    {'remotes': ['conancenter'], 'skip_upload': True},  # Skip upload with specific remotes
+    {'remotes': [], 'skip_upload': True},  # Skip upload with empty remotes
+]
+
+
+@pytest.fixture(name='conan_plugin_data', scope='session', params=CONAN_PLUGIN_DATA_PARAMS)
+def fixture_conan_plugin_data(request) -> dict[str, Any]:
+    """Shared parameterized plugin data for conan tests
+
+    Returns:
+        The constructed plugin data with different combinations of remotes and skip_upload
+    """
+    return request.param
 
 
 @pytest.fixture(autouse=True)

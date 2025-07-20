@@ -29,15 +29,13 @@ class TestConanInstall(ProviderPluginTestMixin[ConanProvider]):
 
     @staticmethod
     @pytest.fixture(name='plugin_data', scope='session')
-    def fixture_plugin_data() -> dict[str, Any]:
+    def fixture_plugin_data(conan_plugin_data: dict[str, Any]) -> dict[str, Any]:
         """A required testing hook that allows data generation
 
         Returns:
             The constructed plugin data
         """
-        return {
-            'remotes': [],
-        }
+        return conan_plugin_data
 
     @staticmethod
     @pytest.fixture(name='plugin_type', scope='session')

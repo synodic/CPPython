@@ -52,7 +52,7 @@ class TestConanCMake:
 
         # --- Setup for Publish with modified config ---
         # Modify the in-memory representation of the pyproject data
-        pyproject_data['tool']['cppython']['providers']['conan']['remotes'] = []
+        pyproject_data['tool']['cppython']['providers']['conan']['skip_upload'] = True
 
         # Create a new project instance with the modified configuration for the 'publish' step
         publish_project = Project(project_configuration, interface, pyproject_data)

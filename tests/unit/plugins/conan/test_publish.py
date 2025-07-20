@@ -42,10 +42,10 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
         """
         return ConanProvider
 
-    def test_local_only(
+    def test_skip_upload(
         self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
     ) -> None:
-        """Test that publish with remotes=[] only exports and builds locally
+        """Test that publish with skip_upload=True only exports and builds locally
 
         Args:
             plugin: The plugin instance
@@ -53,8 +53,8 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
             conan_temp_conanfile: Fixture to create conanfile.py
             mocker: Pytest mocker fixture
         """
-        # Set plugin to local mode
-        plugin.data.remotes = []
+        # Set plugin to skip upload mode
+        plugin.data.skip_upload = True
 
         # Mock the necessary imports and API creation
         mocker.patch('cppython.plugins.conan.plugin.ConanAPI', return_value=conan_mock_api_publish)
@@ -190,8 +190,8 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
             conan_temp_conanfile: Fixture to create conanfile.py
             mocker: Pytest mocker fixture
         """
-        # Set plugin to local mode
-        plugin.data.remotes = []
+        # Set plugin to skip upload mode
+        plugin.data.skip_upload = True
 
         # Mock the necessary imports and API creation
         mocker.patch('cppython.plugins.conan.plugin.ConanAPI', return_value=conan_mock_api_publish)
