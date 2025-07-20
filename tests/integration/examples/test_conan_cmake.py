@@ -111,6 +111,10 @@ class TestConanCMake:
         library_source = examples_root / 'conan_cmake' / 'library'
         library_temp = Path('temp_library')
 
+        # Clean up any existing temp directory first
+        if library_temp.exists():
+            shutil.rmtree(library_temp)
+
         # Copy library to temp location
         shutil.copytree(library_source, library_temp)
 
@@ -130,6 +134,9 @@ class TestConanCMake:
 
         finally:
             os.chdir(original_cwd)
+            # Clean up temp directory
+            if library_temp.exists():
+                shutil.rmtree(library_temp)
 
     @staticmethod
     def test_library_consumer(example_runner: CliRunner) -> None:
