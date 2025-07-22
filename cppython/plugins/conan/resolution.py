@@ -188,7 +188,7 @@ def _resolve_profiles(
             _apply_cmake_config_to_profile(profile, cmake_program, profile_type)
             return profile
         except Exception as e:
-            logger.warning('Default %s profile not available, using auto-detection: %s', profile_type, str(e))
+            logger.debug('Default %s profile not available, using auto-detection: %s', profile_type, str(e))
 
             # Create auto-detected profile
             profile = conan_api.profiles.detect()
