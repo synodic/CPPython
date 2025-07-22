@@ -82,7 +82,7 @@ class CMakeSyncData(SyncData):
     """The CMake sync data"""
 
     top_level_includes: FilePath | None = None
-    toolchain: FilePath | None = None
+    toolchain: Path | None = None  # We don't resolve the toolchain until after we set it
 
     def model_post_init(self, __context) -> None:
         """Validate that at least one of top_level_includes or toolchain is provided."""
