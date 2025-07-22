@@ -59,7 +59,7 @@ class ConfigurePreset(CPPythonModel, extra='allow'):
         Field(description='The path to the output binary directory.'),
     ] = None
     toolchainFile: Annotated[
-        FilePath | None,
+        Path | None,
         Field(description='Path to the toolchain file.'),
     ] = None
     cacheVariables: dict[str, None | bool | str | CacheVariable] | None = None
