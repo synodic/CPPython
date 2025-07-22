@@ -229,9 +229,6 @@ class ConanProvider(Provider):
                 # Use the CMakeToolchain file directly as the toolchain
                 toolchain_path = self.core_data.cppython_data.build_path / 'conan_toolchain.cmake'
 
-                # Create the directory structure if it doesn't exist
-                toolchain_path.parent.mkdir(parents=True, exist_ok=True)
-
                 return CMakeSyncData(
                     provider_name=TypeName('conan'),
                     toolchain=toolchain_path,
