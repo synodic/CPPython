@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from cppython.plugins.cmake.schema import CMakeData, CMakePresets, CMakeSyncData, ConfigurePreset
+from cppython.plugins.cmake.schema import CacheVariable, CMakeData, CMakePresets, CMakeSyncData, ConfigurePreset
 
 
 class Builder:
@@ -21,10 +21,18 @@ class Builder:
         """
         generated_configure_preset = ConfigurePreset(name=provider_data.provider_name, hidden=True)
 
-        # Toss in that sync data from the provider
-        generated_configure_preset.cacheVariables = {
-            'CMAKE_PROJECT_TOP_LEVEL_INCLUDES': str(provider_data.top_level_includes.as_posix()),
-        }
+        # Handle both top_level_includes and toolchain options
+        cache_variables: dict[str, str | bool | CacheVariable | None] = {}
+
+        if provider_data.top_level_includes:
+            cache_variables['CMAKE_PROJECT_TOP_LEVEL_INCLUDES'] = str(provider_data.top_level_includes.as_posix())
+
+        if provider_data.toolchain:
+            # Use the toolchainFile field for better integration
+            generated_configure_preset.toolchainFile = str(provider_data.toolchain.as_posix())
+
+        if cache_variables:
+            generated_configure_preset.cacheVariables = cache_variables
 
         return CMakePresets(configurePresets=[generated_configure_preset])
 

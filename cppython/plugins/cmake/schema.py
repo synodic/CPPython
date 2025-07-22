@@ -58,6 +58,10 @@ class ConfigurePreset(CPPythonModel, extra='allow'):
         str | None,
         Field(description='The path to the output binary directory.'),
     ] = None
+    toolchainFile: Annotated[
+        FilePath | None,
+        Field(description='Path to the toolchain file.'),
+    ] = None
     cacheVariables: dict[str, None | bool | str | CacheVariable] | None = None
 
 
@@ -77,7 +81,13 @@ class CMakePresets(CPPythonModel, extra='allow'):
 class CMakeSyncData(SyncData):
     """The CMake sync data"""
 
-    top_level_includes: FilePath
+    top_level_includes: FilePath | None = None
+    toolchain: FilePath | None = None
+
+    def model_post_init(self, __context) -> None:
+        """Validate that at least one of top_level_includes or toolchain is provided."""
+        if not self.top_level_includes and not self.toolchain:
+            raise ValueError("Either 'top_level_includes' or 'toolchain' must be provided")
 
 
 class CMakeData(CPPythonModel):

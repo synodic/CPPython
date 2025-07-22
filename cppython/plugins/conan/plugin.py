@@ -8,7 +8,6 @@ installation, and synchronization with other tools.
 from pathlib import Path
 from typing import Any
 
-import requests
 from conan.api.conan_api import ConanAPI
 from conan.api.model import ListPattern
 
@@ -27,8 +26,6 @@ from cppython.utility.utility import TypeName
 class ConanProvider(Provider):
     """Conan Provider"""
 
-    _provider_url = 'https://raw.githubusercontent.com/conan-io/cmake-conan/refs/heads/develop2/conan_provider.cmake'
-
     def __init__(
         self, group_data: ProviderPluginGroupData, core_data: CorePluginData, configuration_data: dict[str, Any]
     ) -> None:
@@ -38,15 +35,6 @@ class ConanProvider(Provider):
         self.data: ConanData = resolve_conan_data(configuration_data, core_data)
 
         self.builder = Builder()
-
-    @staticmethod
-    def _download_file(url: str, file: Path) -> None:
-        """Replaces the given file with the contents of the url"""
-        file.parent.mkdir(parents=True, exist_ok=True)
-
-        with open(file, 'wb') as out_file:
-            content = requests.get(url, stream=True).content
-            out_file.write(content)
 
     @staticmethod
     def features(directory: Path) -> SupportedFeatures:
@@ -197,6 +185,13 @@ class ConanProvider(Provider):
             output_folder=str(self.core_data.cppython_data.build_path),
         )
 
+        # Rename the generated toolchain file so our wrapper can include it
+        original_toolchain = self.core_data.cppython_data.build_path / 'conan_toolchain.cmake'
+        renamed_toolchain = self.core_data.cppython_data.build_path / 'conan_toolchain.cmake.real'
+
+        if original_toolchain.exists() and not renamed_toolchain.exists():
+            original_toolchain.rename(renamed_toolchain)
+
     def install(self) -> None:
         """Installs the provider"""
         self._install_dependencies(update=False)
@@ -231,17 +226,51 @@ class ConanProvider(Provider):
         """
         for sync_type in consumer.sync_types():
             if sync_type == CMakeSyncData:
+                # Use the CMakeToolchain file directly as the toolchain
+                toolchain_path = self.core_data.cppython_data.build_path / 'conan_toolchain.cmake'
+
+                # Create the directory structure if it doesn't exist
+                toolchain_path.parent.mkdir(parents=True, exist_ok=True)
+
+                # Always create a minimal toolchain file that includes dependencies when they exist
+                toolchain_content = f'''# Conan CMake integration file
+# This file is managed by CPPython and integrates Conan dependencies with CMake
+
+# Set the build directory for reference
+set(CONAN_BUILD_DIR "{self.core_data.cppython_data.build_path.as_posix()}")
+
+# Include CMakeDeps generated dependency files if they exist
+file(GLOB CONAN_DEPS_FILES "${{CONAN_BUILD_DIR}}/*-config.cmake")
+foreach(DEPS_FILE ${{CONAN_DEPS_FILES}})
+    include("${{DEPS_FILE}}")
+endforeach()
+
+# Include any conan-generated toolchain files
+if(EXISTS "${{CONAN_BUILD_DIR}}/conan_toolchain.cmake.real")
+    include("${{CONAN_BUILD_DIR}}/conan_toolchain.cmake.real")
+else()
+    message(STATUS "Conan dependencies not installed yet - run conan install to install dependencies")
+endif()
+'''
+
+                toolchain_path.write_text(toolchain_content)
+
                 return CMakeSyncData(
                     provider_name=TypeName('conan'),
-                    top_level_includes=self.core_data.cppython_data.install_path / 'conan_provider.cmake',
+                    toolchain=toolchain_path,
                 )
 
         raise NotSupportedError(f'Unsupported sync types: {consumer.sync_types()}')
 
     @classmethod
     async def download_tooling(cls, directory: Path) -> None:
-        """Downloads the conan provider file"""
-        cls._download_file(cls._provider_url, directory / 'conan_provider.cmake')
+        """Download external tooling required by the Conan provider.
+
+        Since we're using CMakeToolchain generator instead of cmake-conan provider,
+        no external tooling needs to be downloaded.
+        """
+        # No external tooling required when using CMakeToolchain
+        pass
 
     def publish(self) -> None:
         """Publishes the package using conan create workflow."""
