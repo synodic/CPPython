@@ -125,7 +125,7 @@ class Builder:
         """Creates a conanfile.py file with the necessary content."""
         template_string = """
         from conan import ConanFile
-        from conan.tools.cmake import CMake, CMakeDeps, cmake_layout
+        from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
         class AutoPackage(ConanFile):
             name = "${name}"
@@ -139,6 +139,8 @@ class Builder:
             def generate(self):
                 deps = CMakeDeps(self)
                 deps.generate()
+                tc = CMakeToolchain(self)
+                tc.generate()
 
             def build(self):
                 cmake = CMake(self)
