@@ -232,29 +232,6 @@ class ConanProvider(Provider):
                 # Create the directory structure if it doesn't exist
                 toolchain_path.parent.mkdir(parents=True, exist_ok=True)
 
-                # Always create a minimal toolchain file that includes dependencies when they exist
-                toolchain_content = f'''# Conan CMake integration file
-# This file is managed by CPPython and integrates Conan dependencies with CMake
-
-# Set the build directory for reference
-set(CONAN_BUILD_DIR "{self.core_data.cppython_data.build_path.as_posix()}")
-
-# Include CMakeDeps generated dependency files if they exist
-file(GLOB CONAN_DEPS_FILES "${{CONAN_BUILD_DIR}}/*-config.cmake")
-foreach(DEPS_FILE ${{CONAN_DEPS_FILES}})
-    include("${{DEPS_FILE}}")
-endforeach()
-
-# Include any conan-generated toolchain files
-if(EXISTS "${{CONAN_BUILD_DIR}}/conan_toolchain.cmake.real")
-    include("${{CONAN_BUILD_DIR}}/conan_toolchain.cmake.real")
-else()
-    message(STATUS "Conan dependencies not installed yet - run conan install to install dependencies")
-endif()
-'''
-
-                toolchain_path.write_text(toolchain_content)
-
                 return CMakeSyncData(
                     provider_name=TypeName('conan'),
                     toolchain=toolchain_path,
