@@ -29,7 +29,7 @@ class Builder:
 
         if provider_data.toolchain:
             # Use the toolchainFile field for better integration
-            generated_configure_preset.toolchainFile = provider_data.toolchain
+            generated_configure_preset.toolchainFile = provider_data.toolchain.as_posix()
 
         if cache_variables:
             generated_configure_preset.cacheVariables = cache_variables
