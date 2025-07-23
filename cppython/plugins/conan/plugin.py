@@ -182,9 +182,7 @@ class ConanProvider(Provider):
             deps_graph=deps_graph,
             generators=None,  # Our conanfile.py template defines this
             source_folder=str(project_root),
-            output_folder=str(self.core_data.cppython_data.build_path),
         )
-        conan_api.install.
 
     def install(self) -> None:
         """Installs the provider"""
@@ -221,7 +219,7 @@ class ConanProvider(Provider):
         for sync_type in consumer.sync_types():
             if sync_type == CMakeSyncData:
                 # Use the CMakeToolchain file directly as the toolchain
-                toolchain_path = self.core_data.cppython_data.build_path / 'conan_toolchain.cmake'
+                toolchain_path = self.core_data.cppython_data.build_path / 'generators' / 'conan_toolchain.cmake'
 
                 return CMakeSyncData(
                     provider_name=TypeName('conan'),
