@@ -24,7 +24,7 @@ pytest = ["pytest>=8.4.1", "pytest-mock>=3.14.1"]
 git = ["dulwich>=0.23.2"]
 pdm = ["pdm>=2.25.4"]
 cmake = ["cmake>=4.0.3"]
-conan = ["conan>=2.18.1", "libcst>=1.8.2"]
+conan = ["conan>=2.19.0", "libcst>=1.8.2"]
 
 [project.urls]
 homepage = "https://github.com/Synodic-Software/CPPython"
@@ -47,7 +47,7 @@ cppython = "cppython.plugins.pdm.plugin:CPPythonPlugin"
 cppython = "cppython.test.pytest.fixtures"
 
 [dependency-groups]
-lint = ["ruff>=0.12.4", "pyrefly>=0.25.0"]
+lint = ["ruff>=0.12.5", "pyrefly>=0.25.1"]
 test = ["pytest>=8.4.1", "pytest-cov>=6.2.1", "pytest-mock>=3.14.1"]
 
 [project.scripts]
