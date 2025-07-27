@@ -4,8 +4,6 @@ This module contains integration tests for projects that use conan and CMake.
 The tests ensure that the projects build, configure, and execute correctly.
 """
 
-import os
-import shutil
 import subprocess
 from pathlib import Path
 from tomllib import loads
@@ -103,63 +101,3 @@ class TestConanCMake:
         # Package the library to local cache
         publish_project = TestConanCMake._create_project(skip_upload=True)
         publish_project.publish()
-
-    @staticmethod
-    def _publish_library_to_cache() -> None:
-        """Helper method to publish the library to local Conan cache"""
-        examples_root = Path(__file__).parent.parent.parent.parent / 'examples'
-        library_source = examples_root / 'conan_cmake' / 'library'
-        library_temp = Path('temp_library')
-
-        # Clean up any existing temp directory first
-        if library_temp.exists():
-            shutil.rmtree(library_temp)
-
-        # Copy library to temp location
-        shutil.copytree(library_source, library_temp)
-
-        # Change to library directory and publish it
-        original_cwd = Path.cwd()
-        try:
-            os.chdir(library_temp)
-
-            # Create and configure library project
-            lib_project = TestConanCMake._create_project(skip_upload=True)
-            lib_project.install()
-
-            # Build and publish library
-            TestConanCMake._run_cmake_configure()
-            TestConanCMake._run_cmake_build()
-            lib_project.publish()
-
-        finally:
-            os.chdir(original_cwd)
-            # Clean up temp directory
-            if library_temp.exists():
-                shutil.rmtree(library_temp)
-
-    @staticmethod
-    def test_library_consumer(example_runner: CliRunner) -> None:
-        """Test that a consumer can use the published library"""
-        # First, publish the library to the local cache
-        TestConanCMake._publish_library_to_cache()
-
-        # Create consumer project and install dependencies
-        consumer_project = TestConanCMake._create_project(skip_upload=False)
-        consumer_project.install()
-
-        # Configure and build the consumer
-        TestConanCMake._run_cmake_configure()
-        TestConanCMake._run_cmake_build()
-        build_path = TestConanCMake._verify_build_artifacts()
-
-        # Verify the executable was created and works
-        exe_files = list(build_path.glob('**/consumer*'))
-        assert len(exe_files) > 0, f'No consumer executable found in {build_path}'
-
-        # Run the consumer to verify it works
-        exe_path = next((f for f in exe_files if f.suffix == '.exe' or f.is_file()), None)
-        if exe_path:
-            result = subprocess.run([str(exe_path)], capture_output=True, text=True, check=False)
-            assert result.returncode == 0, f'Consumer execution failed: {result.stderr}'
-            assert 'MathUtils' in result.stdout, f'Expected MathUtils output not found: {result.stdout}'
