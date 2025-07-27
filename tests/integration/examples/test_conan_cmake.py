@@ -85,26 +85,6 @@ class TestConanCMake:
         publish_project.publish()
 
     @staticmethod
-    def test_library(example_runner: CliRunner) -> None:
-        """Test library creation and packaging workflow"""
-        # Create project and install dependencies
-        project = TestConanCMake._create_project(skip_upload=False)
-        project.install()
-
-        # Configure, build, and verify
-        TestConanCMake._run_cmake_configure()
-        TestConanCMake._run_cmake_build()
-        build_path = TestConanCMake._verify_build_artifacts()
-
-        # Verify library files exist (platform-specific)
-        lib_files = list(build_path.glob('**/libmathutils.*')) + list(build_path.glob('**/mathutils.lib'))
-        assert len(lib_files) > 0, f'No library files found in {build_path}'
-
-        # Package the library to local cache
-        publish_project = TestConanCMake._create_project(skip_upload=True)
-        publish_project.publish()
-
-    @staticmethod
     def _publish_library_to_cache() -> None:
         """Helper method to publish the library to local Conan cache"""
         examples_root = Path(__file__).parent.parent.parent.parent / 'examples'
