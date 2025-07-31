@@ -1,20 +1,21 @@
 """Unit tests for the conan plugin publish functionality"""
 
+import subprocess
 from typing import Any
-from unittest.mock import MagicMock, Mock
 
 import pytest
 from pytest_mock import MockerFixture
 
 from cppython.plugins.conan.plugin import ConanProvider
 from cppython.test.pytest.mixins import ProviderPluginTestMixin
-from cppython.utility.exception import ProviderConfigurationError, ProviderInstallationError
+from cppython.utility.exception import ProviderInstallationError
 
 # Use shared fixtures
 pytest_plugins = ['tests.fixtures.conan']
 
 # Constants for test assertions
-EXPECTED_PROFILE_CALLS = 2
+EXPECTED_SUBPROCESS_CALLS_WITH_UPLOAD = 2
+EXPECTED_SUBPROCESS_CALLS_SINGLE = 1
 
 
 class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
@@ -43,246 +44,217 @@ class TestConanPublish(ProviderPluginTestMixin[ConanProvider]):
         return ConanProvider
 
     def test_skip_upload(
-        self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
+        self, plugin: ConanProvider, conan_temp_conanfile: None, mocker: MockerFixture
     ) -> None:
-        """Test that publish with skip_upload=True only exports and builds locally
+        """Test that publish with skip_upload=True only runs conan create without upload
 
         Args:
             plugin: The plugin instance
-            conan_mock_api_publish: Mock ConanAPI for publish operations
             conan_temp_conanfile: Fixture to create conanfile.py
             mocker: Pytest mocker fixture
         """
         # Set plugin to skip upload mode
         plugin.data.skip_upload = True
 
-        # Mock the necessary imports and API creation
-        mocker.patch('cppython.plugins.conan.plugin.ConanAPI', return_value=conan_mock_api_publish)
+        # Mock subprocess.run
+        mock_subprocess_run = mocker.patch('cppython.plugins.conan.plugin.subprocess.run')
+        mock_subprocess_run.return_value = mocker.Mock(returncode=0)
 
-        # Mock the dependencies graph
-        mock_graph = mocker.Mock()
-        conan_mock_api_publish.graph.load_graph_consumer.return_value = mock_graph
+        # Mock getLogger
+        mock_logger = mocker.Mock()
+        mocker.patch('cppython.plugins.conan.plugin.getLogger', return_value=mock_logger)
 
         # Execute publish
         plugin.publish()
 
-        # Verify export was called
-        conan_mock_api_publish.export.export.assert_called_once()
+        # Verify subprocess.run was called once for conan create
+        mock_subprocess_run.assert_called_once()
+        call_args = mock_subprocess_run.call_args[0][0]
+        assert call_args[0] == 'conan'
+        assert call_args[1] == 'create'
+        assert '--build' in call_args
+        assert 'missing' in call_args
 
-        # Verify graph loading and analysis
-        conan_mock_api_publish.graph.load_graph_consumer.assert_called_once()
-        conan_mock_api_publish.graph.analyze_binaries.assert_called_once_with(
-            graph=mock_graph,
-            build_mode=['*'],
-            remotes=conan_mock_api_publish.remotes.list(),
-            update=None,
-            lockfile=None,
-        )
-
-        # Verify install was called
-        conan_mock_api_publish.install.install_binaries.assert_called_once_with(
-            deps_graph=mock_graph, remotes=conan_mock_api_publish.remotes.list()
-        )
-
-        # Verify upload was NOT called for local mode
-        conan_mock_api_publish.upload.upload_full.assert_not_called()
+        # Verify no upload commands were executed (since skip_upload=True)
+        assert mock_subprocess_run.call_count == EXPECTED_SUBPROCESS_CALLS_SINGLE
 
     def test_with_upload(
-        self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
+        self, plugin: ConanProvider, conan_temp_conanfile: None, mocker: MockerFixture
     ) -> None:
-        """Test that publish with remotes=['conancenter'] exports, builds, and uploads
+        """Test that publish with remotes=['conancenter'] runs conan create and upload
 
         Args:
             plugin: The plugin instance
-            conan_mock_api_publish: Mock ConanAPI for publish operations
             conan_temp_conanfile: Fixture to create conanfile.py
             mocker: Pytest mocker fixture
         """
         # Set plugin to upload mode
         plugin.data.remotes = ['conancenter']
+        plugin.data.skip_upload = False
 
-        # Mock the necessary imports and API creation
-        mocker.patch('cppython.plugins.conan.plugin.ConanAPI', return_value=conan_mock_api_publish)
+        # Mock subprocess.run
+        mock_subprocess_run = mocker.patch('cppython.plugins.conan.plugin.subprocess.run')
+        mock_subprocess_run.return_value = mocker.Mock(returncode=0)
 
-        # Mock the dependencies graph
-        mock_graph = mocker.Mock()
-        conan_mock_api_publish.graph.load_graph_consumer.return_value = mock_graph
+        # Mock getLogger
+        mock_logger = mocker.Mock()
+        mocker.patch('cppython.plugins.conan.plugin.getLogger', return_value=mock_logger)
 
         # Execute publish
         plugin.publish()
 
-        # Verify all steps were called
-        conan_mock_api_publish.export.export.assert_called_once()
-        conan_mock_api_publish.graph.load_graph_consumer.assert_called_once()
-        conan_mock_api_publish.graph.analyze_binaries.assert_called_once()
-        conan_mock_api_publish.install.install_binaries.assert_called_once()
+        # Verify subprocess.run was called twice (create + upload)
+        assert mock_subprocess_run.call_count == EXPECTED_SUBPROCESS_CALLS_WITH_UPLOAD
 
-        # Verify upload was called
-        conan_mock_api_publish.list.select.assert_called_once()
-        conan_mock_api_publish.upload.upload_full.assert_called_once()
+        # Check first call - conan create
+        create_call_args = mock_subprocess_run.call_args_list[0][0][0]
+        assert create_call_args[0] == 'conan'
+        assert create_call_args[1] == 'create'
 
-    def test_no_remotes_configured(
-        self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
+        # Check second call - conan upload
+        upload_call_args = mock_subprocess_run.call_args_list[1][0][0]
+        assert upload_call_args[0] == 'conan'
+        assert upload_call_args[1] == 'upload'
+        assert '--remote' in upload_call_args
+        assert 'conancenter' in upload_call_args
+
+    def test_upload_to_all_remotes(
+        self, plugin: ConanProvider, conan_temp_conanfile: None, mocker: MockerFixture
     ) -> None:
-        """Test that publish raises error when no remotes are configured for upload
+        """Test that publish with empty remotes list uploads to all available remotes
 
         Args:
             plugin: The plugin instance
-            conan_mock_api_publish: Mock ConanAPI for publish operations
             conan_temp_conanfile: Fixture to create conanfile.py
             mocker: Pytest mocker fixture
         """
-        # Set plugin to upload mode
-        plugin.data.remotes = ['conancenter']
+        # Set plugin to upload to all remotes
+        plugin.data.remotes = []
+        plugin.data.skip_upload = False
 
-        # Mock the necessary imports and API creation
-        mocker.patch('cppython.plugins.conan.plugin.ConanAPI', return_value=conan_mock_api_publish)
+        # Mock subprocess.run
+        mock_subprocess_run = mocker.patch('cppython.plugins.conan.plugin.subprocess.run')
+        mock_subprocess_run.return_value = mocker.Mock(returncode=0)
 
-        # Mock the dependencies graph
-        mock_graph = mocker.Mock()
-        conan_mock_api_publish.graph.load_graph_consumer.return_value = mock_graph
+        # Mock getLogger
+        mock_logger = mocker.Mock()
+        mocker.patch('cppython.plugins.conan.plugin.getLogger', return_value=mock_logger)
 
-        # Mock no remotes configured
-        conan_mock_api_publish.remotes.list.return_value = []
+        # Execute publish
+        plugin.publish()
 
-        # Execute publish and expect ProviderConfigurationError
-        with pytest.raises(ProviderConfigurationError, match='No configured remotes found'):
-            plugin.publish()
+        # Verify subprocess.run was called twice (create + upload)
+        assert mock_subprocess_run.call_count == EXPECTED_SUBPROCESS_CALLS_WITH_UPLOAD
 
-    def test_no_packages_found(
-        self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
+        # Check second call - conan upload to all remotes
+        upload_call_args = mock_subprocess_run.call_args_list[1][0][0]
+        assert upload_call_args[0] == 'conan'
+        assert upload_call_args[1] == 'upload'
+        assert '--all' in upload_call_args
+        assert '--confirm' in upload_call_args
+
+    def test_conan_create_failure(
+        self, plugin: ConanProvider, conan_temp_conanfile: None, mocker: MockerFixture
     ) -> None:
-        """Test that publish raises error when no packages are found to upload
+        """Test that publish raises error when conan create fails
 
         Args:
             plugin: The plugin instance
-            conan_mock_api_publish: Mock ConanAPI for publish operations
             conan_temp_conanfile: Fixture to create conanfile.py
             mocker: Pytest mocker fixture
         """
-        # Set plugin to upload mode
-        plugin.data.remotes = ['conancenter']
-
-        # Mock the necessary imports and API creation
-        mocker.patch('cppython.plugins.conan.plugin.ConanAPI', return_value=conan_mock_api_publish)
-
-        # Mock the dependencies graph
-        mock_graph = mocker.Mock()
-        conan_mock_api_publish.graph.load_graph_consumer.return_value = mock_graph
-
-        # Mock empty package list
-        mock_select_result = mocker.Mock()
-        mock_select_result.recipes = []
-        conan_mock_api_publish.list.select.return_value = mock_select_result
-
-        # Execute publish and expect ProviderInstallationError
-        with pytest.raises(ProviderInstallationError, match='No packages found to upload'):
-            plugin.publish()
-
-    def test_with_default_profiles(
-        self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
-    ) -> None:
-        """Test that publish uses pre-resolved profiles from plugin construction
-
-        Args:
-            plugin: The plugin instance
-            conan_mock_api_publish: Mock ConanAPI for publish operations
-            conan_temp_conanfile: Fixture to create conanfile.py
-            mocker: Pytest mocker fixture
-        """
-        # Set plugin to skip upload mode
+        # Set plugin to skip upload mode for simpler test
         plugin.data.skip_upload = True
 
-        # Mock the necessary imports and API creation
-        mocker.patch('cppython.plugins.conan.plugin.ConanAPI', return_value=conan_mock_api_publish)
-
-        # Mock the dependencies graph
-        mock_graph = mocker.Mock()
-        conan_mock_api_publish.graph.load_graph_consumer.return_value = mock_graph
-
-        # Execute publish
-        plugin.publish()
-
-        # Verify that the resolved profiles were used in the graph loading
-        conan_mock_api_publish.graph.load_graph_consumer.assert_called_once()
-        call_args = conan_mock_api_publish.graph.load_graph_consumer.call_args
-        assert call_args.kwargs['profile_host'] == plugin.data.host_profile
-        assert call_args.kwargs['profile_build'] == plugin.data.build_profile
-
-    def test_upload_parameters(
-        self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
-    ) -> None:
-        """Test that publish upload is called with correct parameters
-
-        Args:
-            plugin: The plugin instance
-            conan_mock_api_publish: Mock ConanAPI for publish operations
-            conan_temp_conanfile: Fixture to create conanfile.py
-            mocker: Pytest mocker fixture
-        """
-        # Set plugin to upload mode
-        plugin.data.remotes = ['conancenter']
-
-        # Mock the necessary imports and API creation
-        mocker.patch('cppython.plugins.conan.plugin.ConanAPI', return_value=conan_mock_api_publish)
-
-        # Mock the dependencies graph
-        mock_graph = mocker.Mock()
-        conan_mock_api_publish.graph.load_graph_consumer.return_value = mock_graph
-
-        # Mock remotes and package list
-        mock_remote = MagicMock()
-        mock_remote.name = 'conancenter'
-        remotes = [mock_remote]
-        conan_mock_api_publish.remotes.list.return_value = remotes
-
-        mock_package_list = MagicMock()
-        mock_package_list.recipes = ['test_package/1.0@user/channel']
-        conan_mock_api_publish.list.select.return_value = mock_package_list
-
-        # Execute publish
-        plugin.publish()
-
-        # Verify upload_full was called with correct parameters
-        conan_mock_api_publish.upload.upload_full.assert_called_once_with(
-            package_list=mock_package_list,
-            remote=mock_remote,
-            enabled_remotes=remotes,
-            check_integrity=False,
-            force=False,
-            metadata=None,
-            dry_run=False,
+        # Mock subprocess.run to fail
+        mock_subprocess_run = mocker.patch('cppython.plugins.conan.plugin.subprocess.run')
+        mock_subprocess_run.side_effect = subprocess.CalledProcessError(
+            1, ['conan', 'create'], stderr='Conan create failed: missing dependency'
         )
 
-    def test_list_pattern_creation(
-        self, plugin: ConanProvider, conan_mock_api_publish: Mock, conan_temp_conanfile: None, mocker: MockerFixture
+        # Mock getLogger
+        mock_logger = mocker.Mock()
+        mocker.patch('cppython.plugins.conan.plugin.getLogger', return_value=mock_logger)
+
+        # Execute publish and expect ProviderInstallationError
+        with pytest.raises(ProviderInstallationError, match='Conan create failed: missing dependency'):
+            plugin.publish()
+
+    def test_conan_upload_failure(
+        self, plugin: ConanProvider, conan_temp_conanfile: None, mocker: MockerFixture
     ) -> None:
-        """Test that publish creates correct ListPattern for package selection
+        """Test that publish raises error when conan upload fails
 
         Args:
             plugin: The plugin instance
-            conan_mock_api_publish: Mock ConanAPI for publish operations
             conan_temp_conanfile: Fixture to create conanfile.py
             mocker: Pytest mocker fixture
         """
         # Set plugin to upload mode
         plugin.data.remotes = ['conancenter']
+        plugin.data.skip_upload = False
 
-        # Mock the necessary imports and API creation
-        mocker.patch('cppython.plugins.conan.plugin.ConanAPI', return_value=conan_mock_api_publish)
-        mock_list_pattern = mocker.patch('cppython.plugins.conan.plugin.ListPattern')
+        # Mock subprocess.run
+        mock_subprocess_run = mocker.patch('cppython.plugins.conan.plugin.subprocess.run')
+        
+        # First call (create) succeeds, second call (upload) fails
+        def subprocess_side_effect(*args, **kwargs):
+            if 'create' in args[0]:
+                return mocker.Mock(returncode=0)
+            elif 'upload' in args[0]:
+                raise subprocess.CalledProcessError(
+                    1, ['conan', 'upload'], stderr='Upload failed: authentication error'
+                )
+            
+        mock_subprocess_run.side_effect = subprocess_side_effect
 
-        # Mock the dependencies graph
-        mock_graph = mocker.Mock()
-        conan_mock_api_publish.graph.load_graph_consumer.return_value = mock_graph
+        # Mock getLogger
+        mock_logger = mocker.Mock()
+        mocker.patch('cppython.plugins.conan.plugin.getLogger', return_value=mock_logger)
+
+        # Execute publish and expect ProviderInstallationError
+        with pytest.raises(ProviderInstallationError, match='Upload to conancenter failed'):
+            plugin.publish()
+
+    def test_with_custom_profiles(
+        self, plugin: ConanProvider, conan_temp_conanfile: None, mocker: MockerFixture
+    ) -> None:
+        """Test that publish uses custom profiles when specified
+
+        Args:
+            plugin: The plugin instance
+            conan_temp_conanfile: Fixture to create conanfile.py
+            mocker: Pytest mocker fixture
+        """
+        # Set plugin to skip upload mode for simpler test
+        plugin.data.skip_upload = True
+
+        # Mock custom profiles
+        custom_host_profile = mocker.Mock()
+        custom_build_profile = mocker.Mock()
+        
+        # Override profiles in the plugin data
+        plugin.data.host_profile = custom_host_profile
+        plugin.data.build_profile = custom_build_profile
+
+        # Mock subprocess.run
+        mock_subprocess_run = mocker.patch('cppython.plugins.conan.plugin.subprocess.run')
+        mock_subprocess_run.return_value = mocker.Mock(returncode=0)
+
+        # Mock getLogger
+        mock_logger = mocker.Mock()
+        mocker.patch('cppython.plugins.conan.plugin.getLogger', return_value=mock_logger)
 
         # Execute publish
         plugin.publish()
 
-        # Get the ref from the export call to verify ListPattern creation
-        # The export call returns (ref, conanfile) - we need the ref.name
-        export_return = conan_mock_api_publish.export.export.return_value
-        ref = export_return[0]  # First element of the tuple
-
-        # Verify ListPattern was created with correct reference pattern
-        mock_list_pattern.assert_called_once_with(f'{ref.name}/*', package_id='*', only_recipe=False)
+        # Verify subprocess.run was called with custom profiles
+        mock_subprocess_run.assert_called_once()
+        call_args = mock_subprocess_run.call_args[0][0]
+        
+        # Find profile arguments
+        profile_host_idx = call_args.index('--profile:host')
+        profile_build_idx = call_args.index('--profile:build')
+        
+        assert call_args[profile_host_idx + 1] == str(custom_host_profile)
+        assert call_args[profile_build_idx + 1] == str(custom_build_profile)

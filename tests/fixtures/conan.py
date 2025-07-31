@@ -166,14 +166,12 @@ def fixture_conan_mock_dependencies() -> list[Requirement]:
 @pytest.fixture(name='conan_setup_mocks')
 def fixture_conan_setup_mocks(
     plugin: ConanProvider,
-    conan_mock_api: Mock,
     mocker: MockerFixture,
 ) -> dict[str, Mock]:
     """Sets up all mocks for testing install/update operations
 
     Args:
         plugin: The plugin instance
-        conan_mock_api: Mock ConanAPI instance
         mocker: Pytest mocker fixture
 
     Returns:
@@ -185,8 +183,9 @@ def fixture_conan_setup_mocks(
     # Set the builder attribute on the plugin
     plugin.builder = mock_builder  # type: ignore[attr-defined]
 
-    # Mock ConanAPI constructor
-    mock_conan_api_constructor = mocker.patch('cppython.plugins.conan.plugin.ConanAPI', return_value=conan_mock_api)
+    # Mock subprocess.run to simulate successful command execution
+    mock_subprocess_run = mocker.patch('cppython.plugins.conan.plugin.subprocess.run')
+    mock_subprocess_run.return_value = mocker.Mock(returncode=0)
 
     # Mock resolve_conan_dependency
     def mock_resolve(requirement: Requirement) -> ConanDependency:
@@ -196,8 +195,13 @@ def fixture_conan_setup_mocks(
         'cppython.plugins.conan.plugin.resolve_conan_dependency', side_effect=mock_resolve
     )
 
+    # Mock getLogger to avoid logging setup issues
+    mock_logger = mocker.Mock()
+    mocker.patch('cppython.plugins.conan.plugin.getLogger', return_value=mock_logger)
+
     return {
         'builder': mock_builder,
-        'conan_api_constructor': mock_conan_api_constructor,
+        'subprocess_run': mock_subprocess_run,
         'resolve_conan_dependency': mock_resolve_conan_dependency,
+        'logger': mock_logger,
     }
