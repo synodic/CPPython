@@ -248,15 +248,15 @@ class Builder:
         """
         # Update existing preset to ensure it inherits from 'default'
         if existing_preset.inherits is None:
-            existing_preset.inherits = 'default'
+            existing_preset.inherits = 'default'  # type: ignore[misc]
         elif isinstance(existing_preset.inherits, str) and existing_preset.inherits != 'default':
-            existing_preset.inherits = ['default', existing_preset.inherits]
+            existing_preset.inherits = ['default', existing_preset.inherits]  # type: ignore[misc]
         elif isinstance(existing_preset.inherits, list) and 'default' not in existing_preset.inherits:
             existing_preset.inherits.insert(0, 'default')
 
         # Update binary directory if not set
         if not existing_preset.binaryDir:
-            existing_preset.binaryDir = build_directory.as_posix()
+            existing_preset.binaryDir = build_directory.as_posix()  # type: ignore[misc]
 
     @staticmethod
     def _handle_configure_presets(
@@ -270,7 +270,7 @@ class Builder:
             build_directory: The build directory to use
         """
         if root_preset.configurePresets is None:
-            root_preset.configurePresets = [user_configure_preset]
+            root_preset.configurePresets = [user_configure_preset]  # type: ignore[misc]
         else:
             # Update or add the user's configure preset
             existing_preset = next(
@@ -290,7 +290,7 @@ class Builder:
             user_build_presets: The user's build presets to add
         """
         if root_preset.buildPresets is None:
-            root_preset.buildPresets = user_build_presets.copy()
+            root_preset.buildPresets = user_build_presets.copy()  # type: ignore[misc]
         else:
             # Add build presets if they don't exist
             for build_preset in user_build_presets:
@@ -313,7 +313,7 @@ class Builder:
 
         # Handle includes
         if not root_preset.include:
-            root_preset.include = []
+            root_preset.include = []  # type: ignore[misc]
 
         if str(relative_preset) not in root_preset.include:
             root_preset.include.append(str(relative_preset))
