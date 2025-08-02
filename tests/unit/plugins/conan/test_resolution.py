@@ -1,8 +1,5 @@
 """Unit tests for Conan resolution functionality."""
 
-import logging
-from unittest.mock import Mock, patch
-
 import pytest
 from packaging.requirements import Requirement
 
@@ -17,7 +14,6 @@ from cppython.plugins.conan.schema import (
     ConanVersion,
     ConanVersionRange,
 )
-from cppython.utility.exception import ProviderConfigurationError
 
 # Constants for test validation
 EXPECTED_PROFILE_CALL_COUNT = 2
@@ -130,46 +126,46 @@ class TestResolveDependency:
     def test_with_user_channel(self) -> None:
         """Test that ConanDependency handles user/channel correctly."""
         dependency = ConanDependency(
-            name='mylib',
+            name='example',
             version=ConanVersion.from_string('1.0.0'),
             user_channel=ConanUserChannel(user='myuser', channel='stable'),
         )
 
-        assert dependency.requires() == 'mylib/1.0.0@myuser/stable'
+        assert dependency.requires() == 'example/1.0.0@myuser/stable'
 
     def test_with_revision(self) -> None:
         """Test that ConanDependency handles revisions correctly."""
         dependency = ConanDependency(
-            name='mylib', version=ConanVersion.from_string('1.0.0'), revision=ConanRevision(revision='abc123')
+            name='example', version=ConanVersion.from_string('1.0.0'), revision=ConanRevision(revision='abc123')
         )
 
-        assert dependency.requires() == 'mylib/1.0.0#abc123'
+        assert dependency.requires() == 'example/1.0.0#abc123'
 
     def test_full_reference(self) -> None:
         """Test that ConanDependency handles full references correctly."""
         dependency = ConanDependency(
-            name='mylib',
+            name='example',
             version=ConanVersion.from_string('1.0.0'),
             user_channel=ConanUserChannel(user='myuser', channel='stable'),
             revision=ConanRevision(revision='abc123'),
         )
 
-        assert dependency.requires() == 'mylib/1.0.0@myuser/stable#abc123'
+        assert dependency.requires() == 'example/1.0.0@myuser/stable#abc123'
 
     def test_from_reference_simple(self) -> None:
         """Test parsing a simple package name."""
-        dependency = ConanDependency.from_conan_reference('mylib')
+        dependency = ConanDependency.from_conan_reference('example')
 
-        assert dependency.name == 'mylib'
+        assert dependency.name == 'example'
         assert dependency.version is None
         assert dependency.user_channel is None
         assert dependency.revision is None
 
     def test_from_reference_with_version(self) -> None:
         """Test parsing a package with version."""
-        dependency = ConanDependency.from_conan_reference('mylib/1.0.0')
+        dependency = ConanDependency.from_conan_reference('example/1.0.0')
 
-        assert dependency.name == 'mylib'
+        assert dependency.name == 'example'
         assert dependency.version is not None
         assert str(dependency.version) == '1.0.0'
         assert dependency.user_channel is None
@@ -177,9 +173,9 @@ class TestResolveDependency:
 
     def test_from_reference_with_version_range(self) -> None:
         """Test parsing a package with version range."""
-        dependency = ConanDependency.from_conan_reference('mylib/[>=1.0 <2.0]')
+        dependency = ConanDependency.from_conan_reference('example/[>=1.0 <2.0]')
 
-        assert dependency.name == 'mylib'
+        assert dependency.name == 'example'
         assert dependency.version is None
         assert dependency.version_range is not None
         assert dependency.version_range.expression == '>=1.0 <2.0'
@@ -188,9 +184,9 @@ class TestResolveDependency:
 
     def test_from_reference_full(self) -> None:
         """Test parsing a full Conan reference."""
-        dependency = ConanDependency.from_conan_reference('mylib/1.0.0@myuser/stable#abc123')
+        dependency = ConanDependency.from_conan_reference('example/1.0.0@myuser/stable#abc123')
 
-        assert dependency.name == 'mylib'
+        assert dependency.name == 'example'
         assert dependency.version is not None
         assert str(dependency.version) == '1.0.0'
         assert dependency.user_channel is not None
@@ -199,8 +195,10 @@ class TestResolveDependency:
         assert dependency.revision is not None
         assert dependency.revision.revision == 'abc123'
 
+
 class TestResolveProfiles:
     """Test profile resolution functionality."""
+
 
 class TestResolveConanData:
     """Test Conan data resolution."""
