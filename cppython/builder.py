@@ -1,10 +1,14 @@
 """Defines the data and routines for building a CPPython project type"""
 
 import logging
+import os
 from importlib.metadata import entry_points
 from inspect import getmodule
 from logging import Logger
 from typing import Any, cast
+
+from rich.console import Console
+from rich.logging import RichHandler
 
 from cppython.core.plugin_schema.generator import Generator
 from cppython.core.plugin_schema.provider import Provider
@@ -471,8 +475,28 @@ class Builder:
         self._project_configuration = project_configuration
         self._logger = logger
 
-        # Add default output stream
-        self._logger.addHandler(logging.StreamHandler())
+        # Informal standard to check for color
+        force_color = os.getenv('FORCE_COLOR', '1') != '0'
+
+        console = Console(
+            force_terminal=force_color,
+            color_system='auto',
+            width=120,
+            legacy_windows=False,
+            no_color=False,
+        )
+
+        rich_handler = RichHandler(
+            console=console,
+            rich_tracebacks=True,
+            show_time=False,
+            show_path=False,
+            markup=True,
+            show_level=False,
+            enable_link_path=False,
+        )
+
+        self._logger.addHandler(rich_handler)
         self._logger.setLevel(Builder.levels[project_configuration.verbosity])
 
         self._logger.info('Logging setup complete')
