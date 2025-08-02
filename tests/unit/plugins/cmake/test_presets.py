@@ -27,7 +27,7 @@ class TestBuilder:
         assert any(p.name == 'test-configuration' for p in result.configurePresets)
 
         preset = next(p for p in result.configurePresets if p.name == 'test-configuration')
-        assert preset.inherits == 'cppython'
+        assert preset.inherits == 'default'
 
     @staticmethod
     def test_generate_root_preset_existing(project_data: ProjectData) -> None:

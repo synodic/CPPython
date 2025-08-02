@@ -2,7 +2,14 @@
 
 from pathlib import Path
 
-from cppython.plugins.cmake.schema import CacheVariable, CMakeData, CMakePresets, CMakeSyncData, ConfigurePreset
+from cppython.plugins.cmake.schema import (
+    BuildPreset,
+    CacheVariable,
+    CMakeData,
+    CMakePresets,
+    CMakeSyncData,
+    ConfigurePreset,
+)
 
 
 class Builder:
@@ -16,10 +23,10 @@ class Builder:
         """Generates a provider preset from input sync data
 
         Args:
-            provider_directory: The base directory to place the preset files
             provider_data: The providers synchronization data
         """
-        generated_configure_preset = ConfigurePreset(name=provider_data.provider_name, hidden=True)
+        # Base hidden preset with common configuration
+        base_preset = ConfigurePreset(name=f'{provider_data.provider_name}-base', hidden=True)
 
         # Handle both top_level_includes and toolchain options
         cache_variables: dict[str, str | bool | CacheVariable | None] = {}
@@ -29,12 +36,31 @@ class Builder:
 
         if provider_data.toolchain:
             # Use the toolchainFile field for better integration
-            generated_configure_preset.toolchainFile = provider_data.toolchain.as_posix()
+            base_preset.toolchainFile = provider_data.toolchain.as_posix()
 
         if cache_variables:
-            generated_configure_preset.cacheVariables = cache_variables
+            base_preset.cacheVariables = cache_variables
 
-        return CMakePresets(configurePresets=[generated_configure_preset])
+        # Create specific configuration presets
+        default_preset = ConfigurePreset(
+            name=f'{provider_data.provider_name}-default', hidden=True, inherits=f'{provider_data.provider_name}-base'
+        )
+
+        release_preset = ConfigurePreset(
+            name=f'{provider_data.provider_name}-release',
+            hidden=True,
+            inherits=f'{provider_data.provider_name}-base',
+            cacheVariables={'CMAKE_BUILD_TYPE': 'Release'},
+        )
+
+        debug_preset = ConfigurePreset(
+            name=f'{provider_data.provider_name}-debug',
+            hidden=True,
+            inherits=f'{provider_data.provider_name}-base',
+            cacheVariables={'CMAKE_BUILD_TYPE': 'Debug'},
+        )
+
+        return CMakePresets(configurePresets=[base_preset, default_preset, release_preset, debug_preset])
 
     @staticmethod
     def write_provider_preset(provider_directory: Path, provider_data: CMakeSyncData) -> None:
@@ -75,8 +101,50 @@ class Builder:
         Returns:
             A CMakePresets object
         """
-        generated_configure_preset = ConfigurePreset(name='cppython', inherits=provider_data.provider_name, hidden=True)
-        generated_preset = CMakePresets(configurePresets=[generated_configure_preset])
+        # Configure presets similar to Conan structure
+        default_configure = ConfigurePreset(
+            name='default', inherits=f'{provider_data.provider_name}-default', hidden=False
+        )
+
+        release_configure = ConfigurePreset(
+            name='release', inherits=f'{provider_data.provider_name}-release', hidden=False
+        )
+
+        debug_configure = ConfigurePreset(name='debug', inherits=f'{provider_data.provider_name}-debug', hidden=False)
+
+        # Build presets for multi-config and single-config generators
+        multi_release_build = BuildPreset(
+            name='multi-release',
+            configurePreset='default',
+            configuration='Release',
+            inherits=f'{provider_data.provider_name}-release',
+        )
+
+        multi_debug_build = BuildPreset(
+            name='multi-debug',
+            configurePreset='default',
+            configuration='Debug',
+            inherits=f'{provider_data.provider_name}-debug',
+        )
+
+        release_build = BuildPreset(
+            name='release',
+            configurePreset='release',
+            configuration='Release',
+            inherits=f'{provider_data.provider_name}-release',
+        )
+
+        debug_build = BuildPreset(
+            name='debug',
+            configurePreset='debug',
+            configuration='Debug',
+            inherits=f'{provider_data.provider_name}-debug',
+        )
+
+        generated_preset = CMakePresets(
+            configurePresets=[default_configure, release_configure, debug_configure],
+            buildPresets=[multi_release_build, multi_debug_build, release_build, debug_build],
+        )
 
         # Get the relative path to the provider preset file
         provider_preset_file = provider_directory / f'{provider_data.provider_name}.json'
@@ -122,6 +190,135 @@ class Builder:
         return cppython_preset_file
 
     @staticmethod
+    def _create_user_presets(cmake_data: CMakeData, build_directory: Path) -> tuple[ConfigurePreset, list[BuildPreset]]:
+        """Create user configure and build presets.
+
+        Args:
+            cmake_data: The CMake data to use
+            build_directory: The build directory to use
+
+        Returns:
+            A tuple containing the configure preset and list of build presets
+        """
+        user_configure_preset = ConfigurePreset(
+            name=cmake_data.configuration_name,
+            inherits='default',  # Inherit from cppython's default preset
+            binaryDir=build_directory.as_posix(),
+        )
+
+        user_build_presets = [
+            BuildPreset(
+                name=f'{cmake_data.configuration_name}-multi-release',
+                configurePreset=cmake_data.configuration_name,
+                configuration='Release',
+            ),
+            BuildPreset(
+                name=f'{cmake_data.configuration_name}-multi-debug',
+                configurePreset=cmake_data.configuration_name,
+                configuration='Debug',
+            ),
+        ]
+
+        return user_configure_preset, user_build_presets
+
+    @staticmethod
+    def _load_existing_preset(preset_file: Path) -> CMakePresets | None:
+        """Load existing preset file if it exists.
+
+        Args:
+            preset_file: Path to the preset file
+
+        Returns:
+            CMakePresets object if file exists, None otherwise
+        """
+        if not preset_file.exists():
+            return None
+
+        with open(preset_file, encoding='utf-8') as file:
+            initial_json = file.read()
+        return CMakePresets.model_validate_json(initial_json)
+
+    @staticmethod
+    def _update_configure_preset(existing_preset: ConfigurePreset, build_directory: Path) -> None:
+        """Update an existing configure preset to ensure proper inheritance and binary directory.
+
+        Args:
+            existing_preset: The preset to update
+            build_directory: The build directory to use
+        """
+        # Update existing preset to ensure it inherits from 'default'
+        if existing_preset.inherits is None:
+            existing_preset.inherits = 'default'
+        elif isinstance(existing_preset.inherits, str) and existing_preset.inherits != 'default':
+            existing_preset.inherits = ['default', existing_preset.inherits]
+        elif isinstance(existing_preset.inherits, list) and 'default' not in existing_preset.inherits:
+            existing_preset.inherits.insert(0, 'default')
+
+        # Update binary directory if not set
+        if not existing_preset.binaryDir:
+            existing_preset.binaryDir = build_directory.as_posix()
+
+    @staticmethod
+    def _handle_configure_presets(
+        root_preset: CMakePresets, user_configure_preset: ConfigurePreset, build_directory: Path
+    ) -> None:
+        """Handle configure presets in the root preset.
+
+        Args:
+            root_preset: The root preset to modify
+            user_configure_preset: The user's configure preset
+            build_directory: The build directory to use
+        """
+        if root_preset.configurePresets is None:
+            root_preset.configurePresets = [user_configure_preset]
+        else:
+            # Update or add the user's configure preset
+            existing_preset = next(
+                (p for p in root_preset.configurePresets if p.name == user_configure_preset.name), None
+            )
+            if existing_preset:
+                Builder._update_configure_preset(existing_preset, build_directory)
+            else:
+                root_preset.configurePresets.append(user_configure_preset)
+
+    @staticmethod
+    def _handle_build_presets(root_preset: CMakePresets, user_build_presets: list[BuildPreset]) -> None:
+        """Handle build presets in the root preset.
+
+        Args:
+            root_preset: The root preset to modify
+            user_build_presets: The user's build presets to add
+        """
+        if root_preset.buildPresets is None:
+            root_preset.buildPresets = user_build_presets.copy()
+        else:
+            # Add build presets if they don't exist
+            for build_preset in user_build_presets:
+                existing = next((p for p in root_preset.buildPresets if p.name == build_preset.name), None)
+                if not existing:
+                    root_preset.buildPresets.append(build_preset)
+
+    @staticmethod
+    def _handle_includes(root_preset: CMakePresets, preset_file: Path, cppython_preset_file: Path) -> None:
+        """Handle include paths in the root preset.
+
+        Args:
+            root_preset: The root preset to modify
+            preset_file: Path to the preset file
+            cppython_preset_file: Path to the cppython preset file to include
+        """
+        # Get the relative path to the cppython preset file
+        preset_directory = preset_file.parent.absolute()
+        relative_preset = cppython_preset_file.relative_to(preset_directory, walk_up=True).as_posix()
+
+        # Handle includes
+        if not root_preset.include:
+            root_preset.include = []
+
+        if str(relative_preset) not in root_preset.include:
+            root_preset.include.append(str(relative_preset))
+
+    @staticmethod
     def generate_root_preset(
         preset_file: Path, cppython_preset_file: Path, cmake_data: CMakeData, build_directory: Path
     ) -> CMakePresets:
@@ -136,51 +333,23 @@ class Builder:
         Returns:
             A CMakePresets object
         """
-        default_configure_preset = ConfigurePreset(
-            name=cmake_data.configuration_name,
-            inherits='cppython',
-            binaryDir=build_directory.as_posix(),
-            cacheVariables={
-                'CMAKE_BUILD_TYPE': 'Release'  # Ensure compatibility for single-config and multi-config generators
-            },
-        )
+        # Create user presets
+        user_configure_preset, user_build_presets = Builder._create_user_presets(cmake_data, build_directory)
 
-        if preset_file.exists():
-            with open(preset_file, encoding='utf-8') as file:
-                initial_json = file.read()
-            root_preset = CMakePresets.model_validate_json(initial_json)
-
-            if root_preset.configurePresets is None:
-                root_preset.configurePresets = [default_configure_preset]
-
-            # Set defaults
-            preset = next((p for p in root_preset.configurePresets if p.name == default_configure_preset.name), None)
-            if preset:
-                # If the name matches, we need to verify it inherits from cppython
-                if preset.inherits is None:
-                    preset.inherits = 'cppython'
-                elif isinstance(preset.inherits, str) and preset.inherits != 'cppython':
-                    preset.inherits = [preset.inherits, 'cppython']
-                elif isinstance(preset.inherits, list) and 'cppython' not in preset.inherits:
-                    preset.inherits.append('cppython')
-            else:
-                root_preset.configurePresets.append(default_configure_preset)
-
+        # Load existing preset or create new one
+        root_preset = Builder._load_existing_preset(preset_file)
+        if root_preset is None:
+            root_preset = CMakePresets(
+                configurePresets=[user_configure_preset],
+                buildPresets=user_build_presets,
+            )
         else:
-            # If the file doesn't exist, we need to default it for the user
-            root_preset = CMakePresets(configurePresets=[default_configure_preset])
+            # Handle existing preset
+            Builder._handle_configure_presets(root_preset, user_configure_preset, build_directory)
+            Builder._handle_build_presets(root_preset, user_build_presets)
 
-        # Get the relative path to the cppython preset file
-        preset_directory = preset_file.parent.absolute()
-        relative_preset = cppython_preset_file.relative_to(preset_directory, walk_up=True).as_posix()
-
-        # If the include key doesn't exist, we know we will write to disk afterwards
-        if not root_preset.include:
-            root_preset.include = []
-
-        # Only the included preset file if it doesn't exist. Implied by the above check
-        if str(relative_preset) not in root_preset.include:
-            root_preset.include.append(str(relative_preset))
+        # Handle includes
+        Builder._handle_includes(root_preset, preset_file, cppython_preset_file)
 
         return root_preset
 
