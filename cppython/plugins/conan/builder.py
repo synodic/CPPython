@@ -121,7 +121,9 @@ class Builder:
         self._filename = 'conanfile.py'
 
     @staticmethod
-    def _create_conanfile(conan_file: Path, dependencies: list[ConanDependency], name: str, version: str) -> None:
+    def _create_conanfile(
+        conan_file: Path, dependencies: list[ConanDependency], name: str, version: str, preset_file: Path
+    ) -> None:
         """Creates a conanfile.py file with the necessary content."""
         template_string = """
         from conan import ConanFile
@@ -140,6 +142,7 @@ class Builder:
                 deps = CMakeDeps(self)
                 deps.generate()
                 tc = CMakeToolchain(self)
+                tc.user_presets_path = "${preset_file}"
                 tc.generate()
 
             def build(self):
@@ -158,6 +161,7 @@ class Builder:
             'name': name,
             'version': version,
             'dependencies': [dependency.requires() for dependency in dependencies],
+            'preset_file': str(preset_file),
         }
 
         result = template.substitute(values)
@@ -166,7 +170,7 @@ class Builder:
             file.write(result)
 
     def generate_conanfile(
-        self, directory: DirectoryPath, dependencies: list[ConanDependency], name: str, version: str
+        self, directory: DirectoryPath, dependencies: list[ConanDependency], name: str, version: str, preset_file: Path
     ) -> None:
         """Generate a conanfile.py file for the project."""
         conan_file = directory / self._filename
@@ -181,4 +185,4 @@ class Builder:
             conan_file.write_text(modified.code, encoding='utf-8')
         else:
             directory.mkdir(parents=True, exist_ok=True)
-            self._create_conanfile(conan_file, dependencies, name, version)
+            self._create_conanfile(conan_file, dependencies, name, version, preset_file)

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 """Conan plugin schema
 
 This module defines Pydantic models used for integrating the Conan
@@ -8,7 +10,6 @@ provide structured configuration and data needed by the Conan Provider.
 import re
 from typing import Annotated
 
-from conan.internal.model.profile import Profile
 from pydantic import Field, field_validator
 
 from cppython.core.schema import CPPythonModel
@@ -294,8 +295,7 @@ class ConanData(CPPythonModel):
 
     remotes: list[str]
     skip_upload: bool
-    host_profile: Profile
-    build_profile: Profile
+    profile_dir: Path
 
 
 class ConanConfiguration(CPPythonModel):
@@ -307,19 +307,13 @@ class ConanConfiguration(CPPythonModel):
     ] = ['conancenter']
     skip_upload: Annotated[
         bool,
-        Field(description='If true, skip uploading packages during publish (local-only mode).'),
+        Field(description='If true, skip uploading packages to a remote during publishing.'),
     ] = False
-    host_profile: Annotated[
-        str | None,
+    profile_dir: Annotated[
+        str,
         Field(
-            description='Conan host profile defining the target platform where the built software will run. '
-            'Used for cross-compilation scenarios.'
+            description='Directory containing Conan profiles. Profiles will be looked up relative to this directory. '
+            'If profiles do not exist in this directory, Conan will fall back to default profiles.'
+            "If a relative path is provided, it will be resolved relative to the tool's working directory."
         ),
-    ] = 'default'
-    build_profile: Annotated[
-        str | None,
-        Field(
-            description='Conan build profile defining the platform where the compilation process executes. '
-            'Typically matches the development machine.'
-        ),
-    ] = 'default'
+    ] = 'profiles'

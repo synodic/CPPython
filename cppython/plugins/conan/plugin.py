@@ -91,6 +91,7 @@ class ConanProvider(Provider):
             resolved_dependencies,
             self.core_data.pep621_data.name,
             self.core_data.pep621_data.version,
+            self.core_data.cppython_data.tool_path / 'ConanPresets.json',
         )
 
         # Ensure build directory exists
@@ -120,15 +121,8 @@ class ConanProvider(Provider):
         command.extend(['--build', 'missing'])
 
         # Add profiles if specified
-        if self.data.host_profile and str(self.data.host_profile) != 'default':
-            command.extend(['--profile:host', str(self.data.host_profile)])
-        else:
-            command.extend(['--profile:host', 'default'])
-
-        if self.data.build_profile and str(self.data.build_profile) != 'default':
-            command.extend(['--profile:build', str(self.data.build_profile)])
-        else:
-            command.extend(['--profile:build', 'default'])
+        command.extend(['--profile:host', 'default'])
+        command.extend(['--profile:build', 'default'])
 
         # Add update flag if needed
         if update:
@@ -225,15 +219,8 @@ class ConanProvider(Provider):
             command.extend(['--build', 'missing'])
 
             # Add profiles
-            if self.data.host_profile and str(self.data.host_profile) != 'default':
-                command.extend(['--profile:host', str(self.data.host_profile)])
-            else:
-                command.extend(['--profile:host', 'default'])
-
-            if self.data.build_profile and str(self.data.build_profile) != 'default':
-                command.extend(['--profile:build', str(self.data.build_profile)])
-            else:
-                command.extend(['--profile:build', 'default'])
+            command.extend(['--profile:host', 'default'])
+            command.extend(['--profile:build', 'default'])
 
             # Log the command being executed
             logger.info('Executing conan create command: %s', ' '.join(command))
