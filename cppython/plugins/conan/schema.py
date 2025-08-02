@@ -1,5 +1,3 @@
-from pathlib import Path
-
 """Conan plugin schema
 
 This module defines Pydantic models used for integrating the Conan
@@ -8,6 +6,7 @@ provide structured configuration and data needed by the Conan Provider.
 """
 
 import re
+from pathlib import Path
 from typing import Annotated
 
 from pydantic import Field, field_validator

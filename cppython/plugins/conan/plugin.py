@@ -5,10 +5,13 @@ integration with the Conan package manager, including dependency resolution,
 installation, and synchronization with other tools.
 """
 
-import subprocess
+import os
 from logging import getLogger
 from pathlib import Path
 from typing import Any
+
+from conan.api.conan_api import ConanAPI
+from conan.cli.cli import Cli
 
 from cppython.core.plugin_schema.generator import SyncConsumer
 from cppython.core.plugin_schema.provider import Provider, ProviderPluginGroupData, SupportedProviderFeatures
@@ -34,6 +37,11 @@ class ConanProvider(Provider):
         self.data: ConanData = resolve_conan_data(configuration_data, core_data)
 
         self.builder = Builder()
+        # Initialize ConanAPI once and reuse it
+        self._conan_api = ConanAPI()
+        # Initialize CLI for command API to work properly
+        self._cli = Cli(self._conan_api)
+        self._cli.add_commands()
 
     @staticmethod
     def features(directory: Path) -> SupportedFeatures:
@@ -107,44 +115,45 @@ class ConanProvider(Provider):
         return conanfile_path
 
     def _run_conan_install(self, conanfile_path: Path, update: bool, logger) -> None:
-        """Run conan install command.
+        """Run conan install command using Conan API.
 
         Args:
             conanfile_path: Path to the conanfile.py
             update: Whether to check for updates
             logger: Logger instance
         """
-        # Build conan install command
-        command = ['conan', 'install', str(conanfile_path)]
+        # Build conan install command arguments
+        command_args = ['install', str(conanfile_path)]
 
         # Add build missing flag
-        command.extend(['--build', 'missing'])
+        command_args.extend(['--build', 'missing'])
 
         # Add profiles if specified
-        command.extend(['--profile:host', 'default'])
-        command.extend(['--profile:build', 'default'])
+        command_args.extend(['--profile:host', 'default'])
+        command_args.extend(['--profile:build', 'default'])
 
         # Add update flag if needed
         if update:
-            command.append('--update')
+            command_args.append('--update')
 
         # Add output folder
         build_path = self.core_data.cppython_data.build_path
-        command.extend(['--output-folder', str(build_path)])
+        command_args.extend(['--output-folder', str(build_path)])
 
         # Log the command being executed
-        logger.info('Executing conan command: %s', ' '.join(command))
+        logger.info('Executing conan command: conan %s', ' '.join(command_args))
 
         try:
-            subprocess.run(
-                command,
-                cwd=str(self.core_data.project_data.project_root),
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-        except subprocess.CalledProcessError as e:
-            error_msg = e.stderr if e.stderr else str(e)
+            # Use reusable Conan API instance instead of subprocess
+            # Change to project directory since Conan API might not handle cwd like subprocess
+            original_cwd = os.getcwd()
+            try:
+                os.chdir(str(self.core_data.project_data.project_root))
+                self._conan_api.command.run(command_args)
+            finally:
+                os.chdir(original_cwd)
+        except Exception as e:
+            error_msg = str(e)
             logger.error('Conan install failed: %s', error_msg, exc_info=True)
             raise ProviderInstallationError('conan', error_msg, e) from e
 
@@ -212,77 +221,65 @@ class ConanProvider(Provider):
             raise FileNotFoundError(f'conanfile.py not found at {conanfile_path}')
 
         try:
-            # Build conan create command
-            command = ['conan', 'create', str(conanfile_path)]
+            # Build conan create command arguments
+            command_args = ['create', str(conanfile_path)]
 
             # Add build mode (build everything for publishing)
-            command.extend(['--build', 'missing'])
+            command_args.extend(['--build', 'missing'])
 
             # Add profiles
-            command.extend(['--profile:host', 'default'])
-            command.extend(['--profile:build', 'default'])
+            command_args.extend(['--profile:host', 'default'])
+            command_args.extend(['--profile:build', 'default'])
 
             # Log the command being executed
-            logger.info('Executing conan create command: %s', ' '.join(command))
+            logger.info('Executing conan create command: conan %s', ' '.join(command_args))
 
-            # Run conan create
-            subprocess.run(
-                command,
-                cwd=str(project_root),
-                check=True,
-                capture_output=True,
-                text=True,
-            )
+            # Run conan create using reusable Conan API instance
+            # Change to project directory since Conan API might not handle cwd like subprocess
+            original_cwd = os.getcwd()
+            try:
+                os.chdir(str(project_root))
+                self._conan_api.command.run(command_args)
+            finally:
+                os.chdir(original_cwd)
 
             # Upload if not skipped
             if not self.data.skip_upload:
                 self._upload_package(logger)
 
-        except subprocess.CalledProcessError as e:
-            error_msg = e.stderr if e.stderr else str(e)
+        except Exception as e:
+            error_msg = str(e)
             logger.error('Conan create failed: %s', error_msg, exc_info=True)
             raise ProviderInstallationError('conan', error_msg, e) from e
 
     def _upload_package(self, logger) -> None:
-        """Upload the package to configured remotes using CLI commands."""
+        """Upload the package to configured remotes using Conan API."""
         # If no remotes configured, upload to all remotes
         if not self.data.remotes:
             # Upload to all available remotes
-            command = ['conan', 'upload', '*', '--all', '--confirm']
+            command_args = ['upload', '*', '--all', '--confirm']
         else:
             # Upload only to specified remotes
             for remote in self.data.remotes:
-                command = ['conan', 'upload', '*', '--remote', remote, '--all', '--confirm']
+                command_args = ['upload', '*', '--remote', remote, '--all', '--confirm']
 
                 # Log the command being executed
-                logger.info('Executing conan upload command: %s', ' '.join(command))
+                logger.info('Executing conan upload command: conan %s', ' '.join(command_args))
 
                 try:
-                    subprocess.run(
-                        command,
-                        cwd=str(self.core_data.project_data.project_root),
-                        check=True,
-                        capture_output=True,
-                        text=True,
-                    )
-                except subprocess.CalledProcessError as e:
-                    error_msg = e.stderr if e.stderr else str(e)
+                    self._conan_api.command.run(command_args)
+                except Exception as e:
+                    error_msg = str(e)
                     logger.error('Conan upload failed for remote %s: %s', remote, error_msg, exc_info=True)
                     raise ProviderInstallationError('conan', f'Upload to {remote} failed: {error_msg}', e) from e
             return
 
         # Log the command for uploading to all remotes
-        logger.info('Executing conan upload command: %s', ' '.join(command))
+        logger.info('Executing conan upload command: conan %s', ' '.join(command_args))
 
         try:
-            subprocess.run(
-                command,
-                cwd=str(self.core_data.project_data.project_root),
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-        except subprocess.CalledProcessError as e:
-            error_msg = e.stderr if e.stderr else str(e)
+            self._conan_api.command.run(command_args)
+        except Exception as e:
+            error_msg = str(e)
             logger.error('Conan upload failed: %s', error_msg, exc_info=True)
             raise ProviderInstallationError('conan', error_msg, e) from e
