@@ -1,0 +1,14 @@
+= CMake Configuration Options
+
+This page provides a comprehensive reference for configuring the CMake Generator Plugin in CPPython.
+
+== Configuration Location
+
+CMake plugin configuration is specified in your project's `pyproject.toml` file under the `[tool.cppython.generators.cmake]` section:
+
+[source,toml]
+----
+[tool.cppython.generators.cmake]
+preset_file = "CMakePresets.json"
+configuration_name = "default"
+----

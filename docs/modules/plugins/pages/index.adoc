@@ -1,0 +1,47 @@
+= Plugin System Overview
+
+CPPython uses a plugin-based architecture to support different build systems, package managers, and source control systems. The plugin system is designed to be extensible and modular, allowing for easy integration of new tools and workflows.
+
+== Plugin Types
+
+CPPython supports three main types of plugins:
+
+=== Generator Plugins
+
+Generator plugins integrate with build systems like CMake, providing functionality to generate build files and manage build configurations.
+
+Currently supported generators:
+- xref:cmake.adoc[CMake Generator Plugin]
+
+=== Provider Plugins
+
+Provider plugins integrate with package managers and dependency providers, handling dependency resolution and environment setup.
+
+Currently supported providers:
+- Conan
+- vcpkg
+
+=== Source Control Manager (SCM) Plugins
+
+SCM plugins integrate with version control systems to manage project metadata and versioning.
+
+Currently supported SCM systems:
+- Git
+
+== Plugin Architecture
+
+The plugin system follows a consistent pattern where each plugin type implements specific interfaces:
+
+- **Generator Interface**: Handles build system integration
+- **Provider Interface**: Manages dependency resolution
+- **SCM Interface**: Provides version control integration
+
+Each plugin can define:
+- Configuration schemas using Pydantic models
+- Synchronization data structures
+- Build and resolution logic
+- File generation and management
+
+== Configuration
+
+Plugins are configured through the `pyproject.toml` file in the `[tool.cppython]` section. Each plugin type has its own configuration section with specific options and defaults.

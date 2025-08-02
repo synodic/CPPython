@@ -2,5 +2,6 @@ name: cppython
 version: 0.1.0
 title: CPPython
 nav:
-  - modules/ROOT/nav.adoc
-  - modules/tests/nav.adoc
+    - modules/ROOT/nav.adoc
+    - modules/plugins/nav.adoc
+    - modules/tests/nav.adoc

@@ -1,1 +1,16 @@
-= Documentation for CPPython
+= CPPython Documentation
+
+CPPython is a C++ project management tool that integrates with various build systems, package managers, and development tools through a flexible plugin architecture.
+
+== Getting Started
+
+- xref:configuration.adoc[Configuration Guide] - Learn how to configure CPPython for your project
+- xref:plugins:index.adoc[Plugin System] - Understand the plugin architecture and available plugins
+
+== Plugin Documentation
+
+=== Build System Integration
+
+- xref:plugins:cmake.adoc[CMake Generator Plugin] - Complete integration with CMake build system
+  * xref:plugins:cmake-presets.adoc[CMake Presets System] - Advanced preset management
+  * xref:plugins:cmake-configuration.adoc[Configuration Options] - Detailed configuration reference
