@@ -128,10 +128,6 @@ class ConanProvider(Provider):
         # Add build missing flag
         command_args.extend(['--build', 'missing'])
 
-        # Add profiles if specified
-        command_args.extend(['--profile:host', 'default'])
-        command_args.extend(['--profile:build', 'default'])
-
         # Add update flag if needed
         if update:
             command_args.append('--update')
@@ -226,10 +222,6 @@ class ConanProvider(Provider):
 
             # Add build mode (build everything for publishing)
             command_args.extend(['--build', 'missing'])
-
-            # Add profiles
-            command_args.extend(['--profile:host', 'default'])
-            command_args.extend(['--profile:build', 'default'])
 
             # Log the command being executed
             logger.info('Executing conan create command: conan %s', ' '.join(command_args))
