@@ -43,6 +43,8 @@ class ConanProvider(Provider):
         self._cli = Cli(self._conan_api)
         self._cli.add_commands()
 
+        self._ensure_default_profiles()
+
     @staticmethod
     def features(directory: Path) -> SupportedFeatures:
         """Queries conan support
@@ -113,6 +115,15 @@ class ConanProvider(Provider):
             raise FileNotFoundError('Generated conanfile.py not found')
 
         return conanfile_path
+
+    def _ensure_default_profiles(self) -> None:
+        """Ensure default Conan profiles exist, creating them if necessary."""
+        try:
+            self._conan_api.profiles.get_default_host()
+            self._conan_api.profiles.get_default_build()
+        except Exception:
+            # If profiles don't exist, create them using profile detect
+            self._conan_api.command.run(['profile', 'detect'])
 
     def _run_conan_install(self, conanfile_path: Path, update: bool, logger) -> None:
         """Run conan install command using Conan API.

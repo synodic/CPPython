@@ -161,7 +161,7 @@ class Builder:
             'name': name,
             'version': version,
             'dependencies': [dependency.requires() for dependency in dependencies],
-            'preset_file': str(preset_file),
+            'preset_file': preset_file.as_posix(),  # Cross-platform path with forward slashes
         }
 
         result = template.substitute(values)
