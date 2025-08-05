@@ -198,15 +198,24 @@ class ConanProvider(Provider):
         """
         for sync_type in consumer.sync_types():
             if sync_type == CMakeSyncData:
-                # Use the CMakeToolchain file directly as the toolchain
-                toolchain_path = self.core_data.cppython_data.build_path / 'generators' / 'conan_toolchain.cmake'
-
-                return CMakeSyncData(
-                    provider_name=TypeName('conan'),
-                    toolchain=toolchain_path,
-                )
+                return self._create_cmake_sync_data()
 
         raise NotSupportedError(f'Unsupported sync types: {consumer.sync_types()}')
+
+    def _create_cmake_sync_data(self) -> CMakeSyncData:
+        """Creates CMake synchronization data with Conan toolchain configuration.
+
+        Returns:
+            CMakeSyncData configured for Conan integration
+        """
+        # Conan's CMakeToolchain generator automatically creates preset files
+        # The preset file will be created by Conan in the build directory
+        conan_preset_path = self.core_data.cppython_data.build_path / 'CMakePresets.json'
+
+        return CMakeSyncData(
+            provider_name=TypeName('conan'),
+            preset_file=conan_preset_path,
+        )
 
     @classmethod
     async def download_tooling(cls, directory: Path) -> None:

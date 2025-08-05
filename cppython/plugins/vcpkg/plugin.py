@@ -1,5 +1,6 @@
 """The vcpkg provider implementation"""
 
+import json
 import subprocess
 from logging import getLogger
 from os import name as system_name
@@ -110,12 +111,82 @@ class VcpkgProvider(Provider):
         """
         for sync_type in consumer.sync_types():
             if sync_type == CMakeSyncData:
-                return CMakeSyncData(
-                    provider_name=TypeName('vcpkg'),
-                    top_level_includes=self.core_data.cppython_data.install_path / 'scripts/buildsystems/vcpkg.cmake',
-                )
+                return self._create_cmake_sync_data()
 
         raise NotSupportedError('OOF')
+
+    def _create_cmake_sync_data(self) -> CMakeSyncData:
+        """Creates CMake synchronization data with vcpkg configuration.
+
+        Returns:
+            CMakeSyncData configured for vcpkg integration
+        """
+        # Providers are now responsible for generating their own preset file
+        # Create provider sync data with vcpkg configuration
+        provider_preset_path = self.core_data.cppython_data.tool_path / 'providers' / 'vcpkg.json'
+        provider_preset_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Create CMakeSyncData with vcpkg configuration
+        vcpkg_cmake_path = self.core_data.cppython_data.install_path / 'scripts/buildsystems/vcpkg.cmake'
+
+        # Create a custom provider preset with vcpkg configuration
+        provider_preset = {
+            'version': 9,
+            'configurePresets': [
+                {
+                    'name': 'vcpkg-base',
+                    'hidden': True,
+                    'cacheVariables': {'CMAKE_PROJECT_TOP_LEVEL_INCLUDES': str(vcpkg_cmake_path.as_posix())},
+                },
+                {
+                    'name': 'vcpkg-release',
+                    'hidden': True,
+                    'inherits': 'vcpkg-base',
+                    'cacheVariables': {'CMAKE_BUILD_TYPE': 'Release'},
+                },
+                {
+                    'name': 'vcpkg-debug',
+                    'hidden': True,
+                    'inherits': 'vcpkg-base',
+                    'cacheVariables': {'CMAKE_BUILD_TYPE': 'Debug'},
+                },
+            ],
+            'buildPresets': [
+                {
+                    'name': 'vcpkg-multi-release',
+                    'configurePreset': 'vcpkg-base',
+                    'configuration': 'Release',
+                    'hidden': True,
+                },
+                {
+                    'name': 'vcpkg-multi-debug',
+                    'configurePreset': 'vcpkg-base',
+                    'configuration': 'Debug',
+                    'hidden': True,
+                },
+                {
+                    'name': 'vcpkg-release',
+                    'configurePreset': 'vcpkg-release',
+                    'configuration': 'Release',
+                    'hidden': True,
+                },
+                {
+                    'name': 'vcpkg-debug',
+                    'configurePreset': 'vcpkg-debug',
+                    'configuration': 'Debug',
+                    'hidden': True,
+                },
+            ],
+        }
+
+        # Write the preset file
+        with open(provider_preset_path, 'w', encoding='utf-8') as f:
+            json.dump(provider_preset, f, indent=4)
+
+        return CMakeSyncData(
+            provider_name=TypeName('vcpkg'),
+            preset_file=provider_preset_path,
+        )
 
     @classmethod
     def tooling_downloaded(cls, path: Path) -> bool:

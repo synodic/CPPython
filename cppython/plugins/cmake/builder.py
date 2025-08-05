@@ -4,7 +4,6 @@ from pathlib import Path
 
 from cppython.plugins.cmake.schema import (
     BuildPreset,
-    CacheVariable,
     CMakeData,
     CMakePresets,
     CMakeSyncData,
@@ -19,135 +18,69 @@ class Builder:
         """Initialize the builder"""
 
     @staticmethod
-    def generate_provider_preset(provider_data: CMakeSyncData) -> CMakePresets:
-        """Generates a provider preset from input sync data
-
-        Args:
-            provider_data: The providers synchronization data
-        """
-        # Base hidden preset with common configuration
-        base_preset = ConfigurePreset(name=f'{provider_data.provider_name}-base', hidden=True)
-
-        # Handle both top_level_includes and toolchain options
-        cache_variables: dict[str, str | bool | CacheVariable | None] = {}
-
-        if provider_data.top_level_includes:
-            cache_variables['CMAKE_PROJECT_TOP_LEVEL_INCLUDES'] = str(provider_data.top_level_includes.as_posix())
-
-        if provider_data.toolchain:
-            # Use the toolchainFile field for better integration
-            base_preset.toolchainFile = provider_data.toolchain.as_posix()
-
-        if cache_variables:
-            base_preset.cacheVariables = cache_variables
-
-        # Create specific configuration presets
-        default_preset = ConfigurePreset(
-            name=f'{provider_data.provider_name}-default', hidden=True, inherits=f'{provider_data.provider_name}-base'
-        )
-
-        release_preset = ConfigurePreset(
-            name=f'{provider_data.provider_name}-release',
-            hidden=True,
-            inherits=f'{provider_data.provider_name}-base',
-            cacheVariables={'CMAKE_BUILD_TYPE': 'Release'},
-        )
-
-        debug_preset = ConfigurePreset(
-            name=f'{provider_data.provider_name}-debug',
-            hidden=True,
-            inherits=f'{provider_data.provider_name}-base',
-            cacheVariables={'CMAKE_BUILD_TYPE': 'Debug'},
-        )
-
-        return CMakePresets(configurePresets=[base_preset, default_preset, release_preset, debug_preset])
-
-    @staticmethod
-    def write_provider_preset(provider_directory: Path, provider_data: CMakeSyncData) -> None:
-        """Writes a provider preset from input sync data
-
-        Args:
-            provider_directory: The base directory to place the preset files
-            provider_data: The providers synchronization data
-        """
-        generated_preset = Builder.generate_provider_preset(provider_data)
-
-        provider_preset_file = provider_directory / f'{provider_data.provider_name}.json'
-
-        initial_preset = None
-
-        # If the file already exists, we need to compare it
-        if provider_preset_file.exists():
-            with open(provider_preset_file, encoding='utf-8') as file:
-                initial_json = file.read()
-            initial_preset = CMakePresets.model_validate_json(initial_json)
-
-        if generated_preset != initial_preset:
-            serialized = generated_preset.model_dump_json(exclude_none=True, by_alias=False, indent=4)
-            with open(provider_preset_file, 'w', encoding='utf8') as file:
-                file.write(serialized)
-
-    @staticmethod
     def generate_cppython_preset(
-        cppython_preset_directory: Path, provider_directory: Path, provider_data: CMakeSyncData
+        cppython_preset_directory: Path, provider_preset_file: Path, provider_data: CMakeSyncData
     ) -> CMakePresets:
         """Generates the cppython preset which inherits from the provider presets
 
         Args:
             cppython_preset_directory: The tool directory
-            provider_directory: The base directory containing provider presets
+            provider_preset_file: Path to the provider's preset file
             provider_data: The provider's synchronization data
 
         Returns:
             A CMakePresets object
         """
-        # Configure presets similar to Conan structure
-        default_configure = ConfigurePreset(
-            name='default', inherits=f'{provider_data.provider_name}-default', hidden=False
-        )
+        configure_presets = []
 
-        release_configure = ConfigurePreset(
-            name='release', inherits=f'{provider_data.provider_name}-release', hidden=False
-        )
+        preset_name = 'cppython-default'
+        parent_preset_name = f'{provider_data.provider_name}-default'
 
-        debug_configure = ConfigurePreset(name='debug', inherits=f'{provider_data.provider_name}-debug', hidden=False)
+        # Create a default preset that inherits from provider's default preset
+        default_configure = ConfigurePreset(name=preset_name, inherits=parent_preset_name, hidden=True)
+        configure_presets.append(default_configure)
 
-        # Build presets for multi-config and single-config generators
-        multi_release_build = BuildPreset(
-            name='multi-release',
-            configurePreset='default',
-            configuration='Release',
-            inherits=f'{provider_data.provider_name}-release',
-        )
+        # Create presets for each configuration
+        for config in provider_data.configurations:
+            config_name = config.lower()
+            preset_name = f'cppython-{config_name}'
+            parent_preset_name = f'{provider_data.provider_name}-{config_name}'
+            preset = ConfigurePreset(name=preset_name, inherits=parent_preset_name, hidden=True)
+            configure_presets.append(preset)
 
-        multi_debug_build = BuildPreset(
-            name='multi-debug',
-            configurePreset='default',
-            configuration='Debug',
-            inherits=f'{provider_data.provider_name}-debug',
-        )
+        build_presets = []
 
-        release_build = BuildPreset(
-            name='release',
-            configurePreset='release',
-            configuration='Release',
-            inherits=f'{provider_data.provider_name}-release',
-        )
+        # Multi-config build presets using the default configure preset.
+        # Important: Do not use a configure preset here, the user will do that in their own presets.
+        for config in provider_data.configurations:
+            config_name = config.lower()
+            preset_name = f'cppython-multi-{config_name}'
+            parent_preset_name = f'{provider_data.provider_name}-multi-{config_name}'
+            multi_build_preset = BuildPreset(
+                name=preset_name,
+                configuration=config,
+                inherits=parent_preset_name,
+            )
+            build_presets.append(multi_build_preset)
 
-        debug_build = BuildPreset(
-            name='debug',
-            configurePreset='debug',
-            configuration='Debug',
-            inherits=f'{provider_data.provider_name}-debug',
-        )
+        # Single-config build presets using the config-specific configure presets
+        # Important: Do not use a configure preset here, the user will do that in their own presets.
+        for config in provider_data.configurations:
+            config_name = config.lower()
+            parent_config_name = f'{provider_data.provider_name}-{config_name}'
+            single_build_preset = BuildPreset(
+                name=config_name,
+                configuration=config,
+                inherits=parent_config_name,
+            )
+            build_presets.append(single_build_preset)
 
         generated_preset = CMakePresets(
-            configurePresets=[default_configure, release_configure, debug_configure],
-            buildPresets=[multi_release_build, multi_debug_build, release_build, debug_build],
+            configurePresets=configure_presets,
+            buildPresets=build_presets,
         )
 
         # Get the relative path to the provider preset file
-        provider_preset_file = provider_directory / f'{provider_data.provider_name}.json'
         relative_preset = provider_preset_file.relative_to(cppython_preset_directory, walk_up=True).as_posix()
 
         # Set the data
@@ -156,20 +89,20 @@ class Builder:
 
     @staticmethod
     def write_cppython_preset(
-        cppython_preset_directory: Path, provider_directory: Path, provider_data: CMakeSyncData
+        cppython_preset_directory: Path, provider_preset_file: Path, provider_data: CMakeSyncData
     ) -> Path:
         """Write the cppython presets which inherit from the provider presets
 
         Args:
             cppython_preset_directory: The tool directory
-            provider_directory: The base directory containing provider presets
+            provider_preset_file: Path to the provider's preset file
             provider_data: The provider's synchronization data
 
         Returns:
             A file path to the written data
         """
         generated_preset = Builder.generate_cppython_preset(
-            cppython_preset_directory, provider_directory, provider_data
+            cppython_preset_directory, provider_preset_file, provider_data
         )
         cppython_preset_file = cppython_preset_directory / 'cppython.json'
 
