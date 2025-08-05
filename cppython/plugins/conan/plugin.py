@@ -6,7 +6,7 @@ installation, and synchronization with other tools.
 """
 
 import os
-from logging import getLogger
+from logging import Logger, getLogger
 from pathlib import Path
 from typing import Any
 
@@ -83,8 +83,10 @@ class ConanProvider(Provider):
             raise ProviderInstallationError('conan', f'Failed to prepare {operation} environment: {e}', e) from e
 
         try:
-            # Install dependencies using conan install command
-            self._run_conan_install(conanfile_path, update, logger)
+            build_types = ['Release', 'Debug']
+            for build_type in build_types:
+                logger.info('Installing dependencies for build type: %s', build_type)
+                self._run_conan_install(conanfile_path, update, logger, build_type)
         except Exception as e:
             raise ProviderInstallationError('conan', f'Failed to install dependencies: {e}', e) from e
 
@@ -125,12 +127,13 @@ class ConanProvider(Provider):
             # If profiles don't exist, create them using profile detect
             self._conan_api.command.run(['profile', 'detect'])
 
-    def _run_conan_install(self, conanfile_path: Path, update: bool, logger) -> None:
-        """Run conan install command using Conan API.
+    def _run_conan_install(self, conanfile_path: Path, update: bool, build_type: str, logger: Logger) -> None:
+        """Run conan install command using Conan API with optional build type.
 
         Args:
             conanfile_path: Path to the conanfile.py
             update: Whether to check for updates
+            build_type: Build type (Release, Debug, etc.) or None for default
             logger: Logger instance
         """
         # Build conan install command arguments
@@ -142,6 +145,10 @@ class ConanProvider(Provider):
         # Add update flag if needed
         if update:
             command_args.append('--update')
+
+        # Add build type setting if specified
+        if build_type:
+            command_args.extend(['-s', f'build_type={build_type}'])
 
         # Add output folder
         build_path = self.core_data.cppython_data.build_path
