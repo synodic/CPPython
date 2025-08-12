@@ -86,7 +86,7 @@ class ConanProvider(Provider):
             build_types = ['Release', 'Debug']
             for build_type in build_types:
                 logger.info('Installing dependencies for build type: %s', build_type)
-                self._run_conan_install(conanfile_path, update, logger, build_type)
+                self._run_conan_install(conanfile_path, update, build_type, logger)
         except Exception as e:
             raise ProviderInstallationError('conan', f'Failed to install dependencies: {e}', e) from e
 
