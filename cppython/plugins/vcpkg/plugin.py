@@ -125,7 +125,7 @@ class VcpkgProvider(Provider):
 
         return CMakeSyncData(
             provider_name=TypeName('vcpkg'),
-            preset_file=provider_preset_path,
+            toolchain=vcpkg_cmake_path,
         )
 
     @classmethod
