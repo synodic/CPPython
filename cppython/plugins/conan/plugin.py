@@ -214,9 +214,8 @@ class ConanProvider(Provider):
         Returns:
             CMakeSyncData configured for Conan integration
         """
-        # Conan's CMakeToolchain generator creates preset files at the configured user_presets_path
-        # This should match the path configured in the conanfile template
-        conan_toolchain_path = self.core_data.cppython_data.tool_path / 'ConanPresets.json'
+        # TODO: Use the actual toolchain path conan writes to
+        conan_toolchain_path = self.core_data.cppython_data.tool_path
 
         return CMakeSyncData(
             provider_name=TypeName('conan'),
