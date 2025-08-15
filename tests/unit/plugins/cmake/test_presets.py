@@ -1,7 +1,6 @@
 """Tests for CMakePresets"""
 
 import json
-from pathlib import Path
 
 from cppython.core.schema import ProjectData
 from cppython.plugins.cmake.builder import Builder
@@ -55,58 +54,6 @@ class TestWrites:
     """Tests for writing the CMakePresets class"""
 
     @staticmethod
-    def test_cppython_write(tmp_path: Path) -> None:
-        """Verifies that the cppython preset writing works as intended
-
-        Args:
-            tmp_path: The input path the use
-        """
-        builder = Builder()
-
-        # Create a mock provider preset file
-        provider_preset_file = tmp_path / 'provider.json'
-        provider_preset = {
-            'version': 9,
-            'configurePresets': [
-                {'name': 'test-provider-base', 'hidden': True},
-                {'name': 'test-provider-release', 'hidden': True, 'inherits': 'test-provider-base'},
-                {'name': 'test-provider-debug', 'hidden': True, 'inherits': 'test-provider-base'},
-            ],
-            'buildPresets': [
-                {
-                    'name': 'test-provider-multi-release',
-                    'configurePreset': 'test-provider-base',
-                    'configuration': 'Release',
-                    'hidden': True,
-                },
-                {
-                    'name': 'test-provider-multi-debug',
-                    'configurePreset': 'test-provider-base',
-                    'configuration': 'Debug',
-                    'hidden': True,
-                },
-                {
-                    'name': 'test-provider-release',
-                    'configurePreset': 'test-provider-release',
-                    'configuration': 'Release',
-                    'hidden': True,
-                },
-                {
-                    'name': 'test-provider-debug',
-                    'configurePreset': 'test-provider-debug',
-                    'configuration': 'Debug',
-                    'hidden': True,
-                },
-            ],
-        }
-
-        with provider_preset_file.open('w', encoding='utf-8') as file:
-            json.dump(provider_preset, file, indent=4)
-
-        data = CMakeSyncData(provider_name=TypeName('test-provider'), preset_file=provider_preset_file)
-        builder.write_cppython_preset(tmp_path, provider_preset_file, data)
-
-    @staticmethod
     def test_root_write(project_data: ProjectData) -> None:
         """Verifies that the root preset writing works as intended
 
@@ -138,7 +85,7 @@ class TestWrites:
         with provider_preset_file.open('w') as f:
             json.dump(provider_preset_data, f)
 
-        data = CMakeSyncData(provider_name=TypeName('test-provider'), preset_file=provider_preset_file)
+        data = CMakeSyncData(provider_name=TypeName('test-provider'))
 
         cppython_preset_file = builder.write_cppython_preset(cppython_preset_directory, provider_preset_file, data)
 
@@ -184,7 +131,7 @@ class TestWrites:
         with provider_preset_file.open('w') as f:
             json.dump(provider_preset_data, f)
 
-        data = CMakeSyncData(provider_name=TypeName('test-provider'), preset_file=provider_preset_file)
+        data = CMakeSyncData(provider_name=TypeName('test-provider'))
 
         cppython_preset_file = builder.write_cppython_preset(cppython_preset_directory, provider_preset_file, data)
 

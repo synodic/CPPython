@@ -99,7 +99,7 @@ class CMakePresets(CPPythonModel, extra='allow'):
 class CMakeSyncData(SyncData):
     """The CMake sync data"""
 
-    toolchain: Path | None = None
+    toolchain_file: Path | None = None
 
 
 class CMakeData(CPPythonModel):

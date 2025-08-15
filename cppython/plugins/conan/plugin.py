@@ -219,7 +219,7 @@ class ConanProvider(Provider):
 
         return CMakeSyncData(
             provider_name=TypeName('conan'),
-            toolchain=conan_toolchain_path,
+            toolchain_file=conan_toolchain_path,
         )
 
     @classmethod

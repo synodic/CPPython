@@ -33,51 +33,14 @@ class Builder:
         """
         configure_presets = []
 
-        preset_name = 'cppython-default'
-        parent_preset_name = f'{provider_data.provider_name}-default'
+        preset_name = 'cppython'
 
         # Create a default preset that inherits from provider's default preset
-        default_configure = ConfigurePreset(name=preset_name, inherits=parent_preset_name, hidden=True)
+        default_configure = ConfigurePreset(name=preset_name, hidden=True, toolchainFile=provider_data.toolchain_file)
         configure_presets.append(default_configure)
-
-        # Create presets for each configuration
-        for config in provider_data.configurations:
-            config_name = config.lower()
-            preset_name = f'cppython-{config_name}'
-            parent_preset_name = f'{provider_data.provider_name}-{config_name}'
-            preset = ConfigurePreset(name=preset_name, inherits=parent_preset_name, hidden=True)
-            configure_presets.append(preset)
-
-        build_presets = []
-
-        # Multi-config build presets using the default configure preset.
-        # Important: Do not use a configure preset here, the user will do that in their own presets.
-        for config in provider_data.configurations:
-            config_name = config.lower()
-            preset_name = f'cppython-multi-{config_name}'
-            parent_preset_name = f'{provider_data.provider_name}-multi-{config_name}'
-            multi_build_preset = BuildPreset(
-                name=preset_name,
-                configuration=config,
-                inherits=parent_preset_name,
-            )
-            build_presets.append(multi_build_preset)
-
-        # Single-config build presets using the config-specific configure presets
-        # Important: Do not use a configure preset here, the user will do that in their own presets.
-        for config in provider_data.configurations:
-            config_name = config.lower()
-            parent_config_name = f'{provider_data.provider_name}-{config_name}'
-            single_build_preset = BuildPreset(
-                name=config_name,
-                configuration=config,
-                inherits=parent_config_name,
-            )
-            build_presets.append(single_build_preset)
 
         generated_preset = CMakePresets(
             configurePresets=configure_presets,
-            buildPresets=build_presets,
         )
 
         # Get the relative path to the provider preset file
