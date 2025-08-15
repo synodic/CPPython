@@ -103,7 +103,6 @@ class ConanProvider(Provider):
             resolved_dependencies,
             self.core_data.pep621_data.name,
             self.core_data.pep621_data.version,
-            self.core_data.cppython_data.tool_path / 'ConanPresets.json',
         )
 
         # Ensure build directory exists
@@ -217,11 +216,11 @@ class ConanProvider(Provider):
         """
         # Conan's CMakeToolchain generator creates preset files at the configured user_presets_path
         # This should match the path configured in the conanfile template
-        conan_preset_path = self.core_data.cppython_data.tool_path / 'ConanPresets.json'
+        conan_toolchain_path = self.core_data.cppython_data.tool_path / 'ConanPresets.json'
 
         return CMakeSyncData(
             provider_name=TypeName('conan'),
-            preset_file=conan_preset_path,
+            toolchain=conan_toolchain_path,
         )
 
     @classmethod
