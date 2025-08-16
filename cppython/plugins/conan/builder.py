@@ -151,6 +151,10 @@ class Builder:
             def package(self):
                 cmake = CMake(self)
                 cmake.install()
+
+            def export_sources(self):
+                self.copy("CMakeLists.txt")
+                self.copy("src/*")
             """
 
         template = Template(dedent(template_string))
