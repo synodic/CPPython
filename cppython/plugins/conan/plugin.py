@@ -149,10 +149,6 @@ class ConanProvider(Provider):
         if build_type:
             command_args.extend(['-s', f'build_type={build_type}'])
 
-        # Add output folder
-        build_path = self.core_data.cppython_data.build_path
-        command_args.extend(['--output-folder', str(build_path)])
-
         # Log the command being executed
         logger.info('Executing conan command: conan %s', ' '.join(command_args))
 
