@@ -179,13 +179,13 @@ class Builder:
             existing_preset: The preset to update
             build_directory: The build directory to use
         """
-        # Update existing preset to ensure it inherits from 'default'
+        # Update existing preset to ensure it inherits from 'cppython'
         if existing_preset.inherits is None:
-            existing_preset.inherits = 'default'  # type: ignore[misc]
-        elif isinstance(existing_preset.inherits, str) and existing_preset.inherits != 'default':
-            existing_preset.inherits = ['default', existing_preset.inherits]  # type: ignore[misc]
-        elif isinstance(existing_preset.inherits, list) and 'default' not in existing_preset.inherits:
-            existing_preset.inherits.insert(0, 'default')
+            existing_preset.inherits = 'cppython'  # type: ignore[misc]
+        elif isinstance(existing_preset.inherits, str) and existing_preset.inherits != 'cppython':
+            existing_preset.inherits = ['cppython', existing_preset.inherits]  # type: ignore[misc]
+        elif isinstance(existing_preset.inherits, list) and 'cppython' not in existing_preset.inherits:
+            existing_preset.inherits.insert(0, 'cppython')
 
         # Update binary directory if not set
         if not existing_preset.binaryDir:
@@ -214,10 +214,10 @@ class Builder:
                 existing_preset = next(
                     (p for p in root_preset.configurePresets if p.name == user_configure_preset.name), None
                 )
-            if existing_preset:
-                Builder._update_configure_preset(existing_preset, build_directory)
-            else:
-                root_preset.configurePresets.append(user_configure_preset)
+                if existing_preset:
+                    Builder._update_configure_preset(existing_preset, build_directory)
+                else:
+                    root_preset.configurePresets.append(user_configure_preset)
 
         if root_preset.buildPresets is None:
             root_preset.buildPresets = user_build_presets.copy()  # type: ignore[misc]
@@ -304,8 +304,8 @@ class Builder:
                 initial_json = file.read()
             initial_root_preset = CMakePresets.model_validate_json(initial_json)
 
-        # Ensure that the build_directory is relative to the preset_file
-        build_directory = build_directory.relative_to(preset_file.parent)
+        # Ensure that the build_directory is relative to the preset_file, allowing upward traversal
+        build_directory = build_directory.relative_to(preset_file.parent, walk_up=True)
 
         root_preset = Builder.generate_root_preset(preset_file, cppython_preset_file, cmake_data, build_directory)
 
