@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.24)
 
-project(HelloWorld)
+project(FormatOutput LANGUAGES CXX C)
 
-find_package(fmt CONFIG REQUIRED)
+set(CMAKE_CXX_STANDARD 14)
 
-add_executable(HelloWorld helloworld.cpp)
+find_package(fmt REQUIRED)
 
-target_link_libraries(HelloWorld PRIVATE fmt::fmt)
+add_executable(main src/main.cpp)
+target_link_libraries(main PRIVATE fmt::fmt)

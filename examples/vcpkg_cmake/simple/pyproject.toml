@@ -15,7 +15,7 @@ dependencies = ["cppython[vcpkg, cmake, git]>=0.9.0"]
 [tool.cppython]
 install-path = "install"
 
-dependencies = ["fmt>=11.0.2"]
+dependencies = ["fmt>=11.2.0"]
 
 [tool.cppython.generators.cmake]
 

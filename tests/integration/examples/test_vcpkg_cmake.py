@@ -6,22 +6,54 @@ The tests ensure that the projects build, configure, and execute correctly.
 
 import subprocess
 from pathlib import Path
+from tomllib import loads
 
 from typer.testing import CliRunner
 
-pytest_plugins = ['tests.fixtures.example']
+from cppython.console.schema import ConsoleInterface
+from cppython.core.schema import ProjectConfiguration
+from cppython.project import Project
+
+pytest_plugins = ['tests.fixtures.example', 'tests.fixtures.vcpkg']
 
 
 class TestVcpkgCMake:
     """Test project variation of vcpkg and CMake"""
 
     @staticmethod
+    def _create_project(skip_upload: bool = True) -> Project:
+        """Create a project instance with common configuration."""
+        project_root = Path.cwd()
+        config = ProjectConfiguration(project_root=project_root, version=None, verbosity=2, debug=True)
+        interface = ConsoleInterface()
+
+        pyproject_path = project_root / 'pyproject.toml'
+        pyproject_data = loads(pyproject_path.read_text(encoding='utf-8'))
+
+        if skip_upload:
+            TestVcpkgCMake._ensure_vcpkg_config(pyproject_data)
+            pyproject_data['tool']['cppython']['providers']['vcpkg']['skip_upload'] = True
+
+        return Project(config, interface, pyproject_data)
+
+    @staticmethod
+    def _ensure_vcpkg_config(pyproject_data: dict) -> None:
+        """Helper method to ensure Vcpkg configuration exists in pyproject data"""
+        if 'tool' not in pyproject_data:
+            pyproject_data['tool'] = {}
+        if 'cppython' not in pyproject_data['tool']:
+            pyproject_data['tool']['cppython'] = {}
+        if 'providers' not in pyproject_data['tool']['cppython']:
+            pyproject_data['tool']['cppython']['providers'] = {}
+        if 'vcpkg' not in pyproject_data['tool']['cppython']['providers']:
+            pyproject_data['tool']['cppython']['providers']['vcpkg'] = {}
+
+    @staticmethod
     def test_simple(example_runner: CliRunner) -> None:
         """Simple project"""
-        # By nature of running the test, we require PDM to develop the project and so it will be installed
-        result = subprocess.run(['pdm', 'install'], capture_output=True, text=True, check=False)
-
-        assert result.returncode == 0, f'PDM install failed: {result.stderr}'
+        # Create project and install dependencies
+        project = TestVcpkgCMake._create_project(skip_upload=False)
+        project.install()
 
         # Run the CMake configuration command
         result = subprocess.run(['cmake', '--preset=default'], capture_output=True, text=True, check=False)
