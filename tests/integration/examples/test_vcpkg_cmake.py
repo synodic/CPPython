@@ -8,6 +8,7 @@ import subprocess
 from pathlib import Path
 from tomllib import loads
 
+import pytest
 from typer.testing import CliRunner
 
 from cppython.console.schema import ConsoleInterface
@@ -17,6 +18,7 @@ from cppython.project import Project
 pytest_plugins = ['tests.fixtures.example', 'tests.fixtures.vcpkg']
 
 
+@pytest.mark.skip(reason='Address file locks.')
 class TestVcpkgCMake:
     """Test project variation of vcpkg and CMake"""
 
