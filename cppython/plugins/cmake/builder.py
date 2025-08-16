@@ -40,19 +40,17 @@ class Builder:
             name=preset_name,
             hidden=True,
             description='Injected configuration preset for CPPython',
-            toolchainFile=provider_data.toolchain_file,
         )
+
+        if provider_data.toolchain_file:
+            default_configure.toolchainFile = provider_data.toolchain_file.as_posix()
+
         configure_presets.append(default_configure)
 
         generated_preset = CMakePresets(
             configurePresets=configure_presets,
         )
 
-        # Get the relative path to the provider preset file
-        relative_preset = provider_preset_file.relative_to(cppython_preset_directory, walk_up=True).as_posix()
-
-        # Set the data
-        generated_preset.include = [relative_preset]
         return generated_preset
 
     @staticmethod
@@ -114,7 +112,6 @@ class Builder:
             ConfigurePreset(
                 name=name,
                 description='All multi-configuration generators should inherit from this preset',
-                hidden=True,
                 inherits='cppython',
                 binaryDir='${sourceDir}/' + build_directory.as_posix(),
                 cacheVariables={'CMAKE_CONFIGURATION_TYPES': 'Debug;Release'},
@@ -125,7 +122,6 @@ class Builder:
             ConfigurePreset(
                 name=release_name,
                 description='All single-configuration generators should inherit from this preset',
-                hidden=True,
                 inherits=name,
                 cacheVariables={'CMAKE_BUILD_TYPE': 'Release'},
             )
@@ -135,7 +131,6 @@ class Builder:
             ConfigurePreset(
                 name=debug_name,
                 description='All single-configuration generators should inherit from this preset',
-                hidden=True,
                 inherits=name,
                 cacheVariables={'CMAKE_BUILD_TYPE': 'Debug'},
             )
@@ -145,7 +140,6 @@ class Builder:
             BuildPreset(
                 name=release_name,
                 description='An example build preset for release',
-                hidden=True,
                 configurePreset=release_name,
             )
         )
@@ -154,7 +148,6 @@ class Builder:
             BuildPreset(
                 name=debug_name,
                 description='An example build preset for debug',
-                hidden=True,
                 configurePreset=debug_name,
             )
         )
