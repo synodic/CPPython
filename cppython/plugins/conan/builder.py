@@ -126,6 +126,7 @@ class Builder:
         template_string = """
         from conan import ConanFile
         from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+        from conan.tools.files import copy
 
         class AutoPackage(ConanFile):
             name = "${name}"
@@ -153,8 +154,8 @@ class Builder:
                 cmake.install()
 
             def export_sources(self):
-                self.copy("CMakeLists.txt")
-                self.copy("src/*")
+                copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+                copy(self, "src/*", src=self.recipe_folder, dst=self.export_sources_folder)
             """
 
         template = Template(dedent(template_string))
