@@ -98,7 +98,7 @@ class Builder:
         """
         user_configure_preset = ConfigurePreset(
             name=cmake_data.configuration_name,
-            inherits='default',  # Inherit from cppython's default preset
+            inherits='cppython',
             binaryDir=build_directory.as_posix(),
         )
 
@@ -272,6 +272,9 @@ class Builder:
             with open(preset_file, encoding='utf-8') as file:
                 initial_json = file.read()
             initial_root_preset = CMakePresets.model_validate_json(initial_json)
+
+        # Ensure that the build_directory is relative to the preset_file
+        build_directory = build_directory.relative_to(preset_file.parent)
 
         root_preset = Builder.generate_root_preset(preset_file, cppython_preset_file, cmake_data, build_directory)
 
