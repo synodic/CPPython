@@ -214,8 +214,7 @@ class ConanProvider(Provider):
         Returns:
             CMakeSyncData configured for Conan integration
         """
-        # TODO: Use the actual toolchain path conan writes to
-        conan_toolchain_path = self.core_data.cppython_data.tool_path
+        conan_toolchain_path = self.core_data.cppython_data.build_path / 'generators' / 'conan_toolchain.cmake'
 
         return CMakeSyncData(
             provider_name=TypeName('conan'),
