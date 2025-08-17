@@ -44,7 +44,7 @@ class ProjectConfiguration(CPPythonModel, extra='forbid'):
         bool, Field(description='Debug mode. Additional processing will happen to expose more debug information')
     ] = False
 
-    @field_validator('verbosity')  # type: ignore
+    @field_validator('verbosity')
     @classmethod
     def min_max(cls, value: int) -> int:
         """Validator that clamps the input value
@@ -121,7 +121,7 @@ class CPPythonData(CPPythonModel, extra='forbid'):
     provider_data: Annotated[dict[str, Any], Field(description='Resolved provider configuration data')]
     generator_data: Annotated[dict[str, Any], Field(description='Resolved generator configuration data')]
 
-    @field_validator('configuration_path', 'install_path', 'tool_path', 'build_path')  # type: ignore
+    @field_validator('configuration_path', 'install_path', 'tool_path', 'build_path')
     @classmethod
     def validate_absolute_path(cls, value: Path) -> Path:
         """Enforce the input is an absolute path
