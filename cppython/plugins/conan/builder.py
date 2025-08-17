@@ -158,7 +158,6 @@ class Builder:
 
             def export_sources(self):
                 copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
-                copy(self, "include/*", src=self.recipe_folder, dst=self.export_sources_folder)
                 copy(self, "src/*", src=self.recipe_folder, dst=self.export_sources_folder)
                 copy(self, "cmake/*", src=self.recipe_folder, dst=self.export_sources_folder)
             """
