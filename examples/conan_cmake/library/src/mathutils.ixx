@@ -1,6 +1,7 @@
-export module mathutils;
+#include <fmt/core.h>
+#include <fmt/color.h>
 
-import fmt;
+export module mathutils;
 
 export namespace mathutils
 {
