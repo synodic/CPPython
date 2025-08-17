@@ -5,6 +5,7 @@ import os
 from importlib.metadata import entry_points
 from inspect import getmodule
 from logging import Logger
+from pprint import pformat
 from typing import Any, cast
 
 from rich.console import Console
@@ -555,5 +556,7 @@ class Builder:
         )
 
         plugins = Plugins(generator=generator, provider=provider, scm=scm)
+
+        self._logger.debug('Project data:\n%s', pformat(dict(core_data)))
 
         return Data(core_data, plugins, self._logger)
