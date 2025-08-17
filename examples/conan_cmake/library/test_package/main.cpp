@@ -1,5 +1,5 @@
-#include <mathutils/mathutils.h>
-#include <iostream>
+import mathutils;
+import std;
 
 int main()
 {

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 4.0)
 
 project(mathutils
     VERSION 1.0.0
@@ -12,26 +12,23 @@ include(CMakePackageConfigHelpers)
 # Dependencies
 find_package(fmt REQUIRED)
 
-# Library target
-add_library(mathutils src/mathutils.cpp)
+# Library target with module support
+add_library(mathutils)
 add_library(mathutils::mathutils ALIAS mathutils)
 
-target_compile_features(mathutils PUBLIC cxx_std_17)
-target_include_directories(mathutils PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+target_sources(mathutils
+    PUBLIC
+    FILE_SET CXX_MODULES FILES
+    src/mathutils.ixx
 )
+
+target_compile_features(mathutils PUBLIC cxx_std_23)
 target_link_libraries(mathutils PUBLIC fmt::fmt)
 
 # Installation
 install(TARGETS mathutils
     EXPORT mathutilsTargets
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
-
-install(DIRECTORY include/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    FILES_MATCHING PATTERN "*.h*"
+    FILE_SET CXX_MODULES DESTINATION ${CMAKE_INSTALL_LIBDIR}/cxx/miu
 )
 
 install(EXPORT mathutilsTargets
