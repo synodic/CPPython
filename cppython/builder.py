@@ -375,10 +375,10 @@ class Resolver:
         return combos[0]
 
     @staticmethod
-    def create_scm(
+    def create_scm[T: SCM](
         core_data: CoreData,
-        scm_type: type[SCM],
-    ) -> SCM:
+        scm_type: type[T],
+    ) -> T:
         """Creates a source control manager from input configuration
 
         Args:
@@ -391,17 +391,17 @@ class Resolver:
         cppython_plugin_data = resolve_cppython_plugin(core_data.cppython_data, scm_type)
         scm_data = resolve_scm(core_data.project_data, cppython_plugin_data)
 
-        plugin = cast(SCM, scm_type(scm_data))
+        plugin = scm_type(scm_data)
 
         return plugin
 
-    def create_generator(
+    def create_generator[T: Generator](
         self,
         core_data: CoreData,
         pep621_data: PEP621Data,
         generator_configuration: dict[str, Any],
-        generator_type: type[Generator],
-    ) -> Generator:
+        generator_type: type[T],
+    ) -> T:
         """Creates a generator from input configuration
 
         Args:
@@ -428,15 +428,15 @@ class Resolver:
             cppython_data=cppython_plugin_data,
         )
 
-        return cast(Generator, generator_type(generator_data, core_plugin_data, generator_configuration))
+        return generator_type(generator_data, core_plugin_data, generator_configuration)
 
-    def create_provider(
+    def create_provider[T: Provider](
         self,
         core_data: CoreData,
         pep621_data: PEP621Data,
         provider_configuration: dict[str, Any],
-        provider_type: type[Provider],
-    ) -> Provider:
+        provider_type: type[T],
+    ) -> T:
         """Creates Providers from input data
 
         Args:
@@ -463,7 +463,7 @@ class Resolver:
             cppython_data=cppython_plugin_data,
         )
 
-        return cast(Provider, provider_type(provider_data, core_plugin_data, provider_configuration))
+        return provider_type(provider_data, core_plugin_data, provider_configuration)
 
 
 class Builder:
