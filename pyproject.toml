@@ -12,17 +12,17 @@ dynamic = ["version"]
 requires-python = ">=3.13"
 
 dependencies = [
-    "typer>=0.16.0",
+    "typer>=0.16.1",
     "pydantic>=2.11.7",
     "packaging>=25.0",
-    "requests>=2.32.4",
+    "requests>=2.32.5",
     "types-requests>=2.32.4.20250809",
 ]
 
 [project.optional-dependencies]
 pytest = ["pytest>=8.4.1", "pytest-mock>=3.14.1"]
 git = ["dulwich>=0.24.1"]
-pdm = ["pdm>=2.25.6"]
+pdm = ["pdm>=2.25.9"]
 cmake = ["cmake>=4.1.0"]
 conan = ["conan>=2.19.1", "libcst>=1.8.2"]
 
@@ -47,7 +47,7 @@ cppython = "cppython.plugins.pdm.plugin:CPPythonPlugin"
 cppython = "cppython.test.pytest.fixtures"
 
 [dependency-groups]
-lint = ["ruff>=0.12.9", "pyrefly>=0.28.1"]
+lint = ["ruff>=0.12.10", "pyrefly>=0.29.2"]
 test = ["pytest>=8.4.1", "pytest-cov>=6.2.1", "pytest-mock>=3.14.1"]
 
 [project.scripts]
