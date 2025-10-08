@@ -80,7 +80,7 @@ class PEP621Configuration(CPPythonModel):
 
     @model_validator(mode='after')  # type: ignore
     @classmethod
-    def dynamic_data(cls, model: 'PEP621Configuration') -> 'PEP621Configuration':
+    def dynamic_data(cls, model: PEP621Configuration) -> PEP621Configuration:
         """Validates that dynamic data is represented correctly
 
         Args:
