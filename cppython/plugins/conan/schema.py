@@ -55,7 +55,7 @@ class ConanVersion(CPPythonModel):
         return version
 
     @classmethod
-    def from_string(cls, version_str: str) -> 'ConanVersion':
+    def from_string(cls, version_str: str) -> ConanVersion:
         """Parse a version string into a ConanVersion."""
         if '-' in version_str:
             version_part, prerelease = version_str.split('-', 1)
@@ -219,7 +219,7 @@ class ConanDependency(CPPythonModel):
         return result
 
     @classmethod
-    def from_conan_reference(cls, reference: str) -> 'ConanDependency':
+    def from_conan_reference(cls, reference: str) -> ConanDependency:
         """Parse a Conan reference string into a ConanDependency.
 
         Examples:

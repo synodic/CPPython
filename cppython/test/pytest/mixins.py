@@ -193,7 +193,7 @@ class ProviderPluginTestMixin[T: Provider](DataPluginTestMixin[T], ABC):
 
     @staticmethod
     @pytest.fixture(name='generator_type', scope='session')
-    def fixture_generator_type(request: 'pytest.FixtureRequest') -> type[Generator]:
+    def fixture_generator_type(request: pytest.FixtureRequest) -> type[Generator]:
         """Provide generator variants for cross-plugin testing
 
         Args:
@@ -207,7 +207,7 @@ class ProviderPluginTestMixin[T: Provider](DataPluginTestMixin[T], ABC):
 
     @staticmethod
     @pytest.fixture(name='scm_type', scope='session')
-    def fixture_scm_type(request: 'pytest.FixtureRequest') -> type[SCM]:
+    def fixture_scm_type(request: pytest.FixtureRequest) -> type[SCM]:
         """Provide SCM variants for cross-plugin testing
 
         Args:
@@ -252,7 +252,7 @@ class GeneratorPluginTestMixin[T: Generator](DataPluginTestMixin[T], ABC):
     # Cross-plugin testing fixtures for ensuring compatibility
     @staticmethod
     @pytest.fixture(name='provider_type', scope='session')
-    def fixture_provider_type(request: 'pytest.FixtureRequest') -> type[Provider]:
+    def fixture_provider_type(request: pytest.FixtureRequest) -> type[Provider]:
         """Provide provider variants for cross-plugin testing
 
         Args:
@@ -279,7 +279,7 @@ class GeneratorPluginTestMixin[T: Generator](DataPluginTestMixin[T], ABC):
 
     @staticmethod
     @pytest.fixture(name='scm_type', scope='session')
-    def fixture_scm_type(request: 'pytest.FixtureRequest') -> type[SCM]:
+    def fixture_scm_type(request: pytest.FixtureRequest) -> type[SCM]:
         """Provide SCM variants for cross-plugin testing
 
         Args:
@@ -324,7 +324,7 @@ class SCMPluginTestMixin[T: SCM](PluginTestMixin[T], ABC):
     # Cross-plugin testing fixtures for ensuring compatibility
     @staticmethod
     @pytest.fixture(name='provider_type', scope='session')
-    def fixture_provider_type(request: 'pytest.FixtureRequest') -> type[Provider]:
+    def fixture_provider_type(request: pytest.FixtureRequest) -> type[Provider]:
         """Provide provider variants for cross-plugin testing
 
         Args:
@@ -338,7 +338,7 @@ class SCMPluginTestMixin[T: SCM](PluginTestMixin[T], ABC):
 
     @staticmethod
     @pytest.fixture(name='generator_type', scope='session')
-    def fixture_generator_type(request: 'pytest.FixtureRequest') -> type[Generator]:
+    def fixture_generator_type(request: pytest.FixtureRequest) -> type[Generator]:
         """Provide generator variants for cross-plugin testing
 
         Args:

@@ -107,5 +107,7 @@ class TestSchema:
         types = consumer.sync_types()
 
         for test in types:
-            if producer.supported_sync_type(test) and (data := producer.sync_data(consumer)):
-                consumer.sync(data)
+            if producer.supported_sync_type(test):
+                data = producer.sync_data(consumer)
+                if data:
+                    consumer.sync(data)
