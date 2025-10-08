@@ -2,7 +2,7 @@
 
 from abc import abstractmethod
 from pathlib import Path
-from typing import Annotated, Any, NewType, Protocol, runtime_checkable
+from typing import Annotated, Any, NewType, Protocol, Self, runtime_checkable
 
 from packaging.requirements import Requirement
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -80,7 +80,7 @@ class PEP621Configuration(CPPythonModel):
 
     @model_validator(mode='after')  # type: ignore
     @classmethod
-    def dynamic_data(cls, model: PEP621Configuration) -> PEP621Configuration:
+    def dynamic_data(cls, model: Self) -> Self:
         """Validates that dynamic data is represented correctly
 
         Args:
