@@ -1,5 +1,6 @@
 """Shared fixtures for Conan plugin tests"""
 
+import os
 from pathlib import Path
 from typing import Any
 from unittest.mock import Mock
@@ -34,7 +35,8 @@ def fixture_conan_plugin_data(request) -> dict[str, Any]:
 def clean_conan_cache(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """Sets CONAN_HOME to a temporary directory for each test.
 
-    This ensures all tests run with a clean Conan cache.
+    This ensures all tests run with a clean Conan cache. Copies the user's
+    default profile if it exists to ensure tests have valid compiler settings.
 
     Args:
         tmp_path: Pytest temporary directory fixture
@@ -42,6 +44,17 @@ def clean_conan_cache(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """
     conan_home = tmp_path / 'conan_home'
     conan_home.mkdir()
+
+    # Copy user's default profile if it exists
+    user_conan_home = Path(os.getenv('CONAN_USER_HOME', Path.home() / '.conan2'))
+    user_profiles = user_conan_home / 'profiles'
+    if user_profiles.exists():
+        test_profiles = conan_home / 'profiles'
+        test_profiles.mkdir(parents=True, exist_ok=True)
+        
+        for profile_file in ('default', 'default_build'):
+            if (src := user_profiles / profile_file).exists():
+                src.copy(test_profiles / profile_file)
 
     # Set CONAN_HOME to the temporary directory
     monkeypatch.setenv('CONAN_HOME', str(conan_home))
