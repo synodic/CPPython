@@ -40,9 +40,15 @@ configure_package_config_file(
 install(
     TARGETS mathutils
     EXPORT mathutilsTargets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     FILE_SET CXX_MODULES
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mathutils/src
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mathutils
 )
+
+# Create empty include directory to satisfy CMake's exported target requirements
+# (module-only library with no headers, but CMake expects the directory to exist)
+install(DIRECTORY DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Export and package configuration
 install(
@@ -50,7 +56,6 @@ install(
     FILE mathutilsTargets.cmake
     NAMESPACE mathutils::
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mathutils
-    CXX_MODULES_DIRECTORY cxx-modules
 )
 
 install(
