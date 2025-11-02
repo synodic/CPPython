@@ -5,10 +5,10 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:b2622b10976126fce19eb70004ec43a9b5bb0319222fb13824ff58cfcd81c256"
+content_hash = "sha256:0008cf265767c5de8135ddaafc03fab234785fa2df8c953c047d779d6d85dedb"
 
 [[metadata.targets]]
-requires_python = ">=3.13"
+requires_python = ">=3.14"
 
 [[package]]
 name = "annotated-types"
@@ -42,17 +42,6 @@ requires_python = ">=3.7"
 summary = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
 groups = ["default"]
 files = [
-    {file = "charset_normalizer-3.4.3-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:14c2a87c65b351109f6abfc424cab3927b3bdece6f706e4d12faaf3d52ee5efe"},
-    {file = "charset_normalizer-3.4.3-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:41d1fc408ff5fdfb910200ec0e74abc40387bccb3252f3f27c0676731df2b2c8"},
-    {file = "charset_normalizer-3.4.3-cp313-cp313-manylinux2014_ppc64le.manylinux_2_17_ppc64le.manylinux_2_28_ppc64le.whl", hash = "sha256:1bb60174149316da1c35fa5233681f7c0f9f514509b8e399ab70fea5f17e45c9"},
-    {file = "charset_normalizer-3.4.3-cp313-cp313-manylinux2014_s390x.manylinux_2_17_s390x.manylinux_2_28_s390x.whl", hash = "sha256:30d006f98569de3459c2fc1f2acde170b7b2bd265dc1943e87e1a4efe1b67c31"},
-    {file = "charset_normalizer-3.4.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:416175faf02e4b0810f1f38bcb54682878a4af94059a1cd63b8747244420801f"},
-    {file = "charset_normalizer-3.4.3-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:6aab0f181c486f973bc7262a97f5aca3ee7e1437011ef0c2ec04b5a11d16c927"},
-    {file = "charset_normalizer-3.4.3-cp313-cp313-musllinux_1_2_ppc64le.whl", hash = "sha256:fdabf8315679312cfa71302f9bd509ded4f2f263fb5b765cf1433b39106c3cc9"},
-    {file = "charset_normalizer-3.4.3-cp313-cp313-musllinux_1_2_s390x.whl", hash = "sha256:bd28b817ea8c70215401f657edef3a8aa83c29d447fb0b622c35403780ba11d5"},
-    {file = "charset_normalizer-3.4.3-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:18343b2d246dc6761a249ba1fb13f9ee9a2bcd95decc767319506056ea4ad4dc"},
-    {file = "charset_normalizer-3.4.3-cp313-cp313-win32.whl", hash = "sha256:6fb70de56f1859a3f71261cbe41005f56a7842cc348d3aeb26237560bfa5e0ce"},
-    {file = "charset_normalizer-3.4.3-cp313-cp313-win_amd64.whl", hash = "sha256:cf1ebb7d78e1ad8ec2a8c4732c7be2e736f6e5123a4146c5b89c9d1f585f8cef"},
     {file = "charset_normalizer-3.4.3-cp314-cp314-macosx_10_13_universal2.whl", hash = "sha256:3cd35b7e8aedeb9e34c41385fda4f73ba609e561faedfae0a9e75e44ac558a15"},
     {file = "charset_normalizer-3.4.3-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:b89bc04de1d83006373429975f8ef9e7932534b8cc9ca582e4db7d20d91816db"},
     {file = "charset_normalizer-3.4.3-cp314-cp314-manylinux2014_ppc64le.manylinux_2_17_ppc64le.manylinux_2_28_ppc64le.whl", hash = "sha256:2001a39612b241dae17b4687898843f254f8748b796a2e16f1051a17078d991d"},
@@ -124,7 +113,7 @@ files = [
 
 [[package]]
 name = "cppython"
-version = "0.9.6"
+version = "0.9.7"
 requires_python = ">=3.13"
 summary = "A Python management solution for C++ dependencies"
 groups = ["default"]
@@ -133,28 +122,28 @@ dependencies = [
     "pydantic>=2.11.7",
     "requests>=2.32.4",
     "typer>=0.16.0",
-    "types-requests>=2.32.4.20250611",
+    "types-requests>=2.32.4.20250809",
 ]
 files = [
-    {file = "cppython-0.9.6-py3-none-any.whl", hash = "sha256:9e95545a5bb38b02f86991a4d3873d61764c044adcdeca05d8d9a2a55a885a1f"},
-    {file = "cppython-0.9.6.tar.gz", hash = "sha256:313729995ba1952d8a8e7fca23f3e5be6031a5bfefede747627407ca68d6ea6c"},
+    {file = "cppython-0.9.7-py3-none-any.whl", hash = "sha256:5efed0974ce39f8af7d9a15f71facdc59c5244d9ec7778a813accd48361cd016"},
+    {file = "cppython-0.9.7.tar.gz", hash = "sha256:28f02a24793ad44888ef49fb9da6bd84d321592245afd90ba8c252509157488e"},
 ]
 
 [[package]]
 name = "cppython"
-version = "0.9.6"
+version = "0.9.7"
 extras = ["cmake", "git", "vcpkg"]
 requires_python = ">=3.13"
 summary = "A Python management solution for C++ dependencies"
 groups = ["default"]
 dependencies = [
-    "cmake>=4.0.3",
-    "cppython==0.9.6",
-    "dulwich>=0.23.2",
+    "cmake>=4.1.0",
+    "cppython==0.9.7",
+    "dulwich>=0.24.1",
 ]
 files = [
-    {file = "cppython-0.9.6-py3-none-any.whl", hash = "sha256:9e95545a5bb38b02f86991a4d3873d61764c044adcdeca05d8d9a2a55a885a1f"},
-    {file = "cppython-0.9.6.tar.gz", hash = "sha256:313729995ba1952d8a8e7fca23f3e5be6031a5bfefede747627407ca68d6ea6c"},
+    {file = "cppython-0.9.7-py3-none-any.whl", hash = "sha256:5efed0974ce39f8af7d9a15f71facdc59c5244d9ec7778a813accd48361cd016"},
+    {file = "cppython-0.9.7.tar.gz", hash = "sha256:28f02a24793ad44888ef49fb9da6bd84d321592245afd90ba8c252509157488e"},
 ]
 
 [[package]]
@@ -168,11 +157,6 @@ dependencies = [
     "urllib3>=1.25",
 ]
 files = [
-    {file = "dulwich-0.24.1-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:1a11ec69fc6604228804ddfc32c85b22bc627eca4cf4ff3f27dbe822e6f29477"},
-    {file = "dulwich-0.24.1-cp313-cp313-manylinux_2_28_aarch64.whl", hash = "sha256:a9800df7238b586b4c38c00432776781bc889cf02d756dcfb8dc0ecb8fc47a33"},
-    {file = "dulwich-0.24.1-cp313-cp313-manylinux_2_28_x86_64.whl", hash = "sha256:3baab4a01aff890e2e6551ccbd33eb2a44173c897f0f027ad3aeab0fb057ec44"},
-    {file = "dulwich-0.24.1-cp313-cp313-win32.whl", hash = "sha256:b39689aa4d143ba1fb0a687a4eb93d2e630d2c8f940aaa6c6911e9c8dca16e6a"},
-    {file = "dulwich-0.24.1-cp313-cp313-win_amd64.whl", hash = "sha256:8fca9b863b939b52c5f759d292499f0d21a7bf7f8cbb9fdeb8cdd9511c5bc973"},
     {file = "dulwich-0.24.1-py3-none-any.whl", hash = "sha256:57cc0dc5a21059698ffa4ed9a7272f1040ec48535193df84b0ee6b16bf615676"},
     {file = "dulwich-0.24.1.tar.gz", hash = "sha256:e19fd864f10f02bb834bb86167d92dcca1c228451b04458761fc13dabd447758"},
 ]
@@ -251,23 +235,6 @@ dependencies = [
     "typing-extensions!=4.7.0,>=4.6.0",
 ]
 files = [
-    {file = "pydantic_core-2.33.2-cp313-cp313-macosx_10_12_x86_64.whl", hash = "sha256:1082dd3e2d7109ad8b7da48e1d4710c8d06c253cbc4a27c1cff4fbcaa97a9e3f"},
-    {file = "pydantic_core-2.33.2-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:f517ca031dfc037a9c07e748cefd8d96235088b83b4f4ba8939105d20fa1dcd6"},
-    {file = "pydantic_core-2.33.2-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:0a9f2c9dd19656823cb8250b0724ee9c60a82f3cdf68a080979d13092a3b0fef"},
-    {file = "pydantic_core-2.33.2-cp313-cp313-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:2b0a451c263b01acebe51895bfb0e1cc842a5c666efe06cdf13846c7418caa9a"},
-    {file = "pydantic_core-2.33.2-cp313-cp313-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:1ea40a64d23faa25e62a70ad163571c0b342b8bf66d5fa612ac0dec4f069d916"},
-    {file = "pydantic_core-2.33.2-cp313-cp313-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:0fb2d542b4d66f9470e8065c5469ec676978d625a8b7a363f07d9a501a9cb36a"},
-    {file = "pydantic_core-2.33.2-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9fdac5d6ffa1b5a83bca06ffe7583f5576555e6c8b3a91fbd25ea7780f825f7d"},
-    {file = "pydantic_core-2.33.2-cp313-cp313-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:04a1a413977ab517154eebb2d326da71638271477d6ad87a769102f7c2488c56"},
-    {file = "pydantic_core-2.33.2-cp313-cp313-musllinux_1_1_aarch64.whl", hash = "sha256:c8e7af2f4e0194c22b5b37205bfb293d166a7344a5b0d0eaccebc376546d77d5"},
-    {file = "pydantic_core-2.33.2-cp313-cp313-musllinux_1_1_armv7l.whl", hash = "sha256:5c92edd15cd58b3c2d34873597a1e20f13094f59cf88068adb18947df5455b4e"},
-    {file = "pydantic_core-2.33.2-cp313-cp313-musllinux_1_1_x86_64.whl", hash = "sha256:65132b7b4a1c0beded5e057324b7e16e10910c106d43675d9bd87d4f38dde162"},
-    {file = "pydantic_core-2.33.2-cp313-cp313-win32.whl", hash = "sha256:52fb90784e0a242bb96ec53f42196a17278855b0f31ac7c3cc6f5c1ec4811849"},
-    {file = "pydantic_core-2.33.2-cp313-cp313-win_amd64.whl", hash = "sha256:c083a3bdd5a93dfe480f1125926afcdbf2917ae714bdb80b36d34318b2bec5d9"},
-    {file = "pydantic_core-2.33.2-cp313-cp313-win_arm64.whl", hash = "sha256:e80b087132752f6b3d714f041ccf74403799d3b23a72722ea2e6ba2e892555b9"},
-    {file = "pydantic_core-2.33.2-cp313-cp313t-macosx_11_0_arm64.whl", hash = "sha256:61c18fba8e5e9db3ab908620af374db0ac1baa69f0f32df4f61ae23f15e586ac"},
-    {file = "pydantic_core-2.33.2-cp313-cp313t-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:95237e53bb015f67b63c91af7518a62a8660376a6a0db19b89acc77a4d6199f5"},
-    {file = "pydantic_core-2.33.2-cp313-cp313t-win_amd64.whl", hash = "sha256:c2fc0a768ef76c15ab9238afa6da7f69895bb5d1ee83aeea2e3509af4472d0b9"},
     {file = "pydantic_core-2.33.2.tar.gz", hash = "sha256:7cb8bc3605c29176e1b105350d2e6474142d7c1bd1d9327c4a9bdb46bf827acc"},
 ]
 
