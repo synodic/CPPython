@@ -176,7 +176,11 @@ class Builder:
             file.write(result)
 
     def generate_conanfile(
-        self, directory: DirectoryPath, dependencies: list[ConanDependency], name: str, version: str
+        self,
+        directory: DirectoryPath,
+        dependencies: list[ConanDependency],
+        name: str,
+        version: str,
     ) -> None:
         """Generate a conanfile.py file for the project."""
         conan_file = directory / self._filename

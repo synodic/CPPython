@@ -45,6 +45,9 @@ class ConanProvider(Provider):
 
         self._ensure_default_profiles()
 
+        # Initialize cmake_binary with system default. It may be overridden during sync.
+        self._cmake_binary = 'cmake'
+
     @staticmethod
     def features(directory: Path) -> SupportedFeatures:
         """Queries conan support
@@ -149,8 +152,11 @@ class ConanProvider(Provider):
         if build_type:
             command_args.extend(['-s', f'build_type={build_type}'])
 
-        # Log the command being executed
-        logger.info('Executing conan command: conan %s', ' '.join(command_args))
+        # Add cmake binary configuration if specified
+        if self._cmake_binary and self._cmake_binary != 'cmake':
+            # Quote the path if it contains spaces
+            cmake_path = f'"{self._cmake_binary}"' if ' ' in self._cmake_binary else self._cmake_binary
+            command_args.extend(['-c', f'tools.cmake:cmake_program={cmake_path}'])
 
         try:
             # Use reusable Conan API instance instead of subprocess
@@ -200,9 +206,27 @@ class ConanProvider(Provider):
         """
         for sync_type in consumer.sync_types():
             if sync_type == CMakeSyncData:
-                return self._create_cmake_sync_data()
+                return self._sync_with_cmake(consumer)
 
         raise NotSupportedError(f'Unsupported sync types: {consumer.sync_types()}')
+
+    def _sync_with_cmake(self, consumer: SyncConsumer) -> CMakeSyncData:
+        """Synchronize with CMake generator and create sync data.
+
+        Args:
+            consumer: The CMake generator consumer
+
+        Returns:
+            CMakeSyncData configured for Conan integration
+        """
+        # Extract cmake_binary from CMakeGenerator if available
+        if isinstance(consumer, CMakeGenerator) and not os.environ.get('CMAKE_BINARY'):
+            # Only override if not already set from environment variable
+            # Convert Path to string, or use 'cmake' if None
+            cmake_path = consumer.data.cmake_binary
+            self._cmake_binary = str(cmake_path) if cmake_path else 'cmake'
+
+        return self._create_cmake_sync_data()
 
     def _create_cmake_sync_data(self) -> CMakeSyncData:
         """Creates CMake synchronization data with Conan toolchain configuration.
@@ -243,8 +267,11 @@ class ConanProvider(Provider):
             # Add build mode (build everything for publishing)
             command_args.extend(['--build', 'missing'])
 
-            # Log the command being executed
-            logger.info('Executing conan create command: conan %s', ' '.join(command_args))
+            # Add cmake binary configuration if specified
+            if self._cmake_binary and self._cmake_binary != 'cmake':
+                # Quote the path if it contains spaces
+                cmake_path = f'"{self._cmake_binary}"' if ' ' in self._cmake_binary else self._cmake_binary
+                command_args.extend(['-c', f'tools.cmake:cmake_program={cmake_path}'])
 
             # Run conan create using reusable Conan API instance
             # Change to project directory since Conan API might not handle cwd like subprocess

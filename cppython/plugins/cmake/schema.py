@@ -111,6 +111,7 @@ class CMakeData(CPPythonModel):
 
     preset_file: Path
     configuration_name: str
+    cmake_binary: Path | None
 
 
 class CMakeConfiguration(CPPythonModel):
@@ -131,3 +132,10 @@ class CMakeConfiguration(CPPythonModel):
             '"default-release" will also be written'
         ),
     ] = 'default'
+    cmake_binary: Annotated[
+        Path | None,
+        Field(
+            description='Path to a specific CMake binary to use. If not specified, uses "cmake" from PATH. '
+            'Can be overridden via CMAKE_BINARY environment variable.'
+        ),
+    ] = None

@@ -68,9 +68,11 @@ class Project(API):
         self.logger.info('Installing project')
         self.logger.info('Installing %s provider', self._data.plugins.provider.name())
 
+        # Sync before install to allow provider to access generator's resolved configuration
+        self._data.sync()
+
         # Let provider handle its own exceptions for better error context
         self._data.plugins.provider.install()
-        self._data.sync()
 
     def update(self) -> None:
         """Updates project dependencies
@@ -88,9 +90,11 @@ class Project(API):
         self.logger.info('Updating project')
         self.logger.info('Updating %s provider', self._data.plugins.provider.name())
 
+        # Sync before update to allow provider to access generator's resolved configuration
+        self._data.sync()
+
         # Let provider handle its own exceptions for better error context
         self._data.plugins.provider.update()
-        self._data.sync()
 
     def publish(self) -> None:
         """Publishes the project

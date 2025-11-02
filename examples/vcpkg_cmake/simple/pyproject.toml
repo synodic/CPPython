@@ -18,6 +18,7 @@ install-path = "install"
 dependencies = ["fmt>=11.2.0"]
 
 [tool.cppython.generators.cmake]
+cmake_binary = "C:/Program Files/CMake/bin/cmake.exe"
 
 [tool.cppython.providers.vcpkg]
 

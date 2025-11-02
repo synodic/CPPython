@@ -1,5 +1,7 @@
 """Builder to help resolve cmake state"""
 
+import os
+from pathlib import Path
 from typing import Any
 
 from cppython.core.schema import CorePluginData
@@ -24,4 +26,13 @@ def resolve_cmake_data(data: dict[str, Any], core_data: CorePluginData) -> CMake
     if not modified_preset_file.is_absolute():
         modified_preset_file = root_directory / modified_preset_file
 
-    return CMakeData(preset_file=modified_preset_file, configuration_name=parsed_data.configuration_name)
+    # Resolve cmake binary: environment variable takes precedence over configuration
+    cmake_binary: Path | None = None
+    if env_binary := os.environ.get('CMAKE_BINARY'):
+        cmake_binary = Path(env_binary)
+    elif parsed_data.cmake_binary:
+        cmake_binary = parsed_data.cmake_binary
+
+    return CMakeData(
+        preset_file=modified_preset_file, configuration_name=parsed_data.configuration_name, cmake_binary=cmake_binary
+    )

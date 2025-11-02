@@ -17,7 +17,7 @@ class TestBuilder:
         builder = Builder()
         preset_file = project_data.project_root / 'CMakePresets.json'
         cppython_preset_file = project_data.project_root / 'cppython.json'
-        cmake_data = CMakeData(preset_file=preset_file, configuration_name='test-configuration')
+        cmake_data = CMakeData(preset_file=preset_file, configuration_name='test-configuration', cmake_binary=None)
 
         build_directory = project_data.project_root / 'build'
 
@@ -35,7 +35,7 @@ class TestBuilder:
         builder = Builder()
         preset_file = project_data.project_root / 'CMakePresets.json'
         cppython_preset_file = project_data.project_root / 'cppython.json'
-        cmake_data = CMakeData(preset_file=preset_file, configuration_name='test-configuration')
+        cmake_data = CMakeData(preset_file=preset_file, configuration_name='test-configuration', cmake_binary=None)
 
         # Create an initial preset file with a different preset
         initial_presets = CMakePresets(configurePresets=[])
@@ -93,7 +93,7 @@ class TestWrites:
         builder.write_root_presets(
             root_file,
             cppython_preset_file,
-            CMakeData(preset_file=root_file, configuration_name='default'),
+            CMakeData(preset_file=root_file, configuration_name='default', cmake_binary=None),
             build_directory,
         )
 
@@ -139,6 +139,6 @@ class TestWrites:
         builder.write_root_presets(
             root_file,
             cppython_preset_file,
-            CMakeData(preset_file=root_file, configuration_name='default'),
+            CMakeData(preset_file=root_file, configuration_name='default', cmake_binary=None),
             build_directory,
         )

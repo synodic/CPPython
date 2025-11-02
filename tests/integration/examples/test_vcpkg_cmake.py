@@ -5,6 +5,7 @@ The tests ensure that the projects build, configure, and execute correctly.
 """
 
 import subprocess
+import tomllib
 from pathlib import Path
 from tomllib import loads
 
@@ -15,7 +16,7 @@ from cppython.console.schema import ConsoleInterface
 from cppython.core.schema import ProjectConfiguration
 from cppython.project import Project
 
-pytest_plugins = ['tests.fixtures.example', 'tests.fixtures.vcpkg']
+pytest_plugins = ['tests.fixtures.example', 'tests.fixtures.vcpkg', 'tests.fixtures.cmake']
 
 
 @pytest.mark.skip(reason='Address file locks.')
@@ -53,12 +54,25 @@ class TestVcpkgCMake:
     @staticmethod
     def test_simple(example_runner: CliRunner) -> None:
         """Simple project"""
+        # Read cmake_binary from the current pyproject.toml (we're in the example directory)
+        pyproject_path = Path.cwd() / 'pyproject.toml'
+        with pyproject_path.open('rb') as file:
+            pyproject_data = tomllib.load(file)
+
+        cmake_binary = (
+            pyproject_data.get('tool', {})
+            .get('cppython', {})
+            .get('generators', {})
+            .get('cmake', {})
+            .get('cmake_binary', 'cmake')
+        )
+
         # Create project and install dependencies
         project = TestVcpkgCMake._create_project(skip_upload=False)
         project.install()
 
         # Run the CMake configuration command
-        result = subprocess.run(['cmake', '--preset=default'], capture_output=True, text=True, check=False)
+        result = subprocess.run([cmake_binary, '--preset=default'], capture_output=True, text=True, check=False)
 
         assert result.returncode == 0, f'Cmake failed: {result.stderr}'
 
