@@ -87,7 +87,9 @@ class TestWrites:
 
         data = CMakeSyncData(provider_name=TypeName('test-provider'))
 
-        cppython_preset_file = builder.write_cppython_preset(cppython_preset_directory, provider_preset_file, data)
+        cppython_preset_file = builder.write_cppython_preset(
+            cppython_preset_directory, provider_preset_file, data, project_data.project_root
+        )
 
         build_directory = project_data.project_root / 'build'
         builder.write_root_presets(
@@ -133,7 +135,11 @@ class TestWrites:
 
         data = CMakeSyncData(provider_name=TypeName('test-provider'))
 
-        cppython_preset_file = builder.write_cppython_preset(cppython_preset_directory, provider_preset_file, data)
+        # For this test, the root file is in a relative indirection subdirectory
+        project_root = root_file.parent
+        cppython_preset_file = builder.write_cppython_preset(
+            cppython_preset_directory, provider_preset_file, data, project_root
+        )
 
         build_directory = project_data.project_root / 'build'
         builder.write_root_presets(

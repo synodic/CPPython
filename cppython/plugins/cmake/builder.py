@@ -19,7 +19,10 @@ class Builder:
 
     @staticmethod
     def generate_cppython_preset(
-        cppython_preset_directory: Path, provider_preset_file: Path, provider_data: CMakeSyncData
+        cppython_preset_directory: Path,
+        provider_preset_file: Path,
+        provider_data: CMakeSyncData,
+        project_root: Path,
     ) -> CMakePresets:
         """Generates the cppython preset which inherits from the provider presets
 
@@ -27,6 +30,7 @@ class Builder:
             cppython_preset_directory: The tool directory
             provider_preset_file: Path to the provider's preset file
             provider_data: The provider's synchronization data
+            project_root: The project root directory (where CMakeLists.txt is located)
 
         Returns:
             A CMakePresets object
@@ -43,7 +47,8 @@ class Builder:
         )
 
         if provider_data.toolchain_file:
-            default_configure.toolchainFile = provider_data.toolchain_file.as_posix()
+            relative_toolchain = provider_data.toolchain_file.relative_to(project_root, walk_up=True)
+            default_configure.toolchainFile = relative_toolchain.as_posix()
 
         configure_presets.append(default_configure)
 
@@ -55,7 +60,10 @@ class Builder:
 
     @staticmethod
     def write_cppython_preset(
-        cppython_preset_directory: Path, provider_preset_file: Path, provider_data: CMakeSyncData
+        cppython_preset_directory: Path,
+        provider_preset_file: Path,
+        provider_data: CMakeSyncData,
+        project_root: Path,
     ) -> Path:
         """Write the cppython presets which inherit from the provider presets
 
@@ -63,12 +71,13 @@ class Builder:
             cppython_preset_directory: The tool directory
             provider_preset_file: Path to the provider's preset file
             provider_data: The provider's synchronization data
+            project_root: The project root directory (where CMakeLists.txt is located)
 
         Returns:
             A file path to the written data
         """
         generated_preset = Builder.generate_cppython_preset(
-            cppython_preset_directory, provider_preset_file, provider_data
+            cppython_preset_directory, provider_preset_file, provider_data, project_root
         )
         cppython_preset_file = cppython_preset_directory / 'cppython.json'
 

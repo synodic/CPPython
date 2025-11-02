@@ -124,6 +124,7 @@ class Builder:
     def _create_conanfile(conan_file: Path, dependencies: list[ConanDependency], name: str, version: str) -> None:
         """Creates a conanfile.py file with the necessary content."""
         template_string = """
+        import os
         from conan import ConanFile
         from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
         from conan.tools.files import copy
@@ -154,7 +155,10 @@ class Builder:
                 cmake.install()
 
             def package_info(self):
-                self.cpp_info.libs = ["${name}"]
+                # Use native CMake config files to preserve FILE_SET information for C++ modules
+                # This tells CMakeDeps to skip generating files and use the package's native config
+                self.cpp_info.set_property("cmake_find_mode", "none")
+                self.cpp_info.builddirs = ["."]
 
             def export_sources(self):
                 copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)

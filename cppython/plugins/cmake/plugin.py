@@ -66,8 +66,10 @@ class CMakeGenerator(Generator):
 
                 cppython_preset_file = self._cppython_preset_directory / 'CPPython.json'
 
+                project_root = self.core_data.project_data.project_root
+
                 cppython_preset_file = self.builder.write_cppython_preset(
-                    self._cppython_preset_directory, cppython_preset_file, sync_data
+                    self._cppython_preset_directory, cppython_preset_file, sync_data, project_root
                 )
 
                 self.builder.write_root_presets(

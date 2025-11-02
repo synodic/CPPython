@@ -13,18 +13,18 @@ requires-python = ">=3.14"
 
 dependencies = [
     "typer>=0.20.0",
-    "pydantic>=2.12.3",
+    "pydantic>=2.12.4",
     "packaging>=25.0",
     "requests>=2.32.5",
     "types-requests>=2.32.4.20250913",
 ]
 
 [project.optional-dependencies]
-pytest = ["pytest>=8.4.2", "pytest-mock>=3.15.1"]
-git = ["dulwich>=0.24.8"]
+pytest = ["pytest>=9.0.1", "pytest-mock>=3.15.1"]
+git = ["dulwich>=0.24.10"]
 pdm = ["pdm>=2.26.1"]
 cmake = ["cmake>=4.1.2"]
-conan = ["conan>=2.22.1", "libcst>=1.8.5"]
+conan = ["conan>=2.22.2", "libcst>=1.8.6"]
 
 [project.urls]
 homepage = "https://github.com/Synodic-Software/CPPython"
@@ -47,8 +47,8 @@ cppython = "cppython.plugins.pdm.plugin:CPPythonPlugin"
 cppython = "cppython.test.pytest.fixtures"
 
 [dependency-groups]
-lint = ["ruff>=0.14.2", "pyrefly>=0.39.4"]
-test = ["pytest>=8.4.2", "pytest-cov>=7.0.0", "pytest-mock>=3.15.1"]
+lint = ["ruff>=0.14.5", "pyrefly>=0.41.3"]
+test = ["pytest>=9.0.1", "pytest-cov>=7.0.0", "pytest-mock>=3.15.1"]
 
 [project.scripts]
 cppython = "cppython.console.entry:app"
