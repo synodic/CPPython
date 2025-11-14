@@ -231,8 +231,12 @@ class VcpkgProvider(Provider):
 
         cls._update_provider(directory)
 
-    def install(self) -> None:
-        """Called when dependencies need to be installed from a lock file."""
+    def install(self, groups: list[str] | None = None) -> None:
+        """Called when dependencies need to be installed from a lock file.
+
+        Args:
+            groups: Optional list of dependency group names to install (currently not used by vcpkg)
+        """
         manifest_directory = self.core_data.project_data.project_root
         manifest = generate_manifest(self.core_data, self.data)
 
@@ -257,8 +261,12 @@ class VcpkgProvider(Provider):
         except subprocess.CalledProcessError as e:
             self._handle_subprocess_error(logger, 'install project dependencies', e, ProviderInstallationError)
 
-    def update(self) -> None:
-        """Called when dependencies need to be updated and written to the lock file."""
+    def update(self, groups: list[str] | None = None) -> None:
+        """Called when dependencies need to be updated and written to the lock file.
+
+        Args:
+            groups: Optional list of dependency group names to update (currently not used by vcpkg)
+        """
         manifest_directory = self.core_data.project_data.project_root
 
         manifest = generate_manifest(self.core_data, self.data)

@@ -30,6 +30,47 @@ def get_enabled_project(context: typer.Context) -> Project:
     return project
 
 
+def _parse_groups_argument(groups: str | None) -> list[str] | None:
+    """Parse pip-style dependency groups from command argument.
+
+    Args:
+        groups: Groups string like '[test]' or '[dev,test]' or None
+
+    Returns:
+        List of group names or None if no groups specified
+
+    Raises:
+        typer.BadParameter: If the groups format is invalid
+    """
+    if groups is None:
+        return None
+
+    # Strip whitespace
+    groups = groups.strip()
+
+    if not groups:
+        return None
+
+    # Check for square brackets
+    if not (groups.startswith('[') and groups.endswith(']')):
+        raise typer.BadParameter(f"Invalid groups format: '{groups}'. Use square brackets like: [test] or [dev,test]")
+
+    # Extract content between brackets and split by comma
+    content = groups[1:-1].strip()
+
+    if not content:
+        raise typer.BadParameter('Empty groups specification. Provide at least one group name.')
+
+    # Split by comma and strip whitespace from each group
+    group_list = [g.strip() for g in content.split(',')]
+
+    # Validate group names are not empty
+    if any(not g for g in group_list):
+        raise typer.BadParameter('Group names cannot be empty.')
+
+    return group_list
+
+
 def _find_pyproject_file() -> Path:
     """Searches upward for a pyproject.toml file
 
@@ -83,33 +124,57 @@ def info(
 @app.command()
 def install(
     context: typer.Context,
+    groups: Annotated[
+        str | None,
+        typer.Argument(
+            help='Dependency groups to install in addition to base dependencies. '
+            'Use square brackets like: [test] or [dev,test]'
+        ),
+    ] = None,
 ) -> None:
     """Install API call
 
     Args:
         context: The CLI configuration object
+        groups: Optional dependency groups to install (e.g., [test] or [dev,test])
 
     Raises:
         ValueError: If the configuration object is missing
     """
     project = get_enabled_project(context)
-    project.install()
+
+    # Parse groups from pip-style syntax
+    group_list = _parse_groups_argument(groups)
+
+    project.install(groups=group_list)
 
 
 @app.command()
 def update(
     context: typer.Context,
+    groups: Annotated[
+        str | None,
+        typer.Argument(
+            help='Dependency groups to update in addition to base dependencies. '
+            'Use square brackets like: [test] or [dev,test]'
+        ),
+    ] = None,
 ) -> None:
     """Update API call
 
     Args:
         context: The CLI configuration object
+        groups: Optional dependency groups to update (e.g., [test] or [dev,test])
 
     Raises:
         ValueError: If the configuration object is missing
     """
     project = get_enabled_project(context)
-    project.update()
+
+    # Parse groups from pip-style syntax
+    group_list = _parse_groups_argument(groups)
+
+    project.update(groups=group_list)
 
 
 @app.command(name='list')

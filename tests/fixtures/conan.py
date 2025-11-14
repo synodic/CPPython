@@ -51,7 +51,7 @@ def clean_conan_cache(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     if user_profiles.exists():
         test_profiles = conan_home / 'profiles'
         test_profiles.mkdir(parents=True, exist_ok=True)
-        
+
         for profile_file in ('default', 'default_build'):
             if (src := user_profiles / profile_file).exists():
                 src.copy(test_profiles / profile_file)

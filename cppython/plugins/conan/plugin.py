@@ -69,19 +69,20 @@ class ConanProvider(Provider):
         """
         return Information()
 
-    def _install_dependencies(self, *, update: bool = False) -> None:
+    def _install_dependencies(self, *, update: bool = False, groups: list[str] | None = None) -> None:
         """Install/update dependencies using Conan CLI.
 
         Args:
             update: If True, check remotes for newer versions/revisions and install those.
                    If False, use cached versions when available.
+            groups: Optional list of dependency group names to include
         """
         operation = 'update' if update else 'install'
         logger = getLogger('cppython.conan')
 
         try:
             # Setup environment and generate conanfile
-            conanfile_path = self._prepare_installation()
+            conanfile_path = self._prepare_installation(groups=groups)
         except Exception as e:
             raise ProviderInstallationError('conan', f'Failed to prepare {operation} environment: {e}', e) from e
 
@@ -93,20 +94,27 @@ class ConanProvider(Provider):
         except Exception as e:
             raise ProviderInstallationError('conan', f'Failed to install dependencies: {e}', e) from e
 
-    def _prepare_installation(self) -> Path:
+    def _prepare_installation(self, groups: list[str] | None = None) -> Path:
         """Prepare the installation environment and generate conanfile.
+
+        Args:
+            groups: Optional list of dependency group names to include
 
         Returns:
             Path to conanfile.py
         """
-        # Resolve dependencies and generate conanfile.py
+        # Resolve base dependencies
         resolved_dependencies = [resolve_conan_dependency(req) for req in self.core_data.cppython_data.dependencies]
 
-        # Resolve dependency groups
-        resolved_dependency_groups = {
-            group_name: [resolve_conan_dependency(req) for req in group_requirements]
-            for group_name, group_requirements in self.core_data.cppython_data.dependency_groups.items()
-        }
+        # Resolve only the requested dependency groups
+        resolved_dependency_groups = {}
+        if groups:
+            for group_name in groups:
+                if group_name in self.core_data.cppython_data.dependency_groups:
+                    resolved_dependency_groups[group_name] = [
+                        resolve_conan_dependency(req)
+                        for req in self.core_data.cppython_data.dependency_groups[group_name]
+                    ]
 
         self.builder.generate_conanfile(
             self.core_data.project_data.project_root,
@@ -180,13 +188,21 @@ class ConanProvider(Provider):
             logger.error('Conan install failed: %s', error_msg, exc_info=True)
             raise ProviderInstallationError('conan', error_msg, e) from e
 
-    def install(self) -> None:
-        """Installs the provider"""
-        self._install_dependencies(update=False)
+    def install(self, groups: list[str] | None = None) -> None:
+        """Installs the provider
 
-    def update(self) -> None:
-        """Updates the provider"""
-        self._install_dependencies(update=True)
+        Args:
+            groups: Optional list of dependency group names to install
+        """
+        self._install_dependencies(update=False, groups=groups)
+
+    def update(self, groups: list[str] | None = None) -> None:
+        """Updates the provider
+
+        Args:
+            groups: Optional list of dependency group names to update
+        """
+        self._install_dependencies(update=True, groups=groups)
 
     @staticmethod
     def supported_sync_type(sync_type: type[SyncData]) -> bool:

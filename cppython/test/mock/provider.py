@@ -83,12 +83,20 @@ class MockProvider(Provider):
         """Downloads the provider tooling"""
         cls.downloaded = directory
 
-    def install(self) -> None:
-        """Installs the provider"""
+    def install(self, groups: list[str] | None = None) -> None:
+        """Installs the provider
+
+        Args:
+            groups: Optional list of dependency group names to install
+        """
         pass
 
-    def update(self) -> None:
-        """Updates the provider"""
+    def update(self, groups: list[str] | None = None) -> None:
+        """Updates the provider
+
+        Args:
+            groups: Optional list of dependency group names to update
+        """
         pass
 
     def publish(self) -> None:

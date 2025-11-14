@@ -52,8 +52,11 @@ class Project(API):
         """
         return self._enabled
 
-    def install(self) -> None:
+    def install(self, groups: list[str] | None = None) -> None:
         """Installs project dependencies
+
+        Args:
+            groups: Optional list of dependency groups to install in addition to base dependencies
 
         Raises:
             Exception: Provider-specific exceptions are propagated with full context
@@ -66,16 +69,27 @@ class Project(API):
         asyncio.run(self._data.download_provider_tools())
 
         self.logger.info('Installing project')
+
+        # Log active groups
+        if groups:
+            self.logger.info('Installing with dependency groups: %s', ', '.join(groups))
+
         self.logger.info('Installing %s provider', self._data.plugins.provider.name())
+
+        # Validate and log active groups
+        self._data.apply_dependency_groups(groups)
 
         # Sync before install to allow provider to access generator's resolved configuration
         self._data.sync()
 
         # Let provider handle its own exceptions for better error context
-        self._data.plugins.provider.install()
+        self._data.plugins.provider.install(groups=groups)
 
-    def update(self) -> None:
+    def update(self, groups: list[str] | None = None) -> None:
         """Updates project dependencies
+
+        Args:
+            groups: Optional list of dependency groups to update in addition to base dependencies
 
         Raises:
             Exception: Provider-specific exception
@@ -88,13 +102,21 @@ class Project(API):
         asyncio.run(self._data.download_provider_tools())
 
         self.logger.info('Updating project')
+
+        # Log active groups
+        if groups:
+            self.logger.info('Updating with dependency groups: %s', ', '.join(groups))
+
         self.logger.info('Updating %s provider', self._data.plugins.provider.name())
+
+        # Validate and log active groups
+        self._data.apply_dependency_groups(groups)
 
         # Sync before update to allow provider to access generator's resolved configuration
         self._data.sync()
 
         # Let provider handle its own exceptions for better error context
-        self._data.plugins.provider.update()
+        self._data.plugins.provider.update(groups=groups)
 
     def publish(self) -> None:
         """Publishes the project

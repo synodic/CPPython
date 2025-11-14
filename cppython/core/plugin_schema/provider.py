@@ -80,13 +80,21 @@ class Provider(DataPlugin, SyncProducer, Protocol):
         raise NotImplementedError
 
     @abstractmethod
-    def install(self) -> None:
-        """Called when dependencies need to be installed from a lock file."""
+    def install(self, groups: list[str] | None = None) -> None:
+        """Called when dependencies need to be installed from a lock file.
+
+        Args:
+            groups: Optional list of dependency group names to install in addition to base dependencies
+        """
         raise NotImplementedError
 
     @abstractmethod
-    def update(self) -> None:
-        """Called when dependencies need to be updated and written to the lock file."""
+    def update(self, groups: list[str] | None = None) -> None:
+        """Called when dependencies need to be updated and written to the lock file.
+
+        Args:
+            groups: Optional list of dependency group names to update in addition to base dependencies
+        """
         raise NotImplementedError
 
     @abstractmethod

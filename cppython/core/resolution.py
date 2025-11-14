@@ -76,6 +76,21 @@ def resolve_pep621(
     return pep621_data
 
 
+def _resolve_absolute_path(path: Path, root_directory: Path) -> Path:
+    """Convert a path to absolute, using root_directory as base for relative paths.
+
+    Args:
+        path: The path to resolve
+        root_directory: The base directory for relative paths
+
+    Returns:
+        The absolute path
+    """
+    if path.is_absolute():
+        return path
+    return root_directory / path
+
+
 class PluginBuildData(CPPythonModel):
     """Data needed to construct CoreData"""
 
@@ -114,34 +129,20 @@ def resolve_cppython(
     """
     root_directory = project_data.project_root.absolute()
 
-    # Add the base path to all relative paths
+    # Resolve configuration path
     modified_configuration_path = local_configuration.configuration_path
-
-    # TODO: Grab configuration from the project, user, or system
     if modified_configuration_path is None:
         modified_configuration_path = root_directory / 'cppython.json'
+    else:
+        modified_configuration_path = _resolve_absolute_path(modified_configuration_path, root_directory)
 
-    if not modified_configuration_path.is_absolute():
-        modified_configuration_path = root_directory / modified_configuration_path
-
-    modified_install_path = local_configuration.install_path
-
-    if not modified_install_path.is_absolute():
-        modified_install_path = root_directory / modified_install_path
-
-    modified_tool_path = local_configuration.tool_path
-
-    if not modified_tool_path.is_absolute():
-        modified_tool_path = root_directory / modified_tool_path
-
-    modified_build_path = local_configuration.build_path
-
-    if not modified_build_path.is_absolute():
-        modified_build_path = root_directory / modified_build_path
+    # Resolve other paths
+    modified_install_path = _resolve_absolute_path(local_configuration.install_path, root_directory)
+    modified_tool_path = _resolve_absolute_path(local_configuration.tool_path, root_directory)
+    modified_build_path = _resolve_absolute_path(local_configuration.build_path, root_directory)
 
     modified_provider_name = plugin_build_data.provider_name
     modified_generator_name = plugin_build_data.generator_name
-
     modified_scm_name = plugin_build_data.scm_name
 
     # Extract provider and generator configuration data
