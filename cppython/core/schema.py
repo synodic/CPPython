@@ -117,6 +117,7 @@ class CPPythonData(CPPythonModel, extra='forbid'):
     generator_name: TypeName
     scm_name: TypeName
     dependencies: list[Requirement]
+    dependency_groups: dict[str, list[Requirement]]
 
     provider_data: Annotated[dict[str, Any], Field(description='Resolved provider configuration data')]
     generator_data: Annotated[dict[str, Any], Field(description='Resolved generator configuration data')]
@@ -326,6 +327,15 @@ class CPPythonLocalConfiguration(CPPythonModel, extra='forbid'):
         Field(
             description='A list of dependencies that will be installed. This is a list of pip compatible requirements'
             ' strings',
+        ),
+    ] = None
+
+    dependency_groups: Annotated[
+        dict[str, list[str]] | None,
+        Field(
+            alias='dependency-groups',
+            description='Named groups of dependencies. Key is the group name, value is a list of pip compatible'
+            ' requirements strings. Similar to PEP 735 dependency groups.',
         ),
     ] = None
 

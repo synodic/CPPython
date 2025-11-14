@@ -166,6 +166,18 @@ def resolve_cppython(
             except InvalidRequirement as error:
                 invalid_requirements.append(f"Invalid requirement '{dependency}': {error}")
 
+    # Construct dependency groups from the local configuration
+    dependency_groups: dict[str, list[Requirement]] = {}
+    if local_configuration.dependency_groups:
+        for group_name, group_dependencies in local_configuration.dependency_groups.items():
+            resolved_group: list[Requirement] = []
+            for dependency in group_dependencies:
+                try:
+                    resolved_group.append(Requirement(dependency))
+                except InvalidRequirement as error:
+                    invalid_requirements.append(f"Invalid requirement '{dependency}' in group '{group_name}': {error}")
+            dependency_groups[group_name] = resolved_group
+
     if invalid_requirements:
         raise ConfigException('\n'.join(invalid_requirements), [])
 
@@ -179,6 +191,7 @@ def resolve_cppython(
         generator_name=modified_generator_name,
         scm_name=modified_scm_name,
         dependencies=dependencies,
+        dependency_groups=dependency_groups,
         provider_data=provider_data,
         generator_data=generator_data,
     )
@@ -208,6 +221,7 @@ def resolve_cppython_plugin(cppython_data: CPPythonData, plugin_type: type[Plugi
         generator_name=cppython_data.generator_name,
         scm_name=cppython_data.scm_name,
         dependencies=cppython_data.dependencies,
+        dependency_groups=cppython_data.dependency_groups,
         provider_data=cppython_data.provider_data,
         generator_data=cppython_data.generator_data,
     )
