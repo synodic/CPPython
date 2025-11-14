@@ -17,7 +17,13 @@ class Project(API):
     def __init__(
         self, project_configuration: ProjectConfiguration, interface: Interface, pyproject_data: dict[str, Any]
     ) -> None:
-        """Initializes the project"""
+        """Initializes the project
+
+        Args:
+            project_configuration: Project-wide configuration
+            interface: Interface for callbacks to write configuration changes
+            pyproject_data: Merged configuration data from all sources
+        """
         self._enabled = False
         self._interface = interface
         self.logger = logging.getLogger('cppython')

@@ -371,5 +371,16 @@ class Interface(Protocol):
 
     @abstractmethod
     def write_configuration(self) -> None:
-        """Called when CPPython requires the interface to write out configuration changes"""
+        """Called when CPPython requires the interface to write out configuration changes
+
+        This writes to the primary configuration source (pyproject.toml or cppython.toml)
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def write_user_configuration(self) -> None:
+        """Called when CPPython requires the interface to write out global configuration changes
+
+        This writes to ~/.cppython/config.toml for global user configuration
+        """
         raise NotImplementedError

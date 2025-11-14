@@ -21,15 +21,25 @@ class CPPythonPlugin(Interface):
         """Initializes the plugin"""
         post_install.connect(self.on_post_install, weak=False)
         self.logger = getLogger('cppython.interface.pdm')
+        self._core = core
 
         # Register the cpp command
         register_commands(core)
 
     def write_pyproject(self) -> None:
-        """Write to file"""
+        """Called when CPPython requires the interface to write out pyproject.toml changes"""
+        self._core.ui.echo('Writing out pyproject.toml')
+        # TODO: Implement writing to pyproject.toml through PDM
 
     def write_configuration(self) -> None:
-        """Write to configuration"""
+        """Called when CPPython requires the interface to write out configuration changes"""
+        self._core.ui.echo('Writing out configuration')
+        # TODO: Implement writing to cppython.toml
+
+    def write_user_configuration(self) -> None:
+        """Called when CPPython requires the interface to write out user-specific configuration changes"""
+        self._core.ui.echo('Writing out user configuration')
+        # TODO: Implement writing to .cppython.toml
 
     def on_post_install(self, project: Project, dry_run: bool, **_kwargs: Any) -> None:
         """Called after a pdm install command is called

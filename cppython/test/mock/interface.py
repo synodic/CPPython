@@ -11,3 +11,6 @@ class MockInterface(Interface):
 
     def write_configuration(self) -> None:
         """Implementation of Interface function"""
+
+    def write_user_configuration(self) -> None:
+        """Implementation of Interface function"""

@@ -9,10 +9,13 @@ class ConsoleInterface(Interface):
     """Interface implementation to pass to the project"""
 
     def write_pyproject(self) -> None:
-        """Write output"""
+        """Write output to pyproject.toml"""
 
     def write_configuration(self) -> None:
-        """Write output"""
+        """Write output to primary configuration (pyproject.toml or cppython.toml)"""
+
+    def write_user_configuration(self) -> None:
+        """Write output to global user configuration (~/.cppython/config.toml)"""
 
 
 class ConsoleConfiguration(CPPythonModel):

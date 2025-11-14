@@ -5,12 +5,14 @@ import os
 from importlib.metadata import entry_points
 from inspect import getmodule
 from logging import Logger
+from pathlib import Path
 from pprint import pformat
 from typing import Any, cast
 
 from rich.console import Console
 from rich.logging import RichHandler
 
+from cppython.configuration import ConfigurationLoader
 from cppython.core.plugin_schema.generator import Generator
 from cppython.core.plugin_schema.provider import Provider
 from cppython.core.plugin_schema.scm import SCM, SupportedSCMFeatures
@@ -20,6 +22,7 @@ from cppython.core.resolution import (
     resolve_cppython,
     resolve_cppython_plugin,
     resolve_generator,
+    resolve_model,
     resolve_pep621,
     resolve_project_configuration,
     resolve_provider,
@@ -187,11 +190,21 @@ class Resolver:
 
     @staticmethod
     def resolve_global_config() -> CPPythonGlobalConfiguration:
-        """Generates the global configuration object
+        """Generates the global configuration object by loading from ~/.cppython/config.toml
 
         Returns:
-            The global configuration object
+            The global configuration object with loaded or default values
         """
+        loader = ConfigurationLoader(Path.cwd())
+
+        try:
+            global_config_data = loader.load_global_config()
+            if global_config_data:
+                return resolve_model(CPPythonGlobalConfiguration, global_config_data)
+        except (FileNotFoundError, ValueError):
+            # If global config doesn't exist or is invalid, use defaults
+            pass
+
         return CPPythonGlobalConfiguration()
 
     def find_generators(self) -> list[type[Generator]]:

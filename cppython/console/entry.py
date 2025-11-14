@@ -1,12 +1,12 @@
 """A click CLI for CPPython interfacing"""
 
 from pathlib import Path
-from tomllib import loads
 from typing import Annotated
 
 import typer
 from rich import print
 
+from cppython.configuration import ConfigurationLoader
 from cppython.console.schema import ConsoleConfiguration, ConsoleInterface
 from cppython.core.schema import ProjectConfiguration
 from cppython.project import Project
@@ -20,12 +20,18 @@ def get_enabled_project(context: typer.Context) -> Project:
     if configuration is None:
         raise ValueError('The configuration object is missing')
 
-    path = configuration.project_configuration.project_root / 'pyproject.toml'
-    pyproject_data = loads(path.read_text(encoding='utf-8'))
+    # Use ConfigurationLoader to load and merge all configuration sources
+    loader = ConfigurationLoader(configuration.project_configuration.project_root)
+    pyproject_data = loader.get_project_data()
 
     project = Project(configuration.project_configuration, configuration.interface, pyproject_data)
     if not project.enabled:
-        print('[bold red]Error[/bold red]: Project is not enabled. Please check your pyproject.toml configuration.')
+        print('[bold red]Error[/bold red]: Project is not enabled. Please check your configuration files.')
+        print('Configuration files checked:')
+        config_info = loader.config_source_info()
+        for config_file, exists in config_info.items():
+            status = '✓' if exists else '✗'
+            print(f'  {status} {config_file}')
         raise typer.Exit(code=1)
     return project
 
