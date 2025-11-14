@@ -101,9 +101,17 @@ class ConanProvider(Provider):
         """
         # Resolve dependencies and generate conanfile.py
         resolved_dependencies = [resolve_conan_dependency(req) for req in self.core_data.cppython_data.dependencies]
+
+        # Resolve dependency groups
+        resolved_dependency_groups = {
+            group_name: [resolve_conan_dependency(req) for req in group_requirements]
+            for group_name, group_requirements in self.core_data.cppython_data.dependency_groups.items()
+        }
+
         self.builder.generate_conanfile(
             self.core_data.project_data.project_root,
             resolved_dependencies,
+            resolved_dependency_groups,
             self.core_data.pep621_data.name,
             self.core_data.pep621_data.version,
         )
