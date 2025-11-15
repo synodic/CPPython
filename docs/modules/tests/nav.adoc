@@ -1,3 +1,0 @@
-.Testing
-* xref:index.adoc[Testing Overview]
-* xref:fixtures.adoc[Test Fixtures]

@@ -1,7 +1,0 @@
-= CMake Generator Plugin
-
-**TODO**
-
-== Overview
-
-**TODO**

@@ -2,10 +2,10 @@
 # It is not intended for manual editing.
 
 [metadata]
-groups = ["default", "cmake", "conan", "git", "lint", "pdm", "pytest", "release", "test"]
+groups = ["default", "cmake", "conan", "docs", "git", "lint", "pdm", "pytest", "release", "test"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:003592f9dc90a509e4177a7123612b87ce3fc731c82415d955af48c1897d542e"
+content_hash = "sha256:afd12e054b8dee77403a42e9e5da340cb042fb68f86e1f6c8b4f871e98eb1f06"
 
 [[metadata.targets]]
 requires_python = ">=3.14"
@@ -270,6 +270,19 @@ files = [
 ]
 
 [[package]]
+name = "deepmerge"
+version = "2.0"
+requires_python = ">=3.8"
+summary = "A toolset for deeply merging Python dictionaries."
+dependencies = [
+    "typing-extensions; python_version <= \"3.9\"",
+]
+files = [
+    {file = "deepmerge-2.0-py3-none-any.whl", hash = "sha256:6de9ce507115cff0bed95ff0ce9ecc31088ef50cbdf09bc90a09349a318b3d00"},
+    {file = "deepmerge-2.0.tar.gz", hash = "sha256:5c3d86081fbebd04dd5de03626a0607b809a98fb6ccba5770b62466fe940ff20"},
+]
+
+[[package]]
 name = "dep-logic"
 version = "0.5.1"
 summary = ""
@@ -492,6 +505,16 @@ files = [
 ]
 
 [[package]]
+name = "markdown"
+version = "3.10"
+requires_python = ">=3.10"
+summary = "Python implementation of John Gruber's Markdown."
+files = [
+    {file = "markdown-3.10-py3-none-any.whl", hash = "sha256:b5b99d6951e2e4948d939255596523444c0e677c669700b1d17aa4a8a464cb7c"},
+    {file = "markdown-3.10.tar.gz", hash = "sha256:37062d4f2aa4b2b6b32aefb80faa300f82cc790cb949a35b8caede34f2b68c0e"},
+]
+
+[[package]]
 name = "markdown-it-py"
 version = "3.0.0"
 summary = ""
@@ -685,6 +708,20 @@ summary = ""
 files = [
     {file = "pygments-2.19.2-py3-none-any.whl", hash = "sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b"},
     {file = "pygments-2.19.2.tar.gz", hash = "sha256:636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887"},
+]
+
+[[package]]
+name = "pymdown-extensions"
+version = "10.17.1"
+requires_python = ">=3.9"
+summary = "Extension pack for Python Markdown."
+dependencies = [
+    "markdown>=3.6",
+    "pyyaml",
+]
+files = [
+    {file = "pymdown_extensions-10.17.1-py3-none-any.whl", hash = "sha256:1f160209c82eecbb5d8a0d8f89a4d9bd6bdcbde9a8537761844cfc57ad5cd8a6"},
+    {file = "pymdown_extensions-10.17.1.tar.gz", hash = "sha256:60d05fe55e7fb5a1e4740fc575facad20dc6ee3a748e8d3d36ba44142e75ce03"},
 ]
 
 [[package]]
@@ -1014,4 +1051,34 @@ dependencies = [
 files = [
     {file = "virtualenv-20.31.2-py3-none-any.whl", hash = "sha256:36efd0d9650ee985f0cad72065001e66d49a6f24eb44d98980f630686243cf11"},
     {file = "virtualenv-20.31.2.tar.gz", hash = "sha256:e10c0a9d02835e592521be48b332b6caee6887f332c111aa79a09b9e79efc2af"},
+]
+
+[[package]]
+name = "zensical"
+version = "0.0.7"
+requires_python = ">=3.10"
+summary = "A modern static site generator built by the creators of Material for MkDocs"
+dependencies = [
+    "click>=8.1.8",
+    "deepmerge>=2.0",
+    "markdown>=3.7",
+    "pygments>=2.16",
+    "pymdown-extensions>=10.15",
+    "pyyaml>=6.0.2",
+    "tomli>=2.0; python_full_version < \"3.11\"",
+]
+files = [
+    {file = "zensical-0.0.7-cp310-abi3-macosx_10_12_x86_64.whl", hash = "sha256:895ef47444943b4b2dafd4b851fa5f759c1a45cf3df660f430b609a43e6d919d"},
+    {file = "zensical-0.0.7-cp310-abi3-macosx_11_0_arm64.whl", hash = "sha256:522d46093272c8a2f4b8909619228b1f25ebee88e1afe580a0ca706ebd8f9349"},
+    {file = "zensical-0.0.7-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:50b2f0a461bd7bb94e7397b887267c1b334ad2c13a2f5214fe56ecf029130589"},
+    {file = "zensical-0.0.7-cp310-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:b7d63e76f65cd95059d00323a647474ec1ba26cfb6f8ed66ee655416f6a42457"},
+    {file = "zensical-0.0.7-cp310-abi3-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:3714c3578083fedf242e37ddb3fac2fdfb1edb260b4b6965900d4b1290efaff2"},
+    {file = "zensical-0.0.7-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:340e71e3237083f5c9fa814fbd845c8bf05e5005f86b95b8a153783f11e1a2da"},
+    {file = "zensical-0.0.7-cp310-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:467c23873673a2fe2bbc5a6f1e0103a21de302fbcfc0d1f1e2f85a596fd9fc6d"},
+    {file = "zensical-0.0.7-cp310-abi3-musllinux_1_2_armv7l.whl", hash = "sha256:86f6ed4f8be7f33d236e56d892e33b24f0fe31063ea1e43d3ed30a0723376465"},
+    {file = "zensical-0.0.7-cp310-abi3-musllinux_1_2_i686.whl", hash = "sha256:1e9ef76eec5b0e7eed11d82b2da4cd474c76711f940cd3947e794dc8210c862c"},
+    {file = "zensical-0.0.7-cp310-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:90049dea031e870c0381cad99c4108951e06a7526cdb13b36a78256feddb40f2"},
+    {file = "zensical-0.0.7-cp310-abi3-win32.whl", hash = "sha256:2dca8951c4768f0484323254292e5db1c1bc61caac2e35196cae2b50a81cd08e"},
+    {file = "zensical-0.0.7-cp310-abi3-win_amd64.whl", hash = "sha256:c42682b5611298bf13738253b0ee1b0054c115c4488ae2c14878871c1e3f801d"},
+    {file = "zensical-0.0.7.tar.gz", hash = "sha256:4738903eba16a9bc0aa029cfb10e6670d8f031996691a3a9f4a754c49da96e6f"},
 ]

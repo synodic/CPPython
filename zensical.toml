@@ -1,0 +1,5 @@
+[project]
+site_name = "CPPython"
+site_url = "https://synodic.github.io/CPPython"
+docs_dir = "docs"
+site_dir = "dist"

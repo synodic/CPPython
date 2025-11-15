@@ -1,5 +1,0 @@
-.Plugins
-* xref:index.adoc[Plugin System Overview]
-* xref:cmake.adoc[CMake Generator Plugin]
-** xref:cmake-presets.adoc[CMake Presets System]
-** xref:cmake-configuration.adoc[Configuration Options]

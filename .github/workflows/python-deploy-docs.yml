@@ -1,0 +1,27 @@
+name: Publish Website to GitHub Pages
+on:
+    push:
+        branches:
+            - stable
+
+    # Manual trigger
+    workflow_dispatch:
+
+    # External trigger
+    repository_dispatch:
+        types:
+            - docs-deploy
+
+# Allow one concurrent deployment for the workflow
+concurrency:
+    group: page-deploy
+    cancel-in-progress: true
+
+jobs:
+    build:
+        permissions:
+            contents: read
+            pages: write
+            id-token: write
+        if: github.repository_owner == 'synodic'
+        uses: synodic/.github/.github/workflows/python-deploy-docs.yml@stable

@@ -1,3 +1,0 @@
-.CPPython
-* xref:index.adoc[]
-* xref:configuration.adoc[]
