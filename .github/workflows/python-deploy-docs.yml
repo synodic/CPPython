@@ -1,9 +1,10 @@
 name: Publish Website to GitHub Pages
 on:
     push:
+        paths:
+            - docs/**
         branches:
-            - stable
-            - development
+            - "**"
 
     # Manual trigger
     workflow_dispatch:
