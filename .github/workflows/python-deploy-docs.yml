@@ -3,6 +3,7 @@ on:
     push:
         branches:
             - stable
+            - development
 
     # Manual trigger
     workflow_dispatch:
