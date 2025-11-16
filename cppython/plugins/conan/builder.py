@@ -1,116 +1,10 @@
 """Construction of Conan data"""
 
 from pathlib import Path
-from string import Template
-from textwrap import dedent
 
-import libcst as cst
 from pydantic import DirectoryPath
 
 from cppython.plugins.conan.schema import ConanDependency
-
-
-class RequiresTransformer(cst.CSTTransformer):
-    """Transformer to add or update the `requires` attribute in a ConanFile class."""
-
-    def __init__(self, dependencies: list[ConanDependency]) -> None:
-        """Initialize the transformer with a list of dependencies."""
-        self.dependencies = dependencies
-
-    def _create_requires_assignment(self) -> cst.Assign:
-        """Create a `requires` assignment statement."""
-        return cst.Assign(
-            targets=[cst.AssignTarget(cst.Name(value='requires'))],
-            value=cst.List(
-                [cst.Element(cst.SimpleString(f'"{dependency.requires()}"')) for dependency in self.dependencies]
-            ),
-        )
-
-    def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.BaseStatement:
-        """Modify the class definition to include or update 'requires'.
-
-        Args:
-            original_node: The original class definition.
-            updated_node: The updated class definition.
-
-        Returns: The modified class definition.
-        """
-        if self._is_conanfile_class(original_node):
-            updated_node = self._update_requires(updated_node)
-        return updated_node
-
-    @staticmethod
-    def _is_conanfile_class(class_node: cst.ClassDef) -> bool:
-        """Check if the class inherits from ConanFile.
-
-        Args:
-            class_node: The class definition to check.
-
-        Returns: True if the class inherits from ConanFile, False otherwise.
-        """
-        return any((isinstance(base.value, cst.Name) and base.value.value == 'ConanFile') for base in class_node.bases)
-
-    def _update_requires(self, updated_node: cst.ClassDef) -> cst.ClassDef:
-        """Update or add a 'requires' assignment in a ConanFile class definition."""
-        # Check if 'requires' is already defined
-        for body_statement_line in updated_node.body.body:
-            if not isinstance(body_statement_line, cst.SimpleStatementLine):
-                continue
-            for assignment_statement in body_statement_line.body:
-                if not isinstance(assignment_statement, cst.Assign):
-                    continue
-                for target in assignment_statement.targets:
-                    if not isinstance(target.target, cst.Name) or target.target.value != 'requires':
-                        continue
-                    # Replace only the assignment within the SimpleStatementLine
-                    return self._replace_requires(updated_node, body_statement_line, assignment_statement)
-
-        # Find the last attribute assignment before methods
-        last_attribute = None
-        for body_statement_line in updated_node.body.body:
-            if not isinstance(body_statement_line, cst.SimpleStatementLine):
-                break
-            if not body_statement_line.body:
-                break
-            if not isinstance(body_statement_line.body[0], cst.Assign):
-                break
-            last_attribute = body_statement_line
-
-        # Construct a new statement for the 'requires' attribute
-        new_statement = cst.SimpleStatementLine(
-            body=[self._create_requires_assignment()],
-        )
-
-        # Insert the new statement after the last attribute assignment
-        if last_attribute is not None:
-            new_body = [item for item in updated_node.body.body]
-            index = new_body.index(last_attribute)
-            new_body.insert(index + 1, new_statement)
-        else:
-            new_body = [new_statement] + [item for item in updated_node.body.body]
-        return updated_node.with_changes(body=updated_node.body.with_changes(body=new_body))
-
-    def _replace_requires(
-        self, updated_node: cst.ClassDef, body_statement_line: cst.SimpleStatementLine, assignment_statement: cst.Assign
-    ) -> cst.ClassDef:
-        """Replace the existing 'requires' assignment with a new one, preserving other statements on the same line."""
-        new_value = cst.List(
-            [cst.Element(cst.SimpleString(f'"{dependency.requires()}"')) for dependency in self.dependencies]
-        )
-        new_assignment = assignment_statement.with_changes(value=new_value)
-
-        # Replace only the relevant assignment in the SimpleStatementLine
-        new_body = [
-            new_assignment if statement is assignment_statement else statement for statement in body_statement_line.body
-        ]
-        new_statement_line = body_statement_line.with_changes(body=new_body)
-
-        # Replace the statement line in the class body
-        return updated_node.with_changes(
-            body=updated_node.body.with_changes(
-                body=[new_statement_line if item is body_statement_line else item for item in updated_node.body.body]
-            )
-        )
 
 
 class Builder:
@@ -121,73 +15,122 @@ class Builder:
         self._filename = 'conanfile.py'
 
     @staticmethod
-    def _create_conanfile(
-        conan_file: Path,
+    def _create_base_conanfile(
+        base_file: Path,
         dependencies: list[ConanDependency],
         dependency_groups: dict[str, list[ConanDependency]],
+    ) -> None:
+        """Creates a conanfile_base.py with CPPython managed dependencies."""
+        test_dependencies = dependency_groups.get('test', [])
+
+        # Generate requirements method content
+        requires_lines = []
+        for dep in dependencies:
+            requires_lines.append(f'        self.requires("{dep.requires()}")')
+        requires_content = '\n'.join(requires_lines) if requires_lines else '        pass  # No requirements'
+
+        # Generate build_requirements method content
+        test_requires_lines = []
+        for dep in test_dependencies:
+            test_requires_lines.append(f'        self.test_requires("{dep.requires()}")')
+        test_requires_content = (
+            '\n'.join(test_requires_lines) if test_requires_lines else '        pass  # No test requirements'
+        )
+
+        content = f'''"""CPPython managed base ConanFile.
+
+This file is auto-generated by CPPython. Do not edit manually.
+Dependencies are managed through pyproject.toml.
+"""
+
+from conan import ConanFile
+
+
+class CPPythonBase(ConanFile):
+    """Base ConanFile with CPPython managed dependencies."""
+
+    def requirements(self):
+        """CPPython managed requirements."""
+{requires_content}
+
+    def build_requirements(self):
+        """CPPython managed build and test requirements."""
+{test_requires_content}
+'''
+        base_file.write_text(content, encoding='utf-8')
+
+    @staticmethod
+    def _create_conanfile(
+        conan_file: Path,
         name: str,
         version: str,
     ) -> None:
-        """Creates a conanfile.py file with the necessary content."""
-        template_string = """
-        import os
-        from conan import ConanFile
-        from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-        from conan.tools.files import copy
+        """Creates a conanfile.py file that inherits from CPPython base."""
+        class_name = name.replace('-', '_').title().replace('_', '')
+        content = f'''import os
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy
 
-        class AutoPackage(ConanFile):
-            name = "${name}"
-            version = "${version}"
-            settings = "os", "compiler", "build_type", "arch"
-            requires = ${dependencies}
-            test_requires = ${test_requires}
+from conanfile_base import CPPythonBase
 
-            def layout(self):
-                cmake_layout(self)
 
-            def generate(self):
-                deps = CMakeDeps(self)
-                deps.generate()
-                tc = CMakeToolchain(self)
-                tc.user_presets_path = None
-                tc.generate()
+class {class_name}Package(CPPythonBase):
+    """Conan recipe for {name}."""
+    
+    name = "{name}"
+    version = "{version}"
+    settings = "os", "compiler", "build_type", "arch"
+    exports = "conanfile_base.py"
 
-            def build(self):
-                cmake = CMake(self)
-                cmake.configure()
-                cmake.build()
+    def requirements(self):
+        """Declare package dependencies.
+        
+        CPPython managed dependencies are inherited from CPPythonBase.
+        Add your custom requirements here.
+        """
+        super().requirements()  # Get CPPython managed dependencies
+        # Add your custom requirements here
 
-            def package(self):
-                cmake = CMake(self)
-                cmake.install()
+    def build_requirements(self):
+        """Declare build and test dependencies.
+        
+        CPPython managed test dependencies are inherited from CPPythonBase.
+        Add your custom build requirements here.
+        """
+        super().build_requirements()  # Get CPPython managed test dependencies
+        # Add your custom build requirements here
 
-            def package_info(self):
-                # Use native CMake config files to preserve FILE_SET information for C++ modules
-                # This tells CMakeDeps to skip generating files and use the package's native config
-                self.cpp_info.set_property("cmake_find_mode", "none")
-                self.cpp_info.builddirs = ["."]
+    def layout(self):
+        cmake_layout(self)
 
-            def export_sources(self):
-                copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
-                copy(self, "src/*", src=self.recipe_folder, dst=self.export_sources_folder)
-                copy(self, "cmake/*", src=self.recipe_folder, dst=self.export_sources_folder)
-            """
+    def generate(self):
+        deps = CMakeDeps(self)
+        deps.generate()
+        tc = CMakeToolchain(self)
+        tc.user_presets_path = None
+        tc.generate()
 
-        template = Template(dedent(template_string))
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
-        test_dependencies = dependency_groups.get('test', [])
+    def package(self):
+        cmake = CMake(self)
+        cmake.install()
 
-        values = {
-            'name': name,
-            'version': version,
-            'dependencies': [dependency.requires() for dependency in dependencies],
-            'test_requires': [dependency.requires() for dependency in test_dependencies],
-        }
+    def package_info(self):
+        # Use native CMake config files to preserve FILE_SET information for C++ modules
+        # This tells CMakeDeps to skip generating files and use the package's native config
+        self.cpp_info.set_property("cmake_find_mode", "none")
+        self.cpp_info.builddirs = ["."]
 
-        result = template.substitute(values)
-
-        with open(conan_file, 'w', encoding='utf-8') as file:
-            file.write(result)
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        copy(self, "src/*", src=self.recipe_folder, dst=self.export_sources_folder)
+        copy(self, "cmake/*", src=self.recipe_folder, dst=self.export_sources_folder)
+'''
+        conan_file.write_text(content, encoding='utf-8')
 
     def generate_conanfile(
         self,
@@ -197,17 +140,18 @@ class Builder:
         name: str,
         version: str,
     ) -> None:
-        """Generate a conanfile.py file for the project."""
+        """Generate conanfile.py and conanfile_base.py for the project.
+
+        Always generates the base conanfile with managed dependencies.
+        Only creates conanfile.py if it doesn't exist (never modifies existing files).
+        """
+        directory.mkdir(parents=True, exist_ok=True)
+
+        # Always regenerate the base conanfile with managed dependencies
+        base_file = directory / 'conanfile_base.py'
+        self._create_base_conanfile(base_file, dependencies, dependency_groups)
+
+        # Only create conanfile.py if it doesn't exist
         conan_file = directory / self._filename
-
-        if conan_file.exists():
-            source_code = conan_file.read_text(encoding='utf-8')
-
-            module = cst.parse_module(source_code)
-            transformer = RequiresTransformer(dependencies)
-            modified = module.visit(transformer)
-
-            conan_file.write_text(modified.code, encoding='utf-8')
-        else:
-            directory.mkdir(parents=True, exist_ok=True)
-            self._create_conanfile(conan_file, dependencies, dependency_groups, name, version)
+        if not conan_file.exists():
+            self._create_conanfile(conan_file, name, version)
