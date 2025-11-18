@@ -291,6 +291,10 @@ class ConanProvider(Provider):
             # Add build mode (build everything for publishing)
             command_args.extend(['--build', 'missing'])
 
+            # Skip test dependencies during publishing
+            command_args.extend(['-c', 'tools.graph:skip_test=True'])
+            command_args.extend(['-c', 'tools.build:skip_test=True'])
+
             # Add cmake binary configuration if specified
             if self._cmake_binary and self._cmake_binary != 'cmake':
                 # Quote the path if it contains spaces
