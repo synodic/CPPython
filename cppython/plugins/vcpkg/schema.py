@@ -49,13 +49,13 @@ class VcpkgData(CPPythonModel):
 
 
 class VcpkgConfiguration(CPPythonModel):
-    """vcpkg provider data"""
+    """vcpkg provider configuration"""
 
     install_directory: Annotated[
         Path,
         Field(
             alias='install-directory',
-            description='The referenced dependencies defined by the local vcpkg.json manifest file',
+            description='The directory where vcpkg artifacts will be installed.',
         ),
     ] = Path('build')
 

@@ -3,7 +3,11 @@
 This module handles loading configuration from multiple sources:
 1. Global configuration (~/.cppython/config.toml) - User-wide settings for all projects
 2. Project configuration (pyproject.toml or cppython.toml) - Project-specific settings
-3. Local overrides (.cppython.toml) - Overrides for global configuration
+3. Local overrides (.cppython.toml) - User-specific overrides, repository ignored
+
+Local overrides (.cppython.toml) can override any field from both CPPythonLocalConfiguration
+and CPPythonGlobalConfiguration. Validation occurs on the merged result, not on the override
+file itself, allowing flexible user-specific customization.
 """
 
 from pathlib import Path
@@ -77,7 +81,12 @@ class ConfigurationLoader:
     def load_local_overrides(self) -> dict[str, Any] | None:
         """Load local overrides from .cppython.toml if it exists
 
-        These overrides only affect the global configuration, not project configuration.
+        These overrides have the highest priority and override both global
+        and project configuration. This file should be gitignored as it
+        contains machine-specific or user-specific settings.
+
+        The override file can contain any fields from CPPythonLocalConfiguration
+        or CPPythonGlobalConfiguration. Validation occurs on the merged result.
 
         Returns:
             Dictionary containing local override data, or None if file doesn't exist
@@ -113,23 +122,15 @@ class ConfigurationLoader:
         """Load and merge the CPPython configuration table from all sources
 
         Priority (highest to lowest):
-        1. Project configuration (pyproject.toml or cppython.toml)
-        2. Local overrides (.cppython.toml) merged with global config
-        3. Global configuration (~/.cppython/config.toml)
+        1. Local overrides (.cppython.toml) - Machine/user-specific settings
+        2. Project configuration (pyproject.toml or cppython.toml) - Project-specific settings
+        3. Global configuration (~/.cppython/config.toml) - User-wide defaults
 
         Returns:
             Merged CPPython configuration dictionary, or None if no config found
         """
-        # Start with global configuration
-        global_config = self.load_global_config()
-
-        # Apply local overrides to global config
-        local_overrides = self.load_local_overrides()
-        if local_overrides is not None and global_config is not None:
-            global_config = self.merge_configurations(global_config, local_overrides)
-        elif local_overrides is not None and global_config is None:
-            # Local overrides exist but no global config - use overrides as base
-            global_config = local_overrides
+        # Start with global configuration (lowest priority)
+        result_config = self.load_global_config()
 
         # Load project configuration (pyproject.toml or cppython.toml)
         pyproject_data = self.load_pyproject_data()
@@ -145,16 +146,21 @@ class ConfigurationLoader:
                 )
             project_config = cppython_toml_config
 
-        # Merge: global config (with local overrides) + project config
-        # Project config has highest priority
-        if project_config is not None and global_config is not None:
-            return self.merge_configurations(global_config, project_config)
+        # Merge project config over global config
+        if project_config is not None and result_config is not None:
+            result_config = self.merge_configurations(result_config, project_config)
         elif project_config is not None:
-            return project_config
-        elif global_config is not None:
-            return global_config
+            result_config = project_config
 
-        return None
+        # Apply local overrides with highest priority
+        local_overrides = self.load_local_overrides()
+        if local_overrides is not None:
+            if result_config is not None:
+                result_config = self.merge_configurations(result_config, local_overrides)
+            else:
+                result_config = local_overrides
+
+        return result_config
 
     def get_project_data(self) -> dict[str, Any]:
         """Get the complete pyproject data with merged CPPython configuration

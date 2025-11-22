@@ -112,8 +112,8 @@ dependencies = ["fmt>=10.0.0"]
         assert config['tool-path'] == 'global-tools'
         assert config['providers']['conan']['remotes'] == ['global-remote']
 
-    def test_local_overrides_affect_global_only(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        """Test that .cppython.toml only overrides global config, not project config"""
+    def test_local_overrides_highest_priority(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that .cppython.toml has highest priority and overrides all other config sources"""
         # Create fake home with global config
         fake_home = tmp_path / 'home'
         fake_home.mkdir()
@@ -152,7 +152,7 @@ build-path = "project-build"
             encoding='utf-8',
         )
 
-        # Create local overrides
+        # Create local overrides (highest priority)
         local_override_path = project_root / '.cppython.toml'
         local_override_path.write_text(
             """
@@ -169,15 +169,17 @@ profile_dir = "/local/profiles"
         config = loader.load_cppython_table()
 
         assert config is not None
-        # Project config has highest priority (not overridden by local)
-        assert config['build-path'] == 'project-build'
+        # Local overrides have highest priority - overrides project config
+        assert config['build-path'] == 'local-build'
+        # Project config is preserved for non-overridden fields
         assert config['dependencies'] == ['fmt>=10.0.0']
 
-        # Local override affects global config
+        # Local override has highest priority
         assert config['install-path'] == '/local/install'
 
-        # Provider settings: project doesn't override, so local override applies
+        # Provider settings: local override takes precedence
         assert config['providers']['conan']['profile_dir'] == '/local/profiles'
+        # Global remote preserved since not overridden
         assert config['providers']['conan']['remotes'] == ['global-remote']
 
     def test_conflicting_configs_error(self, tmp_path: Path) -> None:

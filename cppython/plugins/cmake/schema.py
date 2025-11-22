@@ -115,7 +115,7 @@ class CMakeData(CPPythonModel):
 
 
 class CMakeConfiguration(CPPythonModel):
-    """Configuration"""
+    """Configuration for the CMake generator plugin"""
 
     preset_file: Annotated[
         Path,

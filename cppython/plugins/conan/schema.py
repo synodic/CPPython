@@ -298,7 +298,7 @@ class ConanData(CPPythonModel):
 
 
 class ConanConfiguration(CPPythonModel):
-    """Raw conan data"""
+    """Conan provider configuration"""
 
     remotes: Annotated[
         list[str],
@@ -312,7 +312,7 @@ class ConanConfiguration(CPPythonModel):
         str,
         Field(
             description='Directory containing Conan profiles. Profiles will be looked up relative to this directory. '
-            'If profiles do not exist in this directory, Conan will fall back to default profiles.'
+            'If profiles do not exist in this directory, Conan will fall back to default profiles. '
             "If a relative path is provided, it will be resolved relative to the tool's working directory."
         ),
     ] = 'profiles'

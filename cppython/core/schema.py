@@ -269,7 +269,11 @@ GeneratorData = NewType('GeneratorData', dict[str, Any])
 
 
 class CPPythonLocalConfiguration(CPPythonModel, extra='forbid'):
-    """Data required by the tool"""
+    """Project-level CPPython configuration
+
+    This configuration is stored in pyproject.toml or cppython.toml.
+    User-specific overrides can be placed in .cppython.toml (which should be gitignored).
+    """
 
     configuration_path: Annotated[
         Path | None,
