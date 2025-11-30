@@ -6,6 +6,7 @@ installation, and synchronization with other tools.
 """
 
 import os
+import shutil
 from logging import Logger, getLogger
 from pathlib import Path
 from typing import Any
@@ -45,8 +46,7 @@ class ConanProvider(Provider):
 
         self._ensure_default_profiles()
 
-        # Initialize cmake_binary with system default. It may be overridden during sync.
-        self._cmake_binary = 'cmake'
+        self._cmake_binary: str | None = None
 
     @staticmethod
     def features(directory: Path) -> SupportedFeatures:
@@ -174,7 +174,7 @@ class ConanProvider(Provider):
             command_args.extend(['-s', f'build_type={build_type}'])
 
         # Add cmake binary configuration if specified
-        if self._cmake_binary and self._cmake_binary != 'cmake':
+        if self._cmake_binary:
             # Quote the path if it contains spaces
             cmake_path = f'"{self._cmake_binary}"' if ' ' in self._cmake_binary else self._cmake_binary
             command_args.extend(['-c', f'tools.cmake:cmake_program={cmake_path}'])
@@ -239,6 +239,23 @@ class ConanProvider(Provider):
 
         raise NotSupportedError(f'Unsupported sync types: {consumer.sync_types()}')
 
+    @staticmethod
+    def _resolve_cmake_binary(cmake_path: Path | str | None) -> str | None:
+        """Resolve the cmake binary path.
+
+        If an explicit path is provided, use it. Otherwise, try to find cmake
+        in the current Python environment (venv) to ensure we use the same
+        cmake version for all operations including dependency builds.
+
+        Args:
+            cmake_path: Explicit cmake path, or None to auto-detect
+
+        Returns:
+            Resolved cmake path as string, or None if not found
+        """
+        resolved = cmake_path or shutil.which('cmake')
+        return str(Path(resolved).resolve()) if resolved else None
+
     def _sync_with_cmake(self, consumer: SyncConsumer) -> CMakeSyncData:
         """Synchronize with CMake generator and create sync data.
 
@@ -250,10 +267,7 @@ class ConanProvider(Provider):
         """
         # Extract cmake_binary from CMakeGenerator if available
         if isinstance(consumer, CMakeGenerator) and not os.environ.get('CMAKE_BINARY'):
-            # Only override if not already set from environment variable
-            # Convert Path to string, or use 'cmake' if None
-            cmake_path = consumer.data.cmake_binary
-            self._cmake_binary = str(cmake_path) if cmake_path else 'cmake'
+            self._cmake_binary = self._resolve_cmake_binary(consumer.data.cmake_binary)
 
         return self._create_cmake_sync_data()
 
@@ -301,7 +315,7 @@ class ConanProvider(Provider):
             command_args.extend(['-c', 'tools.build:skip_test=True'])
 
             # Add cmake binary configuration if specified
-            if self._cmake_binary and self._cmake_binary != 'cmake':
+            if self._cmake_binary:
                 # Quote the path if it contains spaces
                 cmake_path = f'"{self._cmake_binary}"' if ' ' in self._cmake_binary else self._cmake_binary
                 command_args.extend(['-c', f'tools.cmake:cmake_program={cmake_path}'])
