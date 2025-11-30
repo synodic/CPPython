@@ -20,7 +20,7 @@ from cppython.plugins.cmake.plugin import CMakeGenerator
 from cppython.plugins.cmake.schema import CMakeSyncData
 from cppython.plugins.conan.builder import Builder
 from cppython.plugins.conan.resolution import resolve_conan_data, resolve_conan_dependency
-from cppython.plugins.conan.schema import ConanData
+from cppython.plugins.conan.schema import ConanData, ConanfileGenerationData
 from cppython.utility.exception import NotSupportedError, ProviderInstallationError
 from cppython.utility.utility import TypeName
 
@@ -116,12 +116,17 @@ class ConanProvider(Provider):
                         for req in self.core_data.cppython_data.dependency_groups[group_name]
                     ]
 
+        generation_data = ConanfileGenerationData(
+            dependencies=resolved_dependencies,
+            dependency_groups=resolved_dependency_groups,
+            name=self.core_data.pep621_data.name,
+            version=self.core_data.pep621_data.version,
+            cmake_binary=self._cmake_binary,
+        )
+
         self.builder.generate_conanfile(
             self.core_data.project_data.project_root,
-            resolved_dependencies,
-            resolved_dependency_groups,
-            self.core_data.pep621_data.name,
-            self.core_data.pep621_data.version,
+            generation_data,
         )
 
         # Ensure build directory exists

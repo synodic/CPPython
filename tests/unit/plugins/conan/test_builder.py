@@ -6,7 +6,7 @@ from textwrap import dedent
 import pytest
 
 from cppython.plugins.conan.builder import Builder
-from cppython.plugins.conan.schema import ConanDependency, ConanVersion
+from cppython.plugins.conan.schema import ConanDependency, ConanfileGenerationData, ConanVersion
 
 
 class TestBuilder:
@@ -44,12 +44,15 @@ class TestBuilder:
         ]
         dependency_groups = {}
 
-        builder.generate_conanfile(
-            directory=tmp_path,
+        data = ConanfileGenerationData(
             dependencies=dependencies,
             dependency_groups=dependency_groups,
             name='test-project',
             version='1.0.0',
+        )
+        builder.generate_conanfile(
+            directory=tmp_path,
+            data=data,
         )
 
         base_file = tmp_path / 'conanfile_base.py'
@@ -60,37 +63,43 @@ class TestBuilder:
 
     def test_regenerates_base_file(self, builder: Builder, tmp_path: Path) -> None:
         """Test base file is always regenerated with new dependencies."""
-        dependencies_v1 = [
+        initial_dependencies = [
             ConanDependency(name='boost', version=ConanVersion.from_string('1.80.0')),
         ]
 
-        builder.generate_conanfile(
-            directory=tmp_path,
-            dependencies=dependencies_v1,
+        initial_data = ConanfileGenerationData(
+            dependencies=initial_dependencies,
             dependency_groups={},
             name='test-project',
             version='1.0.0',
+        )
+        builder.generate_conanfile(
+            directory=tmp_path,
+            data=initial_data,
         )
 
         base_file = tmp_path / 'conanfile_base.py'
-        content_v1 = base_file.read_text(encoding='utf-8')
-        assert 'boost/1.80.0' in content_v1
+        initial_content = base_file.read_text(encoding='utf-8')
+        assert 'boost/1.80.0' in initial_content
 
-        dependencies_v2 = [
+        updated_dependencies = [
             ConanDependency(name='zlib', version=ConanVersion.from_string('1.2.13')),
         ]
 
-        builder.generate_conanfile(
-            directory=tmp_path,
-            dependencies=dependencies_v2,
+        updated_data = ConanfileGenerationData(
+            dependencies=updated_dependencies,
             dependency_groups={},
             name='test-project',
             version='1.0.0',
         )
+        builder.generate_conanfile(
+            directory=tmp_path,
+            data=updated_data,
+        )
 
-        content_v2 = base_file.read_text(encoding='utf-8')
-        assert 'zlib/1.2.13' in content_v2
-        assert 'boost/1.80.0' not in content_v2
+        updated_content = base_file.read_text(encoding='utf-8')
+        assert 'zlib/1.2.13' in updated_content
+        assert 'boost/1.80.0' not in updated_content
 
     def test_preserves_user_file(self, builder: Builder, tmp_path: Path) -> None:
         """Test user conanfile is never modified once created."""
@@ -112,12 +121,15 @@ class TestBuilder:
             ConanDependency(name='boost', version=ConanVersion.from_string('1.80.0')),
         ]
 
-        builder.generate_conanfile(
-            directory=tmp_path,
+        data = ConanfileGenerationData(
             dependencies=dependencies,
             dependency_groups={},
             name='new-name',
             version='2.0.0',
+        )
+        builder.generate_conanfile(
+            directory=tmp_path,
+            data=data,
         )
 
         final_content = conan_file.read_text()
@@ -137,12 +149,15 @@ class TestBuilder:
             ]
         }
 
-        builder.generate_conanfile(
-            directory=tmp_path,
+        data = ConanfileGenerationData(
             dependencies=dependencies,
             dependency_groups=dependency_groups,
             name='test-project',
             version='1.0.0',
+        )
+        builder.generate_conanfile(
+            directory=tmp_path,
+            data=data,
         )
 
         base_content = (tmp_path / 'conanfile_base.py').read_text(encoding='utf-8')
@@ -156,3 +171,55 @@ class TestBuilder:
         assert 'class TestProjectPackage(CPPythonBase):' in user_content
         assert 'super().requirements()' in user_content
         assert 'super().build_requirements()' in user_content
+
+    def test_cmake_binary_configure(self, builder: Builder, tmp_path: Path) -> None:
+        """Test that cmake_binary generates configure() with forward slashes."""
+        base_file = tmp_path / 'conanfile_base.py'
+        cmake_path = Path('C:/Program Files/CMake/bin/cmake.exe')
+
+        builder._create_base_conanfile(base_file, [], {}, cmake_binary=cmake_path)
+
+        content = base_file.read_text(encoding='utf-8')
+        assert 'def configure(self):' in content
+        assert 'self.conf.define("tools.cmake:cmake_program"' in content
+        assert 'C:/Program Files/CMake/bin/cmake.exe' in content
+        assert '\\' not in content.split('tools.cmake:cmake_program')[1].split('"')[1]
+
+    def test_no_cmake_binary(self, builder: Builder, tmp_path: Path) -> None:
+        """Test that no cmake_binary means no configure() method."""
+        base_file = tmp_path / 'conanfile_base.py'
+
+        builder._create_base_conanfile(base_file, [], {}, cmake_binary=None)
+
+        content = base_file.read_text(encoding='utf-8')
+        assert 'def configure(self):' not in content
+
+    @pytest.mark.parametrize(
+        ('venv_cmake', 'expect_configure'),
+        [
+            ('/path/to/venv/bin/cmake', True),
+            (None, False),
+        ],
+    )
+    def test_cmake_binary_venv_fallback(
+        self,
+        builder: Builder,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        venv_cmake: str | None,
+        expect_configure: bool,
+    ) -> None:
+        """Test venv cmake fallback when cmake_binary is default."""
+        monkeypatch.setattr('cppython.plugins.conan.builder.shutil.which', lambda _: venv_cmake)
+
+        data = ConanfileGenerationData(
+            dependencies=[],
+            dependency_groups={},
+            name='test-project',
+            version='1.0.0',
+            cmake_binary='cmake',
+        )
+        builder.generate_conanfile(directory=tmp_path, data=data)
+
+        content = (tmp_path / 'conanfile_base.py').read_text(encoding='utf-8')
+        assert ('def configure(self):' in content) == expect_configure

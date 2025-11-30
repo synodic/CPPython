@@ -297,6 +297,19 @@ class ConanData(CPPythonModel):
     profile_dir: Path
 
 
+class ConanfileGenerationData(CPPythonModel):
+    """Data required for generating conanfile.py and conanfile_base.py.
+
+    Groups related parameters for conanfile generation to reduce function argument count.
+    """
+
+    dependencies: list[ConanDependency]
+    dependency_groups: dict[str, list[ConanDependency]]
+    name: str
+    version: str
+    cmake_binary: str | None = None
+
+
 class ConanConfiguration(CPPythonModel):
     """Conan provider configuration"""
 
