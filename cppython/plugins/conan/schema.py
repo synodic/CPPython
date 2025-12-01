@@ -307,7 +307,6 @@ class ConanfileGenerationData(CPPythonModel):
     dependency_groups: dict[str, list[ConanDependency]]
     name: str
     version: str
-    cmake_binary: str | None = None
 
 
 class ConanConfiguration(CPPythonModel):

@@ -121,7 +121,6 @@ class ConanProvider(Provider):
             dependency_groups=resolved_dependency_groups,
             name=self.core_data.pep621_data.name,
             version=self.core_data.pep621_data.version,
-            cmake_binary=self._cmake_binary,
         )
 
         self.builder.generate_conanfile(
