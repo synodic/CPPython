@@ -53,7 +53,7 @@ class TestConanCMake:
         Args:
             cmake_binary: Path or command name for the CMake binary to use
         """
-        result = subprocess.run([cmake_binary, '--preset=default-release'], capture_output=True, text=True, check=False)
+        result = subprocess.run([cmake_binary, '--preset=default'], capture_output=True, text=True, check=False)
         assert result.returncode == 0, f'CMake configuration failed: {result.stderr}'
 
     @staticmethod

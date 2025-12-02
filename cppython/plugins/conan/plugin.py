@@ -283,12 +283,24 @@ class ConanProvider(Provider):
         Returns:
             CMakeSyncData configured for Conan integration
         """
-        # With cmake_layout, Conan creates a subfolder for each build type.
-        # Use the first build type for the toolchain path.
+        # With tools.cmake.cmake_layout:build_folder=. and --output-folder=build_path,
+        # generators are placed in build_path/generators/ for multi-config generators (Windows)
+        # or build_path/<build_type>/generators/ for single-config generators (Linux/Mac).
+        # We check which path exists to handle both cases.
         build_type = self.data.build_types[0] if self.data.build_types else 'Release'
-        conan_toolchain_path = (
+
+        # Try multi-config path first (Windows with Visual Studio)
+        multiconfig_path = self.core_data.cppython_data.build_path / 'generators' / 'conan_toolchain.cmake'
+        # Single-config path (Linux/Mac with Make/Ninja)
+        singleconfig_path = (
             self.core_data.cppython_data.build_path / build_type / 'generators' / 'conan_toolchain.cmake'
         )
+
+        # Use whichever path exists, defaulting to multi-config for sync (before install runs)
+        if singleconfig_path.exists():
+            conan_toolchain_path = singleconfig_path
+        else:
+            conan_toolchain_path = multiconfig_path
 
         return CMakeSyncData(
             provider_name=TypeName('conan'),
