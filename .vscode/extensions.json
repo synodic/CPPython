@@ -1,6 +1,5 @@
 {
     "recommendations": [
-        "asciidoctor.asciidoctor-vscode",
         "charliermarsh.ruff",
         "tamasfe.even-better-toml",
         "meta.pyrefly"
