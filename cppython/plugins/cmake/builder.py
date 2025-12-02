@@ -48,7 +48,7 @@ class Builder:
 
         if provider_data.toolchain_file:
             relative_toolchain = provider_data.toolchain_file.relative_to(project_root, walk_up=True)
-            default_configure.toolchainFile = relative_toolchain.as_posix()
+            default_configure.toolchainFile = '${sourceDir}/' + relative_toolchain.as_posix()
 
         configure_presets.append(default_configure)
 
