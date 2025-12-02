@@ -71,7 +71,6 @@ install-path = "install"  # Where provider tools are cached
 
 dependencies = [
     "fmt>=11.0.0",
-    "nanobind>=2.4.0",
 ]
 
 [tool.cppython.generators.cmake]

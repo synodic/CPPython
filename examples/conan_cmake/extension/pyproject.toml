@@ -7,7 +7,7 @@ authors = [{ name = "Synodic Software", email = "contact@synodic.software" }]
 requires-python = ">=3.10"
 
 [build-system]
-requires = ["cppython[conan, cmake, git]"]
+requires = ["cppython[conan, cmake, git]", "nanobind>=2.4.0"]
 build-backend = "cppython.build"
 
 [tool.scikit-build]
@@ -20,7 +20,7 @@ wheel.packages = ["src/example_extension"]
 # and inject the toolchain file into scikit-build-core
 install-path = "install"
 
-dependencies = ["fmt>=11.0.2", "nanobind>=2.4.0"]
+dependencies = ["fmt>=11.0.2"]
 
 [tool.cppython.generators.cmake]
 # Use the CMakePresets.json in this directory

@@ -5,7 +5,7 @@
 groups = ["default", "cmake", "conan", "docs", "git", "lint", "pdm", "pytest", "test"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:041e2527f6dfc7446b63a6e7251946f9f50f1000ae097aa97fcb59d330e0b31f"
+content_hash = "sha256:1bae711fef71d97486071202b156a2e3a75f019f55372aa7800d031a809447e5"
 
 [[metadata.targets]]
 requires_python = ">=3.14"
@@ -530,6 +530,15 @@ summary = ""
 files = [
     {file = "mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8"},
     {file = "mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba"},
+]
+
+[[package]]
+name = "nanobind"
+version = "2.9.2"
+summary = "nanobind: tiny and efficient C++/Python bindings"
+files = [
+    {file = "nanobind-2.9.2-py3-none-any.whl", hash = "sha256:c37957ffd5eac7eda349cff3622ecd32e5ee1244ecc912c99b5bc8188bafd16e"},
+    {file = "nanobind-2.9.2.tar.gz", hash = "sha256:e7608472de99d375759814cab3e2c94aba3f9ec80e62cfef8ced495ca5c27d6e"},
 ]
 
 [[package]]

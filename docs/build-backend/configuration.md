@@ -68,7 +68,6 @@ List of C++ dependencies in PEP 508-style format.
 [tool.cppython]
 dependencies = [
     "fmt>=11.0.0",
-    "nanobind>=2.4.0",
     "boost>=1.84.0",
 ]
 ```
@@ -159,7 +158,6 @@ build-path = "build"
 
 dependencies = [
     "fmt>=11.0.0",
-    "nanobind>=2.4.0",
     "spdlog>=1.14.0",
 ]
 

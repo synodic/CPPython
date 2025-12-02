@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 4.0)
 project(example_extension LANGUAGES CXX)
 
-# Find Python and nanobind (nanobind will be found via Conan toolchain)
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 find_package(nanobind REQUIRED)
+
 find_package(fmt REQUIRED)
 
 # Create the Python extension module using nanobind
