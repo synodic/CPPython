@@ -1,0 +1,10 @@
+{
+    "version": 9,
+    "configurePresets": [
+        {
+            "name": "default",
+            "hidden": true,
+            "description": "Base preset for all configurations"
+        }
+    ]
+}

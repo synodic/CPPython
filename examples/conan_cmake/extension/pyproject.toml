@@ -1,0 +1,31 @@
+[project]
+name = "example_extension"
+version = "1.0.0"
+description = "A Python extension module using CPPython with Conan-managed dependencies"
+license = { text = "MIT" }
+authors = [{ name = "Synodic Software", email = "contact@synodic.software" }]
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["cppython[conan, cmake, git]"]
+build-backend = "cppython.build"
+
+[tool.scikit-build]
+# scikit-build-core configuration
+cmake.build-type = "Release"
+wheel.packages = ["src/example_extension"]
+
+[tool.cppython]
+# CPPython will install these C++ dependencies via Conan
+# and inject the toolchain file into scikit-build-core
+install-path = "install"
+
+dependencies = ["fmt>=11.0.2", "nanobind>=2.4.0"]
+
+[tool.cppython.generators.cmake]
+# Use the CMakePresets.json in this directory
+
+[tool.cppython.providers.conan]
+# Conan provider configuration
+# Only install Release build type for scikit-build-core (single-config builds)
+build-types = ["Release"]

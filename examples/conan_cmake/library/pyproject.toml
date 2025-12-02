@@ -17,8 +17,6 @@ install-path = "install"
 
 dependencies = ["fmt>=12.1.0"]
 
-[tool.cppython.generators.cmake]
-cmake_binary = "C:/Program Files/CMake/bin/cmake.exe"
 
 [tool.cppython.providers.conan]
 

@@ -295,6 +295,7 @@ class ConanData(CPPythonModel):
     remotes: list[str]
     skip_upload: bool
     profile_dir: Path
+    build_types: list[str]
 
 
 class ConanfileGenerationData(CPPythonModel):
@@ -328,3 +329,13 @@ class ConanConfiguration(CPPythonModel):
             "If a relative path is provided, it will be resolved relative to the tool's working directory."
         ),
     ] = 'profiles'
+    build_types: Annotated[
+        list[str],
+        Field(
+            alias='build-types',
+            description='List of CMake build types to install dependencies for. '
+            'For multi-config generators (Visual Studio), use both Release and Debug. '
+            'For single-config generators or build backends like scikit-build-core, '
+            'use only the build type you need (e.g., ["Release"]).',
+        ),
+    ] = ['Release', 'Debug']

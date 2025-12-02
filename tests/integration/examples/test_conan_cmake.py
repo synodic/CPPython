@@ -5,12 +5,15 @@ The tests ensure that the projects build, configure, and execute correctly.
 """
 
 import subprocess
+import sys
 import tomllib
+import zipfile
 from pathlib import Path
 from tomllib import loads
 
 from typer.testing import CliRunner
 
+from cppython.build import build_wheel
 from cppython.console.schema import ConsoleInterface
 from cppython.core.schema import ProjectConfiguration
 from cppython.project import Project
@@ -136,3 +139,41 @@ class TestConanCMake:
         # Package the library to local cache
         publish_project = TestConanCMake._create_project(skip_upload=True)
         publish_project.publish()
+
+    @staticmethod
+    def test_extension(example_runner: CliRunner) -> None:
+        """Test Python extension module built with cppython.build backend and scikit-build-core"""
+        # This test uses the cppython.build backend which wraps scikit-build-core
+        # The build backend automatically runs CPPython's provider workflow
+
+        # Create dist directory for the wheel
+        dist_path = Path('dist')
+        dist_path.mkdir(exist_ok=True)
+
+        # Build the wheel using the cppython.build backend directly
+        wheel_name = build_wheel(str(dist_path))
+
+        # Verify wheel was created
+        wheel_path = dist_path / wheel_name
+        assert wheel_path.exists(), f'Wheel not created at {wheel_path}'
+
+        # Extract and test the extension
+        install_path = Path('install_target')
+        install_path.mkdir(exist_ok=True)
+
+        with zipfile.ZipFile(wheel_path, 'r') as whl:
+            whl.extractall(install_path)
+
+        # Test the installed extension by adding install_target to path
+        test_code = (
+            f'import sys; sys.path.insert(0, {str(install_path)!r}); '
+            "import example_extension; print(example_extension.format_greeting('Test'))"
+        )
+        test_result = subprocess.run(
+            [sys.executable, '-c', test_code],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert test_result.returncode == 0, f'Extension test failed: {test_result.stderr}'
+        assert 'Hello, Test!' in test_result.stdout, f'Unexpected output: {test_result.stdout}'

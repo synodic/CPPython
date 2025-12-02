@@ -59,7 +59,7 @@ class CPPythonPlugin(Interface):
 
         self.logger.info("CPPython: Entered 'on_post_install'")
 
-        if (pdm_pyproject := project.pyproject.read()) is None:
+        if (pdm_pyproject := project.pyproject.open_for_read()) is None:
             self.logger.info('CPPython: Project data was not available')
             return
 

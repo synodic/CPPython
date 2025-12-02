@@ -15,5 +15,9 @@
         },
         "editor.defaultFormatter": "charliermarsh.ruff"
     },
-    "cmake.ignoreCMakeListsMissing": true
+    "cmake.ignoreCMakeListsMissing": true,
+    "files.associations": {
+        "*.md": "markdown",
+        "xstring": "cpp"
+    }
 }
