@@ -283,9 +283,12 @@ class ConanProvider(Provider):
         Returns:
             CMakeSyncData configured for Conan integration
         """
-        # With tools.cmake.cmake_layout:build_folder=. and --output-folder=build_path,
-        # generators are placed directly in build_path/generators/
-        conan_toolchain_path = self.core_data.cppython_data.build_path / 'generators' / 'conan_toolchain.cmake'
+        # With cmake_layout, Conan creates a subfolder for each build type.
+        # Use the first build type for the toolchain path.
+        build_type = self.data.build_types[0] if self.data.build_types else 'Release'
+        conan_toolchain_path = (
+            self.core_data.cppython_data.build_path / build_type / 'generators' / 'conan_toolchain.cmake'
+        )
 
         return CMakeSyncData(
             provider_name=TypeName('conan'),

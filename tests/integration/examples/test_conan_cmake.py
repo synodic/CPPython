@@ -11,6 +11,7 @@ import zipfile
 from pathlib import Path
 from tomllib import loads
 
+import pytest
 from typer.testing import CliRunner
 
 from cppython.build import build_wheel
@@ -19,6 +20,11 @@ from cppython.core.schema import ProjectConfiguration
 from cppython.project import Project
 
 pytest_plugins = ['tests.fixtures.example', 'tests.fixtures.conan', 'tests.fixtures.cmake']
+
+# C++20 modules require Ninja or Visual Studio generator, not Unix Makefiles
+_skip_modules_test = pytest.mark.skipif(
+    sys.platform != 'win32', reason='C++20 modules require Ninja or Visual Studio generator, not Unix Makefiles.'
+)
 
 
 class TestConanCMake:
@@ -47,7 +53,7 @@ class TestConanCMake:
         Args:
             cmake_binary: Path or command name for the CMake binary to use
         """
-        result = subprocess.run([cmake_binary, '--preset=default'], capture_output=True, text=True, check=False)
+        result = subprocess.run([cmake_binary, '--preset=default-release'], capture_output=True, text=True, check=False)
         assert result.returncode == 0, f'CMake configuration failed: {result.stderr}'
 
     @staticmethod
@@ -108,6 +114,7 @@ class TestConanCMake:
         publish_project.publish()
 
     @staticmethod
+    @_skip_modules_test
     def test_library(example_runner: CliRunner) -> None:
         """Test library creation and packaging workflow"""
         # Read cmake_binary from the current pyproject.toml (we're in the example directory)
