@@ -165,13 +165,6 @@ class ConanProvider(Provider):
         output_folder = self.core_data.cppython_data.build_path
         command_args.extend(['--output-folder', str(output_folder)])
 
-        # Normalize cmake_layout behavior across all platforms/generators:
-        # - build_folder=. puts build output directly in output_folder (no 'build' subfolder)
-        # - build_folder_vars=[] prevents build_type subfolders (Release/Debug)
-        # This ensures generators always end up in output_folder/generators/ consistently
-        command_args.extend(['-c', 'tools.cmake.cmake_layout:build_folder=.'])
-        command_args.extend(['-c', 'tools.cmake.cmake_layout:build_folder_vars=[]'])
-
         # Add build missing flag
         command_args.extend(['--build', 'missing'])
 
@@ -287,8 +280,8 @@ class ConanProvider(Provider):
         Returns:
             CMakeSyncData configured for Conan integration
         """
-        # With cmake_layout config overrides (build_folder=. and build_folder_vars=[]),
-        # generators are always placed in build_path/generators/ regardless of platform/generator
+        # The generated conanfile uses explicit layout (self.folders.generators = "generators")
+        # Combined with --output-folder=build_path, generators are always at build_path/generators/
         conan_toolchain_path = self.core_data.cppython_data.build_path / 'generators' / 'conan_toolchain.cmake'
 
         return CMakeSyncData(
