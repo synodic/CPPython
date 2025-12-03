@@ -165,8 +165,12 @@ class ConanProvider(Provider):
         output_folder = self.core_data.cppython_data.build_path
         command_args.extend(['--output-folder', str(output_folder)])
 
-        # Override cmake_layout's default 'build' subfolder to normalize path structure
+        # Normalize cmake_layout behavior across all platforms/generators:
+        # - build_folder=. puts build output directly in output_folder (no 'build' subfolder)
+        # - build_folder_vars=[] prevents build_type subfolders (Release/Debug)
+        # This ensures generators always end up in output_folder/generators/ consistently
         command_args.extend(['-c', 'tools.cmake.cmake_layout:build_folder=.'])
+        command_args.extend(['-c', 'tools.cmake.cmake_layout:build_folder_vars=[]'])
 
         # Add build missing flag
         command_args.extend(['--build', 'missing'])
@@ -283,24 +287,9 @@ class ConanProvider(Provider):
         Returns:
             CMakeSyncData configured for Conan integration
         """
-        # With tools.cmake.cmake_layout:build_folder=. and --output-folder=build_path,
-        # generators are placed in build_path/generators/ for multi-config generators (Windows)
-        # or build_path/<build_type>/generators/ for single-config generators (Linux/Mac).
-        # We check which path exists to handle both cases.
-        build_type = self.data.build_types[0] if self.data.build_types else 'Release'
-
-        # Try multi-config path first (Windows with Visual Studio)
-        multiconfig_path = self.core_data.cppython_data.build_path / 'generators' / 'conan_toolchain.cmake'
-        # Single-config path (Linux/Mac with Make/Ninja)
-        singleconfig_path = (
-            self.core_data.cppython_data.build_path / build_type / 'generators' / 'conan_toolchain.cmake'
-        )
-
-        # Use whichever path exists, defaulting to multi-config for sync (before install runs)
-        if singleconfig_path.exists():
-            conan_toolchain_path = singleconfig_path
-        else:
-            conan_toolchain_path = multiconfig_path
+        # With cmake_layout config overrides (build_folder=. and build_folder_vars=[]),
+        # generators are always placed in build_path/generators/ regardless of platform/generator
+        conan_toolchain_path = self.core_data.cppython_data.build_path / 'generators' / 'conan_toolchain.cmake'
 
         return CMakeSyncData(
             provider_name=TypeName('conan'),
