@@ -26,6 +26,10 @@ _skip_modules_test = pytest.mark.skipif(
     sys.platform != 'win32', reason='C++20 modules require Ninja or Visual Studio generator, not Unix Makefiles.'
 )
 
+# On Windows (multi-config generators), use 'default' preset
+# On Linux/Mac (single-config generators), use 'default-release' because CMAKE_BUILD_TYPE is required
+_cmake_preset = 'default' if sys.platform == 'win32' else 'default-release'
+
 
 class TestConanCMake:
     """Test project variation of conan and CMake"""
@@ -53,7 +57,7 @@ class TestConanCMake:
         Args:
             cmake_binary: Path or command name for the CMake binary to use
         """
-        result = subprocess.run([cmake_binary, '--preset=default'], capture_output=True, text=True, check=False)
+        result = subprocess.run([cmake_binary, f'--preset={_cmake_preset}'], capture_output=True, text=True, check=False)
         assert result.returncode == 0, f'CMake configuration failed: {result.stderr}'
 
     @staticmethod
