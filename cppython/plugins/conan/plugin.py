@@ -283,7 +283,11 @@ class ConanProvider(Provider):
         pass
 
     def publish(self) -> None:
-        """Publishes the package using conan create workflow."""
+        """Publishes the package using conan create workflow.
+
+        Creates packages for all configured build types (e.g., Release, Debug)
+        to support both single-config and multi-config generators.
+        """
         project_root = self.core_data.project_data.project_root
         conanfile_path = project_root / 'conanfile.py'
         logger = getLogger('cppython.conan')
@@ -292,32 +296,13 @@ class ConanProvider(Provider):
             raise FileNotFoundError(f'conanfile.py not found at {conanfile_path}')
 
         try:
-            # Build conan create command arguments
-            command_args = ['create', str(conanfile_path)]
+            # Create packages for each configured build type
+            build_types = self.data.build_types
+            for build_type in build_types:
+                logger.info('Creating package for build type: %s', build_type)
+                self._run_conan_create(conanfile_path, build_type, logger)
 
-            # Add build mode (build everything for publishing)
-            command_args.extend(['--build', 'missing'])
-
-            # Skip test dependencies during publishing
-            command_args.extend(['-c', 'tools.graph:skip_test=True'])
-            command_args.extend(['-c', 'tools.build:skip_test=True'])
-
-            # Add cmake binary configuration if specified
-            if self._cmake_binary:
-                # Quote the path if it contains spaces
-                cmake_path = f'"{self._cmake_binary}"' if ' ' in self._cmake_binary else self._cmake_binary
-                command_args.extend(['-c', f'tools.cmake:cmake_program={cmake_path}'])
-
-            # Run conan create using reusable Conan API instance
-            # Change to project directory since Conan API might not handle cwd like subprocess
-            original_cwd = os.getcwd()
-            try:
-                os.chdir(str(project_root))
-                self._conan_api.command.run(command_args)
-            finally:
-                os.chdir(original_cwd)
-
-            # Upload if not skipped
+            # Upload once after all configurations are built
             if not self.data.skip_upload:
                 self._upload_package(logger)
 
@@ -325,6 +310,42 @@ class ConanProvider(Provider):
             error_msg = str(e)
             logger.error('Conan create failed: %s', error_msg, exc_info=True)
             raise ProviderInstallationError('conan', error_msg, e) from e
+
+    def _run_conan_create(self, conanfile_path: Path, build_type: str, logger: Logger) -> None:
+        """Run conan create command for a specific build type.
+
+        Args:
+            conanfile_path: Path to the conanfile.py
+            build_type: Build type (Release, Debug, etc.)
+            logger: Logger instance
+        """
+        # Build conan create command arguments
+        command_args = ['create', str(conanfile_path)]
+
+        # Add build mode (build everything for publishing)
+        command_args.extend(['--build', 'missing'])
+
+        # Skip test dependencies during publishing
+        command_args.extend(['-c', 'tools.graph:skip_test=True'])
+        command_args.extend(['-c', 'tools.build:skip_test=True'])
+
+        # Add build type setting
+        command_args.extend(['-s', f'build_type={build_type}'])
+
+        # Add cmake binary configuration if specified
+        if self._cmake_binary:
+            # Quote the path if it contains spaces
+            cmake_path = f'"{self._cmake_binary}"' if ' ' in self._cmake_binary else self._cmake_binary
+            command_args.extend(['-c', f'tools.cmake:cmake_program={cmake_path}'])
+
+        # Run conan create using reusable Conan API instance
+        # Change to project directory since Conan API might not handle cwd like subprocess
+        original_cwd = os.getcwd()
+        try:
+            os.chdir(str(self.core_data.project_data.project_root))
+            self._conan_api.command.run(command_args)
+        finally:
+            os.chdir(original_cwd)
 
     def _upload_package(self, logger) -> None:
         """Upload the package to configured remotes using Conan API."""
