@@ -6,7 +6,6 @@ installation, and synchronization with other tools.
 """
 
 import os
-import shutil
 from logging import Logger, getLogger
 from pathlib import Path
 from typing import Any
@@ -242,23 +241,6 @@ class ConanProvider(Provider):
 
         raise NotSupportedError(f'Unsupported sync types: {consumer.sync_types()}')
 
-    @staticmethod
-    def _resolve_cmake_binary(cmake_path: Path | str | None) -> str | None:
-        """Resolve the cmake binary path.
-
-        If an explicit path is provided, use it. Otherwise, try to find cmake
-        in the current Python environment (venv) to ensure we use the same
-        cmake version for all operations including dependency builds.
-
-        Args:
-            cmake_path: Explicit cmake path, or None to auto-detect
-
-        Returns:
-            Resolved cmake path as string, or None if not found
-        """
-        resolved = cmake_path or shutil.which('cmake')
-        return str(Path(resolved).resolve()) if resolved else None
-
     def _sync_with_cmake(self, consumer: SyncConsumer) -> CMakeSyncData:
         """Synchronize with CMake generator and create sync data.
 
@@ -269,8 +251,9 @@ class ConanProvider(Provider):
             CMakeSyncData configured for Conan integration
         """
         # Extract cmake_binary from CMakeGenerator if available
-        if isinstance(consumer, CMakeGenerator) and not os.environ.get('CMAKE_BINARY'):
-            self._cmake_binary = self._resolve_cmake_binary(consumer.data.cmake_binary)
+        # The cmake_binary is already validated and resolved during CMake data resolution
+        if isinstance(consumer, CMakeGenerator) and consumer.data.cmake_binary:
+            self._cmake_binary = str(consumer.data.cmake_binary.resolve())
 
         return self._create_cmake_sync_data()
 
