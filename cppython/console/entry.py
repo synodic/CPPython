@@ -209,6 +209,10 @@ def publish(
 @app.command()
 def build(
     context: typer.Context,
+    configuration: Annotated[
+        str | None,
+        typer.Option(help='Named build configuration to use (e.g. CMake preset name, Meson build directory)'),
+    ] = None,
 ) -> None:
     """Build the project
 
@@ -216,14 +220,19 @@ def build(
 
     Args:
         context: The CLI configuration object
+        configuration: Optional named configuration
     """
     project = get_enabled_project(context)
-    project.build()
+    project.build(configuration=configuration)
 
 
 @app.command()
 def test(
     context: typer.Context,
+    configuration: Annotated[
+        str | None,
+        typer.Option(help='Named build configuration to use (e.g. CMake preset name, Meson build directory)'),
+    ] = None,
 ) -> None:
     """Run project tests
 
@@ -231,14 +240,19 @@ def test(
 
     Args:
         context: The CLI configuration object
+        configuration: Optional named configuration
     """
     project = get_enabled_project(context)
-    project.test()
+    project.test(configuration=configuration)
 
 
 @app.command()
 def bench(
     context: typer.Context,
+    configuration: Annotated[
+        str | None,
+        typer.Option(help='Named build configuration to use (e.g. CMake preset name, Meson build directory)'),
+    ] = None,
 ) -> None:
     """Run project benchmarks
 
@@ -246,9 +260,10 @@ def bench(
 
     Args:
         context: The CLI configuration object
+        configuration: Optional named configuration
     """
     project = get_enabled_project(context)
-    project.bench()
+    project.bench(configuration=configuration)
 
 
 @app.command()
@@ -258,6 +273,10 @@ def run(
         str,
         typer.Argument(help='The name of the build target/executable to run'),
     ],
+    configuration: Annotated[
+        str | None,
+        typer.Option(help='Named build configuration to use (e.g. CMake preset name, Meson build directory)'),
+    ] = None,
 ) -> None:
     """Run a built executable
 
@@ -266,6 +285,7 @@ def run(
     Args:
         context: The CLI configuration object
         target: The name of the build target to run
+        configuration: Optional named configuration
     """
     project = get_enabled_project(context)
-    project.run(target)
+    project.run(target, configuration=configuration)

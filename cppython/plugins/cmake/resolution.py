@@ -77,5 +77,8 @@ def resolve_cmake_data(data: dict[str, Any], core_data: CorePluginData) -> CMake
     cmake_binary = _resolve_cmake_binary(parsed_data.cmake_binary)
 
     return CMakeData(
-        preset_file=modified_preset_file, configuration_name=parsed_data.configuration_name, cmake_binary=cmake_binary
+        preset_file=modified_preset_file,
+        configuration_name=parsed_data.configuration_name,
+        cmake_binary=cmake_binary,
+        default_configuration=parsed_data.default_configuration,
     )

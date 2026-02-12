@@ -127,34 +127,63 @@ class MesonGenerator(Generator):
 
         subprocess.run(cmd, check=True, cwd=source_dir)
 
-    def build(self) -> None:
-        """Builds the project using meson compile."""
+    def _effective_build_dir(self, configuration: str | None) -> Path:
+        """Returns the build directory, optionally overridden by a configuration name.
+
+        Args:
+            configuration: If provided, used as the build directory name instead of the
+                configured ``build_directory``.
+
+        Returns:
+            The absolute path to the build directory
+        """
+        directory = configuration if configuration else self.data.build_directory
+        return self.data.build_file.parent / directory
+
+    def build(self, configuration: str | None = None) -> None:
+        """Builds the project using meson compile.
+
+        Args:
+            configuration: Optional build directory name override.
+        """
         self._ensure_setup()
-        cmd = [self._meson_command(), 'compile', '-C', str(self._build_dir())]
+        build_dir = self._effective_build_dir(configuration)
+        cmd = [self._meson_command(), 'compile', '-C', str(build_dir)]
         subprocess.run(cmd, check=True, cwd=self.data.build_file.parent)
 
-    def test(self) -> None:
-        """Runs tests using meson test."""
-        cmd = [self._meson_command(), 'test', '-C', str(self._build_dir())]
+    def test(self, configuration: str | None = None) -> None:
+        """Runs tests using meson test.
+
+        Args:
+            configuration: Optional build directory name override.
+        """
+        build_dir = self._effective_build_dir(configuration)
+        cmd = [self._meson_command(), 'test', '-C', str(build_dir)]
         subprocess.run(cmd, check=True, cwd=self.data.build_file.parent)
 
-    def bench(self) -> None:
-        """Runs benchmarks using meson test --benchmark."""
-        cmd = [self._meson_command(), 'test', '--benchmark', '-C', str(self._build_dir())]
+    def bench(self, configuration: str | None = None) -> None:
+        """Runs benchmarks using meson test --benchmark.
+
+        Args:
+            configuration: Optional build directory name override.
+        """
+        build_dir = self._effective_build_dir(configuration)
+        cmd = [self._meson_command(), 'test', '--benchmark', '-C', str(build_dir)]
         subprocess.run(cmd, check=True, cwd=self.data.build_file.parent)
 
-    def run(self, target: str) -> None:
+    def run(self, target: str, configuration: str | None = None) -> None:
         """Runs a built executable by target name.
 
         Searches the build directory for the executable matching the target name.
 
         Args:
             target: The name of the build target/executable to run
+            configuration: Optional build directory name override.
 
         Raises:
             FileNotFoundError: If the target executable cannot be found
         """
-        build_dir = self._build_dir()
+        build_dir = self._effective_build_dir(configuration)
 
         # Search for the executable in the build directory
         candidates = list(build_dir.rglob(target)) + list(build_dir.rglob(f'{target}.exe'))

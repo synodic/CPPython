@@ -61,14 +61,14 @@ class MockGenerator(Generator):
     def sync(self, sync_data: SyncData) -> None:
         """Synchronizes generator files and state with the providers input"""
 
-    def build(self) -> None:
+    def build(self, configuration: str | None = None) -> None:
         """No-op build for testing"""
 
-    def test(self) -> None:
+    def test(self, configuration: str | None = None) -> None:
         """No-op test for testing"""
 
-    def bench(self) -> None:
+    def bench(self, configuration: str | None = None) -> None:
         """No-op bench for testing"""
 
-    def run(self, target: str) -> None:
+    def run(self, target: str, configuration: str | None = None) -> None:
         """No-op run for testing"""

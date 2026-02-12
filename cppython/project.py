@@ -142,11 +142,14 @@ class Project(API):
         # Let provider handle its own exceptions for better error context
         self._data.plugins.provider.publish()
 
-    def build(self) -> None:
+    def build(self, configuration: str | None = None) -> None:
         """Builds the project
 
         Assumes dependencies have been installed via `install`.
-        Syncs presets to ensure they are up-to-date, then executes the build.
+        Syncs generated files to ensure they are up-to-date, then executes the build.
+
+        Args:
+            configuration: Optional named configuration to use
         """
         if not self._enabled:
             self.logger.info('Skipping build because the project is not enabled')
@@ -154,13 +157,16 @@ class Project(API):
 
         self.logger.info('Building project')
         self._data.sync()
-        self._data.build()
+        self._data.build(configuration=configuration)
 
-    def test(self) -> None:
+    def test(self, configuration: str | None = None) -> None:
         """Runs project tests
 
         Assumes dependencies have been installed via `install`.
-        Syncs presets to ensure they are up-to-date, then executes tests.
+        Syncs generated files to ensure they are up-to-date, then executes tests.
+
+        Args:
+            configuration: Optional named configuration to use
         """
         if not self._enabled:
             self.logger.info('Skipping test because the project is not enabled')
@@ -168,13 +174,16 @@ class Project(API):
 
         self.logger.info('Running tests')
         self._data.sync()
-        self._data.test()
+        self._data.test(configuration=configuration)
 
-    def bench(self) -> None:
+    def bench(self, configuration: str | None = None) -> None:
         """Runs project benchmarks
 
         Assumes dependencies have been installed via `install`.
-        Syncs presets to ensure they are up-to-date, then executes benchmarks.
+        Syncs generated files to ensure they are up-to-date, then executes benchmarks.
+
+        Args:
+            configuration: Optional named configuration to use
         """
         if not self._enabled:
             self.logger.info('Skipping bench because the project is not enabled')
@@ -182,16 +191,17 @@ class Project(API):
 
         self.logger.info('Running benchmarks')
         self._data.sync()
-        self._data.bench()
+        self._data.bench(configuration=configuration)
 
-    def run(self, target: str) -> None:
+    def run(self, target: str, configuration: str | None = None) -> None:
         """Runs a built executable
 
         Assumes dependencies have been installed via `install`.
-        Syncs presets to ensure they are up-to-date, then executes the target.
+        Syncs generated files to ensure they are up-to-date, then executes the target.
 
         Args:
             target: The name of the build target to run
+            configuration: Optional named configuration to use
         """
         if not self._enabled:
             self.logger.info('Skipping run because the project is not enabled')
@@ -199,4 +209,4 @@ class Project(API):
 
         self.logger.info('Running target: %s', target)
         self._data.sync()
-        self._data.run(target)
+        self._data.run(target, configuration=configuration)

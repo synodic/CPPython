@@ -26,25 +26,39 @@ class API(Protocol):
         raise NotImplementedError()
 
     @abstractmethod
-    def build(self) -> None:
-        """Builds the project"""
+    def build(self, configuration: str | None = None) -> None:
+        """Builds the project
+
+        Args:
+            configuration: Optional named configuration to use. Interpretation is generator-specific
+                (e.g. CMake preset name, Meson build directory).
+        """
         raise NotImplementedError()
 
     @abstractmethod
-    def test(self) -> None:
-        """Runs project tests"""
+    def test(self, configuration: str | None = None) -> None:
+        """Runs project tests
+
+        Args:
+            configuration: Optional named configuration to use. Interpretation is generator-specific.
+        """
         raise NotImplementedError()
 
     @abstractmethod
-    def bench(self) -> None:
-        """Runs project benchmarks"""
+    def bench(self, configuration: str | None = None) -> None:
+        """Runs project benchmarks
+
+        Args:
+            configuration: Optional named configuration to use. Interpretation is generator-specific.
+        """
         raise NotImplementedError()
 
     @abstractmethod
-    def run(self, target: str) -> None:
+    def run(self, target: str, configuration: str | None = None) -> None:
         """Runs a built executable
 
         Args:
             target: The name of the build target to run
+            configuration: Optional named configuration to use. Interpretation is generator-specific.
         """
         raise NotImplementedError()

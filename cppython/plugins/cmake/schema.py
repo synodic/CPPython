@@ -140,6 +140,7 @@ class CMakeData(CPPythonModel):
     preset_file: Path
     configuration_name: str
     cmake_binary: Path | None
+    default_configuration: str | None = None
 
 
 class CMakeConfiguration(CPPythonModel):
@@ -165,5 +166,14 @@ class CMakeConfiguration(CPPythonModel):
         Field(
             description='Path to a specific CMake binary to use. If not specified, uses "cmake" from PATH. '
             'Can be overridden via CMAKE_BINARY environment variable.'
+        ),
+    ] = None
+    default_configuration: Annotated[
+        str | None,
+        Field(
+            alias='default-configuration',
+            description='Default CMake preset name to use for build/test/bench commands. '
+            'When set, the --configuration CLI option is no longer required. '
+            'The CLI --configuration value takes precedence over this default.',
         ),
     ] = None

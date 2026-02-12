@@ -71,34 +71,41 @@ class Generator(DataPlugin, SyncConsumer, Protocol):
         raise NotImplementedError
 
     @abstractmethod
-    def build(self) -> None:
+    def build(self, configuration: str | None = None) -> None:
         """Builds the project using the generator's build system.
 
-        Executes the build step (e.g. cmake --build --preset).
+        Executes the build step. The interpretation of ``configuration`` is
+        generator-specific (e.g. CMake preset name, Meson build directory).
+
+        Args:
+            configuration: Optional named configuration override.
         """
         raise NotImplementedError
 
     @abstractmethod
-    def test(self) -> None:
+    def test(self, configuration: str | None = None) -> None:
         """Runs tests using the generator's build system.
 
-        Executes the test step (e.g. ctest --preset).
+        Args:
+            configuration: Optional named configuration override.
         """
         raise NotImplementedError
 
     @abstractmethod
-    def bench(self) -> None:
+    def bench(self, configuration: str | None = None) -> None:
         """Runs benchmarks using the generator's build system.
 
-        Executes benchmarks, typically via test presets with a label filter.
+        Args:
+            configuration: Optional named configuration override.
         """
         raise NotImplementedError
 
     @abstractmethod
-    def run(self, target: str) -> None:
+    def run(self, target: str, configuration: str | None = None) -> None:
         """Runs a built executable by target name.
 
         Args:
             target: The name of the build target/executable to run.
+            configuration: Optional named configuration override.
         """
         raise NotImplementedError

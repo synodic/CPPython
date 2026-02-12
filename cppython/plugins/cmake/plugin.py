@@ -108,25 +108,57 @@ class CMakeGenerator(Generator):
                 return str(ctest_exe)
         return 'ctest'
 
-    def build(self) -> None:
-        """Builds the project using cmake --build with the configured preset."""
-        release_preset = self.data.configuration_name + '-release'
-        cmd = [self._cmake_command(), '--build', '--preset', release_preset]
+    def _resolve_configuration(self, configuration: str | None) -> str:
+        """Resolves the effective CMake preset from CLI argument or default config.
+
+        Args:
+            configuration: The configuration value passed from the CLI, or None
+
+        Returns:
+            The resolved CMake preset name
+
+        Raises:
+            ValueError: If no configuration is available from either CLI or default-configuration config
+        """
+        effective = configuration or self.data.default_configuration
+        if effective is None:
+            raise ValueError(
+                'CMake generator requires a configuration. '
+                "Provide --configuration on the CLI or set 'default-configuration' in [tool.cppython.generators.cmake]."
+            )
+        return effective
+
+    def build(self, configuration: str | None = None) -> None:
+        """Builds the project using cmake --build with the resolved preset.
+
+        Args:
+            configuration: Optional CMake preset name. Overrides default-configuration from config.
+        """
+        preset = self._resolve_configuration(configuration)
+        cmd = [self._cmake_command(), '--build', '--preset', preset]
         subprocess.run(cmd, check=True, cwd=self.data.preset_file.parent)
 
-    def test(self) -> None:
-        """Runs tests using ctest with the configured preset."""
-        release_preset = self.data.configuration_name + '-release'
-        cmd = [self._ctest_command(), '--preset', release_preset]
+    def test(self, configuration: str | None = None) -> None:
+        """Runs tests using ctest with the resolved preset.
+
+        Args:
+            configuration: Optional CMake preset name. Overrides default-configuration from config.
+        """
+        preset = self._resolve_configuration(configuration)
+        cmd = [self._ctest_command(), '--preset', preset]
         subprocess.run(cmd, check=True, cwd=self.data.preset_file.parent)
 
-    def bench(self) -> None:
-        """Runs benchmarks using ctest with the configured benchmark preset."""
-        bench_preset = self.data.configuration_name + '-bench-release'
-        cmd = [self._ctest_command(), '--preset', bench_preset]
+    def bench(self, configuration: str | None = None) -> None:
+        """Runs benchmarks using ctest with the resolved preset.
+
+        Args:
+            configuration: Optional CMake preset name. Overrides default-configuration from config.
+        """
+        preset = self._resolve_configuration(configuration)
+        cmd = [self._ctest_command(), '--preset', preset]
         subprocess.run(cmd, check=True, cwd=self.data.preset_file.parent)
 
-    def run(self, target: str) -> None:
+    def run(self, target: str, configuration: str | None = None) -> None:
         """Runs a built executable by target name.
 
         Searches the build directory for the executable matching the target name.
