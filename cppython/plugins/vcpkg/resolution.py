@@ -34,7 +34,7 @@ def generate_manifest(core_data: CorePluginData, data: VcpkgData) -> Manifest:
             result = check_output(['git', 'rev-parse', 'HEAD'], cwd=cwd)
             data.builtin_baseline = result.decode('utf-8').strip()
         except (CalledProcessError, FileNotFoundError) as e:
-            raise ConfigException('Failed to get the current commit hash from the vcpkg repository.', []) from e
+            raise ConfigException('Failed to get the current commit hash from the vcpkg repository.') from e
 
     return Manifest(
         name=core_data.pep621_data.name,
@@ -92,14 +92,14 @@ def resolve_vcpkg_dependency(requirement: Requirement) -> VcpkgDependency:
 
     # If the length of specifiers is greater than one, raise a configuration error
     if len(specifiers) > 1:
-        raise ConfigException('Multiple specifiers are not supported. Please provide a single specifier.', [])
+        raise ConfigException('Multiple specifiers are not supported. Please provide a single specifier.')
 
     # Extract the version from the single specifier
     min_version = None
     if len(specifiers) == 1:
         specifier = next(iter(specifiers))
         if specifier.operator != '>=':
-            raise ConfigException(f"Unsupported specifier '{specifier.operator}'. Only '>=' is supported.", [])
+            raise ConfigException(f"Unsupported specifier '{specifier.operator}'. Only '>=' is supported.")
         min_version = specifier.version
 
     return VcpkgDependency(

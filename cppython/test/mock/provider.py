@@ -83,6 +83,12 @@ class MockProvider(Provider):
         """Downloads the provider tooling"""
         cls.downloaded = directory
 
+    def verify_installed(self) -> None:
+        """Verify that mock provider artifacts exist.
+
+        Always passes since this is a mock.
+        """
+
     def install(self, groups: list[str] | None = None) -> None:
         """Installs the provider
 

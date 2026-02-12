@@ -8,8 +8,10 @@ after running CPPython's preparation workflow.
 import logging
 import tomllib
 from pathlib import Path
+from types import ModuleType
 from typing import Any
 
+import mesonpy
 from scikit_build_core import build as skbuild
 
 from cppython.build.prepare import BuildPreparationResult, prepare_build
@@ -40,10 +42,21 @@ def _is_meson_project() -> bool:
             return True
 
     # Fallback: check for meson.build file
-    if (source_dir / 'meson.build').exists():
-        return True
+    return (source_dir / 'meson.build').exists()
 
-    return False
+
+def _get_backend(is_meson: bool) -> ModuleType:
+    """Get the appropriate backend module.
+
+    Args:
+        is_meson: Whether to use meson-python instead of scikit-build-core
+
+    Returns:
+        The backend module (mesonpy or scikit_build_core.build)
+    """
+    if is_meson:
+        return mesonpy
+    return skbuild
 
 
 def _inject_cmake_toolchain(config_settings: dict[str, Any] | None, toolchain_file: Path | None) -> dict[str, Any]:
@@ -171,58 +184,19 @@ def _is_meson_build(result: BuildPreparationResult) -> bool:
 # PEP 517 Hooks - dispatching to the appropriate backend after preparation
 
 
-def get_requires_for_build_wheel(
-    config_settings: dict[str, Any] | None = None,
-) -> list[str]:
-    """Get additional requirements for building a wheel.
-
-    Args:
-        config_settings: Build configuration settings
-
-    Returns:
-        List of additional requirements
-    """
-    if _is_meson_project():
-        import mesonpy
-
-        return mesonpy.get_requires_for_build_wheel(config_settings)
-    return skbuild.get_requires_for_build_wheel(config_settings)
+def get_requires_for_build_wheel(config_settings: dict[str, Any] | None = None) -> list[str]:
+    """Get additional requirements for building a wheel."""
+    return _get_backend(_is_meson_project()).get_requires_for_build_wheel(config_settings)
 
 
-def get_requires_for_build_sdist(
-    config_settings: dict[str, Any] | None = None,
-) -> list[str]:
-    """Get additional requirements for building an sdist.
-
-    Args:
-        config_settings: Build configuration settings
-
-    Returns:
-        List of additional requirements
-    """
-    if _is_meson_project():
-        import mesonpy
-
-        return mesonpy.get_requires_for_build_sdist(config_settings)
-    return skbuild.get_requires_for_build_sdist(config_settings)
+def get_requires_for_build_sdist(config_settings: dict[str, Any] | None = None) -> list[str]:
+    """Get additional requirements for building an sdist."""
+    return _get_backend(_is_meson_project()).get_requires_for_build_sdist(config_settings)
 
 
-def get_requires_for_build_editable(
-    config_settings: dict[str, Any] | None = None,
-) -> list[str]:
-    """Get additional requirements for building an editable install.
-
-    Args:
-        config_settings: Build configuration settings
-
-    Returns:
-        List of additional requirements
-    """
-    if _is_meson_project():
-        import mesonpy
-
-        return mesonpy.get_requires_for_build_editable(config_settings)
-    return skbuild.get_requires_for_build_editable(config_settings)
+def get_requires_for_build_editable(config_settings: dict[str, Any] | None = None) -> list[str]:
+    """Get additional requirements for building an editable install."""
+    return _get_backend(_is_meson_project()).get_requires_for_build_editable(config_settings)
 
 
 def build_wheel(
@@ -230,58 +204,19 @@ def build_wheel(
     config_settings: dict[str, Any] | None = None,
     metadata_directory: str | None = None,
 ) -> str:
-    """Build a wheel from the source distribution.
-
-    This runs CPPython's provider workflow first to ensure C++ dependencies
-    are installed, then delegates to the appropriate build backend
-    (scikit-build-core for CMake, meson-python for Meson).
-
-    Args:
-        wheel_directory: Directory to place the built wheel
-        config_settings: Build configuration settings
-        metadata_directory: Directory containing wheel metadata
-
-    Returns:
-        The basename of the built wheel
-    """
+    """Build a wheel, running CPPython preparation first."""
     logger.info('CPPython: Starting wheel build')
-
-    # Prepare CPPython and get updated settings
     result, settings = _prepare_and_get_result(config_settings)
-
-    # Delegate to the appropriate backend
-    if _is_meson_build(result):
-        import mesonpy
-
-        return mesonpy.build_wheel(wheel_directory, settings, metadata_directory)
-
-    return skbuild.build_wheel(wheel_directory, settings, metadata_directory)
+    return _get_backend(_is_meson_build(result)).build_wheel(wheel_directory, settings, metadata_directory)
 
 
 def build_sdist(
     sdist_directory: str,
     config_settings: dict[str, Any] | None = None,
 ) -> str:
-    """Build a source distribution.
-
-    For sdist, we don't run the full CPPython workflow since the C++ dependencies
-    should be resolved at wheel build time, not sdist creation time.
-
-    Args:
-        sdist_directory: Directory to place the built sdist
-        config_settings: Build configuration settings
-
-    Returns:
-        The basename of the built sdist
-    """
+    """Build a source distribution (no CPPython workflow needed)."""
     logger.info('CPPython: Starting sdist build')
-
-    # Delegate to the appropriate backend
-    if _is_meson_project():
-        import mesonpy
-
-        return mesonpy.build_sdist(sdist_directory, config_settings)
-    return skbuild.build_sdist(sdist_directory, config_settings)
+    return _get_backend(_is_meson_project()).build_sdist(sdist_directory, config_settings)
 
 
 def build_editable(
@@ -289,67 +224,23 @@ def build_editable(
     config_settings: dict[str, Any] | None = None,
     metadata_directory: str | None = None,
 ) -> str:
-    """Build an editable wheel.
-
-    This runs CPPython's provider workflow first, similar to build_wheel.
-
-    Args:
-        wheel_directory: Directory to place the built wheel
-        config_settings: Build configuration settings
-        metadata_directory: Directory containing wheel metadata
-
-    Returns:
-        The basename of the built wheel
-    """
+    """Build an editable wheel, running CPPython preparation first."""
     logger.info('CPPython: Starting editable build')
-
-    # Prepare CPPython and get updated settings
     result, settings = _prepare_and_get_result(config_settings)
-
-    # Delegate to the appropriate backend
-    if _is_meson_build(result):
-        import mesonpy
-
-        return mesonpy.build_editable(wheel_directory, settings, metadata_directory)
-
-    return skbuild.build_editable(wheel_directory, settings, metadata_directory)
+    return _get_backend(_is_meson_build(result)).build_editable(wheel_directory, settings, metadata_directory)
 
 
 def prepare_metadata_for_build_wheel(
     metadata_directory: str,
     config_settings: dict[str, Any] | None = None,
 ) -> str:
-    """Prepare metadata for wheel build.
-
-    Args:
-        metadata_directory: Directory to place the metadata
-        config_settings: Build configuration settings
-
-    Returns:
-        The basename of the metadata directory
-    """
-    if _is_meson_project():
-        import mesonpy
-
-        return mesonpy.prepare_metadata_for_build_wheel(metadata_directory, config_settings)
-    return skbuild.prepare_metadata_for_build_wheel(metadata_directory, config_settings)
+    """Prepare metadata for wheel build."""
+    return _get_backend(_is_meson_project()).prepare_metadata_for_build_wheel(metadata_directory, config_settings)
 
 
 def prepare_metadata_for_build_editable(
     metadata_directory: str,
     config_settings: dict[str, Any] | None = None,
 ) -> str:
-    """Prepare metadata for editable build.
-
-    Args:
-        metadata_directory: Directory to place the metadata
-        config_settings: Build configuration settings
-
-    Returns:
-        The basename of the metadata directory
-    """
-    if _is_meson_project():
-        import mesonpy
-
-        return mesonpy.prepare_metadata_for_build_editable(metadata_directory, config_settings)
-    return skbuild.prepare_metadata_for_build_editable(metadata_directory, config_settings)
+    """Prepare metadata for editable build."""
+    return _get_backend(_is_meson_project()).prepare_metadata_for_build_editable(metadata_directory, config_settings)

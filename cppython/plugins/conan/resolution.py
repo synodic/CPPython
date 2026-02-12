@@ -41,8 +41,7 @@ def _handle_single_specifier(name: str, specifier) -> ConanDependency:
             return ConanDependency(name=name, version_range=ConanVersionRange(expression=f'>={specifier.version}'))
     else:
         raise ConfigException(
-            f"Unsupported single specifier '{specifier.operator}'. Supported: '==', '>=', '>', '<', '<=', '!=', '~='",
-            [],
+            f"Unsupported single specifier '{specifier.operator}'. Supported: '==', '>=', '>', '<', '<=', '!=', '~='"
         )
 
 
@@ -79,17 +78,14 @@ def resolve_conan_dependency(requirement: Requirement) -> ConanDependency:
             specifier_groups[specifier.operator].append(specifier.version)
         elif specifier.operator == '==':
             # Multiple == operators would be contradictory
-            raise ConfigException(
-                "Multiple '==' specifiers are contradictory. Use a single '==' or range operators.", []
-            )
+            raise ConfigException("Multiple '==' specifiers are contradictory. Use a single '==' or range operators.")
         elif specifier.operator == '~=':
             # ~= with other operators is complex, for now treat as >=
             specifier_groups['>='].append(specifier.version)
         else:
             raise ConfigException(
                 f"Unsupported specifier '{specifier.operator}' in multi-specifier requirement. "
-                f"Supported: '>=', '>', '<', '<=', '!='",
-                [],
+                f"Supported: '>=', '>', '<', '<=', '!='"
             )
 
     # Build range parts in consistent order

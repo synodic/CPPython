@@ -165,6 +165,7 @@ class CMakeGenerator(Generator):
 
         Args:
             target: The name of the build target/executable to run
+            configuration: Optional CMake preset name. Overrides default-configuration from config.
 
         Raises:
             FileNotFoundError: If the target executable cannot be found

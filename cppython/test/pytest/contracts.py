@@ -138,6 +138,13 @@ class ProviderIntegrationTestContract[T: Provider](ProviderPluginTestMixin[T], A
         plugin.install()
 
     @staticmethod
+    def test_verify_installed_after_install(plugin: T) -> None:
+        """Ensure that verify_installed passes after a successful install"""
+        plugin.install()
+        # Should not raise
+        plugin.verify_installed()
+
+    @staticmethod
     def test_update(plugin: T) -> None:
         """Ensure that the provider update command functions"""
         plugin.update()

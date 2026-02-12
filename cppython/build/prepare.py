@@ -11,8 +11,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from cppython.core.schema import Interface, ProjectConfiguration, SyncData
+from cppython.core.interface import NoOpInterface
+from cppython.core.schema import ProjectConfiguration, SyncData
 from cppython.project import Project
+from cppython.utility.exception import InstallationVerificationError
 
 
 @dataclass
@@ -27,17 +29,8 @@ class BuildPreparationResult:
     sync_data: SyncData | None = None
 
 
-class BuildInterface(Interface):
-    """Minimal interface implementation for build backend usage."""
-
-    def write_pyproject(self) -> None:
-        """No-op for build backend - we don't modify pyproject.toml during builds."""
-
-    def write_configuration(self) -> None:
-        """No-op for build backend - we don't modify configuration during builds."""
-
-    def write_user_configuration(self) -> None:
-        """No-op for build backend - we don't modify user configuration during builds."""
+BuildInterface = NoOpInterface
+"""Interface implementation for the build backend (no-op write-backs)."""
 
 
 class BuildPreparation:
@@ -68,32 +61,18 @@ class BuildPreparation:
         with open(pyproject_path, 'rb') as f:
             return tomllib.load(f)
 
-    def _get_sync_data(self, project: Project) -> SyncData | None:
-        """Extract sync data from the project's provider for the active generator.
-
-        Args:
-            project: The initialized CPPython project
-
-        Returns:
-            The sync data from the provider, or None if not available
-        """
-        if not project.enabled:
-            return None
-
-        # Access the internal data to get sync information
-        data = project._data  # noqa: SLF001
-
-        # Get sync data from provider for the generator
-        return data.plugins.provider.sync_data(data.plugins.generator)
-
     def prepare(self) -> BuildPreparationResult:
         """Run CPPython preparation and return the build preparation result.
 
-        This runs the provider workflow (download tools, sync, install)
-        and extracts the sync data for injection into the build backend.
+        Syncs provider config and verifies that C++ dependencies have been
+        installed by a prior ``install()`` call. Does **not** install
+        dependencies itself — the build backend is not responsible for that.
 
         Returns:
             BuildPreparationResult containing sync data for the active generator
+
+        Raises:
+            InstallationVerificationError: If provider artifacts are missing
         """
         self.logger.info('CPPython: Preparing build environment')
 
@@ -124,12 +103,16 @@ class BuildPreparation:
             self.logger.info('CPPython: Project not enabled, skipping preparation')
             return BuildPreparationResult()
 
-        # Run the install workflow to ensure dependencies are ready
-        self.logger.info('CPPython: Installing C++ dependencies')
-        project.install()
+        # Sync and verify — does NOT install dependencies
+        self.logger.info('CPPython: Verifying C++ dependencies are installed')
 
-        # Extract sync data
-        sync_data = self._get_sync_data(project)
+        try:
+            sync_data = project.prepare_build()
+        except InstallationVerificationError:
+            self.logger.error(
+                "CPPython: C++ dependencies not installed. Run 'cppython install' or 'pdm install' before building."
+            )
+            raise
 
         if sync_data:
             self.logger.info('CPPython: Sync data obtained from provider: %s', type(sync_data).__name__)

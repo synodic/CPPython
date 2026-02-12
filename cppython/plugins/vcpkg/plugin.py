@@ -19,7 +19,12 @@ from cppython.plugins.meson.plugin import MesonGenerator
 from cppython.plugins.meson.schema import MesonSyncData
 from cppython.plugins.vcpkg.resolution import generate_manifest, resolve_vcpkg_data
 from cppython.plugins.vcpkg.schema import VcpkgData
-from cppython.utility.exception import NotSupportedError, ProviderInstallationError, ProviderToolingError
+from cppython.utility.exception import (
+    InstallationVerificationError,
+    NotSupportedError,
+    ProviderInstallationError,
+    ProviderToolingError,
+)
 from cppython.utility.utility import TypeName
 
 
@@ -261,6 +266,30 @@ class VcpkgProvider(Provider):
                 cls._handle_subprocess_error(logger, 'clone the vcpkg repository', e, ProviderToolingError)
 
         cls._update_provider(directory)
+
+    def verify_installed(self) -> None:
+        """Verify that vcpkg tooling and installed packages exist on disk.
+
+        Checks that the vcpkg repository has been cloned and that the install
+        directory contains packages from a prior ``install()`` call.
+
+        Raises:
+            InstallationVerificationError: If required artifacts are missing
+        """
+        missing: list[str] = []
+
+        # Check that vcpkg tooling has been downloaded
+        tooling_path = self.core_data.cppython_data.install_path
+        if not self.tooling_downloaded(tooling_path):
+            missing.append(f'vcpkg repository ({tooling_path})')
+
+        # Check that packages have been installed
+        install_directory = self.data.install_directory
+        if not install_directory.is_dir() or not any(install_directory.iterdir()):
+            missing.append(f'installed packages directory ({install_directory})')
+
+        if missing:
+            raise InstallationVerificationError('vcpkg', missing)
 
     def install(self, groups: list[str] | None = None) -> None:
         """Called when dependencies need to be installed from a lock file.

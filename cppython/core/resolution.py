@@ -20,6 +20,7 @@ from cppython.core.schema import (
     PEP621Configuration,
     PEP621Data,
     Plugin,
+    PluginGroupData,
     ProjectConfiguration,
     ProjectData,
 )
@@ -180,7 +181,7 @@ def resolve_cppython(
             dependency_groups[group_name] = resolved_group
 
     if invalid_requirements:
-        raise ConfigException('\n'.join(invalid_requirements), [])
+        raise ConfigException('\n'.join(invalid_requirements))
 
     cppython_data = CPPythonData(
         configuration_path=modified_configuration_path,
@@ -212,20 +213,7 @@ def resolve_cppython_plugin(cppython_data: CPPythonData, plugin_type: type[Plugi
     # Add plugin specific paths to the base path
     modified_install_path = cppython_data.install_path / plugin_type.name()
 
-    plugin_data = CPPythonData(
-        configuration_path=cppython_data.configuration_path,
-        install_path=modified_install_path,
-        tool_path=cppython_data.tool_path,
-        build_path=cppython_data.build_path,
-        current_check=cppython_data.current_check,
-        provider_name=cppython_data.provider_name,
-        generator_name=cppython_data.generator_name,
-        scm_name=cppython_data.scm_name,
-        dependencies=cppython_data.dependencies,
-        dependency_groups=cppython_data.dependency_groups,
-        provider_data=cppython_data.provider_data,
-        generator_data=cppython_data.generator_data,
-    )
+    plugin_data = cppython_data.model_copy(update={'install_path': modified_install_path})
 
     return cast(CPPythonPluginData, plugin_data)
 
@@ -245,8 +233,28 @@ def _write_tool_directory(cppython_data: CPPythonData, directory: Path) -> Direc
     return plugin_directory
 
 
+def _resolve_plugin_group[T: PluginGroupData](
+    project_data: ProjectData, cppython_data: CPPythonPluginData, category: str, plugin_name: str, group_type: type[T]
+) -> T:
+    """Generic helper to resolve plugin group data.
+
+    Args:
+        project_data: The input project data
+        cppython_data: The input cppython data
+        category: The subfolder category (e.g. 'generators', 'providers', 'managers')
+        plugin_name: The name of the specific plugin
+        group_type: The PluginGroupData subclass to construct
+
+    Returns:
+        The plugin specific configuration
+    """
+    root_directory = project_data.project_root
+    tool_directory = _write_tool_directory(cppython_data, Path(category) / plugin_name)
+    return group_type(root_directory=root_directory, tool_directory=tool_directory)
+
+
 def resolve_generator(project_data: ProjectData, cppython_data: CPPythonPluginData) -> GeneratorPluginGroupData:
-    """Creates an instance from the given project
+    """Creates generator plugin group data from the given project.
 
     Args:
         project_data: The input project data
@@ -255,14 +263,13 @@ def resolve_generator(project_data: ProjectData, cppython_data: CPPythonPluginDa
     Returns:
         The plugin specific configuration
     """
-    root_directory = project_data.project_root
-    tool_directory = _write_tool_directory(cppython_data, Path('generators') / cppython_data.generator_name)
-    configuration = GeneratorPluginGroupData(root_directory=root_directory, tool_directory=tool_directory)
-    return configuration
+    return _resolve_plugin_group(
+        project_data, cppython_data, 'generators', cppython_data.generator_name, GeneratorPluginGroupData
+    )
 
 
 def resolve_provider(project_data: ProjectData, cppython_data: CPPythonPluginData) -> ProviderPluginGroupData:
-    """Creates an instance from the given project
+    """Creates provider plugin group data from the given project.
 
     Args:
         project_data: The input project data
@@ -271,14 +278,13 @@ def resolve_provider(project_data: ProjectData, cppython_data: CPPythonPluginDat
     Returns:
         The plugin specific configuration
     """
-    root_directory = project_data.project_root
-    tool_directory = _write_tool_directory(cppython_data, Path('providers') / cppython_data.provider_name)
-    configuration = ProviderPluginGroupData(root_directory=root_directory, tool_directory=tool_directory)
-    return configuration
+    return _resolve_plugin_group(
+        project_data, cppython_data, 'providers', cppython_data.provider_name, ProviderPluginGroupData
+    )
 
 
 def resolve_scm(project_data: ProjectData, cppython_data: CPPythonPluginData) -> SCMPluginGroupData:
-    """Creates an instance from the given project
+    """Creates SCM plugin group data from the given project.
 
     Args:
         project_data: The input project data
@@ -287,10 +293,7 @@ def resolve_scm(project_data: ProjectData, cppython_data: CPPythonPluginData) ->
     Returns:
         The plugin specific configuration
     """
-    root_directory = project_data.project_root
-    tool_directory = _write_tool_directory(cppython_data, Path('managers') / cppython_data.scm_name)
-    configuration = SCMPluginGroupData(root_directory=root_directory, tool_directory=tool_directory)
-    return configuration
+    return _resolve_plugin_group(project_data, cppython_data, 'managers', cppython_data.scm_name, SCMPluginGroupData)
 
 
 def resolve_model[T: BaseModel](model: type[T], data: dict[str, Any]) -> T:
@@ -321,4 +324,4 @@ def resolve_model[T: BaseModel](model: type[T], data: dict[str, Any]) -> T:
         else:
             formatted_errors = 'An unknown validation error occurred.'
 
-        raise ConfigException(f'The input project failed validation:\n{formatted_errors}', []) from e
+        raise ConfigException(f'The input project failed validation:\n{formatted_errors}') from e

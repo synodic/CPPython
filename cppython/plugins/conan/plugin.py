@@ -23,7 +23,7 @@ from cppython.plugins.conan.resolution import resolve_conan_data, resolve_conan_
 from cppython.plugins.conan.schema import ConanData, ConanfileGenerationData
 from cppython.plugins.meson.plugin import MesonGenerator
 from cppython.plugins.meson.schema import MesonSyncData
-from cppython.utility.exception import NotSupportedError, ProviderInstallationError
+from cppython.utility.exception import InstallationVerificationError, NotSupportedError, ProviderInstallationError
 from cppython.utility.utility import TypeName
 
 
@@ -196,6 +196,33 @@ class ConanProvider(Provider):
             error_msg = str(e)
             logger.error('Conan install failed: %s', error_msg, exc_info=True)
             raise ProviderInstallationError('conan', error_msg, e) from e
+
+    def verify_installed(self) -> None:
+        """Verify that Conan-generated artifacts exist on disk.
+
+        Checks for the toolchain/native files that ``conan install`` produces
+        in the generators output directory.
+
+        Raises:
+            InstallationVerificationError: If expected artifacts are missing
+        """
+        generators_path = self.core_data.cppython_data.build_path / 'generators'
+        missing: list[str] = []
+
+        if not generators_path.is_dir():
+            missing.append(f'generators directory ({generators_path})')
+        else:
+            # Check for at least one of the expected toolchain files
+            cmake_toolchain = generators_path / 'conan_toolchain.cmake'
+            meson_native = generators_path / 'conan_meson_native.ini'
+
+            if not cmake_toolchain.exists() and not meson_native.exists():
+                missing.append(
+                    f'toolchain files in {generators_path} (expected conan_toolchain.cmake or conan_meson_native.ini)'
+                )
+
+        if missing:
+            raise InstallationVerificationError('conan', missing)
 
     def install(self, groups: list[str] | None = None) -> None:
         """Installs the provider

@@ -1,4 +1,4 @@
-"""A click CLI for CPPython interfacing"""
+"""A Typer CLI for CPPython interfacing"""
 
 from pathlib import Path
 from typing import Annotated
@@ -78,23 +78,25 @@ def _parse_groups_argument(groups: str | None) -> list[str] | None:
 
 
 def _find_pyproject_file() -> Path:
-    """Searches upward for a pyproject.toml file
+    """Searches upward for a pyproject.toml file.
 
     Returns:
-        The found directory
+        The directory containing pyproject.toml
+
+    Raises:
+        AssertionError: If no pyproject.toml is found up to the filesystem root
     """
-    # Search for a path upward
     path = Path.cwd()
 
-    while not path.glob('pyproject.toml'):
-        if path.is_absolute():
+    while True:
+        if (path / 'pyproject.toml').exists():
+            return path
+        parent = path.parent
+        if parent == path:
             raise AssertionError(
                 'This is not a valid project. No pyproject.toml found in the current directory or any of its parents.'
             )
-
-    path = Path(path)
-
-    return path
+        path = parent
 
 
 @app.callback()

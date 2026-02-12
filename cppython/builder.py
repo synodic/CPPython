@@ -36,6 +36,7 @@ from cppython.core.schema import (
     DataPlugin,
     PEP621Configuration,
     PEP621Data,
+    Plugin,
     ProjectConfiguration,
     ProjectData,
 )
@@ -65,21 +66,21 @@ class Resolver:
         Returns:
             The resolved plugin data
         """
-        raw_generator_plugins = self.find_generators()
+        raw_generator_plugins = self._find_plugins('generator', Generator)
         generator_plugins = self.filter_plugins(
             raw_generator_plugins,
-            self._get_effective_generator_name(cppython_local_configuration),
+            self._get_effective_plugin_name(cppython_local_configuration.generators),
             'Generator',
         )
 
-        raw_provider_plugins = self.find_providers()
+        raw_provider_plugins = self._find_plugins('provider', Provider)
         provider_plugins = self.filter_plugins(
             raw_provider_plugins,
-            self._get_effective_provider_name(cppython_local_configuration),
+            self._get_effective_plugin_name(cppython_local_configuration.providers),
             'Provider',
         )
 
-        scm_plugins = self.find_source_managers()
+        scm_plugins = self._find_plugins('scm', SCM)
 
         scm_type = self.select_scm(scm_plugins, project_data)
 
@@ -88,72 +89,34 @@ class Resolver:
 
         return PluginBuildData(generator_type=generator_type, provider_type=provider_type, scm_type=scm_type)
 
-    def _get_effective_generator_name(self, config: CPPythonLocalConfiguration) -> str | None:
-        """Get the effective generator name from configuration
+    @staticmethod
+    def _get_effective_plugin_name(plugins: dict[TypeName, Any]) -> str | None:
+        """Get the effective plugin name from a plugins configuration dict.
 
         Args:
-            config: The local configuration
+            plugins: The plugins dict (e.g. config.generators or config.providers)
 
         Returns:
-            The generator name to use, or None for auto-detection
+            The first plugin name if any are configured, or None for auto-detection
         """
-        if config.generators:
-            # For now, pick the first generator (in future, could support selection logic)
-            return list(config.generators.keys())[0]
-
-        # No generators specified, use auto-detection
+        if plugins:
+            return list(plugins.keys())[0]
         return None
 
-    def _get_effective_provider_name(self, config: CPPythonLocalConfiguration) -> str | None:
-        """Get the effective provider name from configuration
+    @staticmethod
+    def get_plugin_config(plugins: dict[TypeName, Any], plugin_name: str) -> dict[str, Any]:
+        """Get the configuration dict for a specific plugin.
 
         Args:
-            config: The local configuration
+            plugins: The plugins dict (e.g. config.generators or config.providers)
+            plugin_name: The name of the plugin
 
         Returns:
-            The provider name to use, or None for auto-detection
+            The configuration dict for the plugin, or empty dict if not found
         """
-        if config.providers:
-            # For now, pick the first provider (in future, could support selection logic)
-            return list(config.providers.keys())[0]
-
-        # No providers specified, use auto-detection
-        return None
-
-    def _get_effective_generator_config(
-        self, config: CPPythonLocalConfiguration, generator_name: str
-    ) -> dict[str, Any]:
-        """Get the effective generator configuration
-
-        Args:
-            config: The local configuration
-            generator_name: The name of the generator being used
-
-        Returns:
-            The configuration dict for the generator
-        """
-        generator_type_name = TypeName(generator_name)
-        if config.generators and generator_type_name in config.generators:
-            return config.generators[generator_type_name]
-
-        # Return empty config if not found
-        return {}
-
-    def _get_effective_provider_config(self, config: CPPythonLocalConfiguration, provider_name: str) -> dict[str, Any]:
-        """Get the effective provider configuration
-
-        Args:
-            config: The local configuration
-            provider_name: The name of the provider being used
-
-        Returns:
-            The configuration dict for the provider
-        """
-        provider_type_name = TypeName(provider_name)
-        if config.providers and provider_type_name in config.providers:
-            return config.providers[provider_type_name]
-
-        # Return empty config if not found
+        type_name = TypeName(plugin_name)
+        if type_name in plugins:
+            return plugins[type_name]
         return {}
 
     @staticmethod
@@ -201,92 +164,32 @@ class Resolver:
             global_config_data = loader.load_global_config()
             if global_config_data:
                 return resolve_model(CPPythonGlobalConfiguration, global_config_data)
-        except (FileNotFoundError, ValueError):
+        except FileNotFoundError, ValueError:
             # If global config doesn't exist or is invalid, use defaults
             pass
 
         return CPPythonGlobalConfiguration()
 
-    def find_generators(self) -> list[type[Generator]]:
-        """Extracts the generator plugins from the package's entry points
+    def _find_plugins[T: Plugin](self, group_name: str, base_type: type[T]) -> list[type[T]]:
+        """Extracts plugins of a given type from entry points.
+
+        Args:
+            group_name: The entry point group suffix (e.g. 'generator', 'provider', 'scm')
+            base_type: The expected base type to filter against
 
         Raises:
             PluginError: Raised if no plugins can be found
 
         Returns:
-            The list of generator plugin types
+            The list of discovered plugin types
         """
-        group_name = 'generator'
-        plugin_types: list[type[Generator]] = []
+        plugin_types: list[type[T]] = []
 
         entries = entry_points(group=f'cppython.{group_name}')
 
-        # Filter entries by type
         for entry_point in list(entries):
             loaded_type = entry_point.load()
-            if not issubclass(loaded_type, Generator):
-                self._logger.warning(
-                    f"Found incompatible plugin. The '{loaded_type.name()}' plugin must be an instance of"
-                    f" '{group_name}'"
-                )
-            else:
-                self._logger.info(f'{group_name} plugin found: {loaded_type.name()} from {getmodule(loaded_type)}')
-                plugin_types.append(loaded_type)
-
-        if not plugin_types:
-            raise PluginError(f'No {group_name} plugin was found')
-
-        return plugin_types
-
-    def find_providers(self) -> list[type[Provider]]:
-        """Extracts the provider plugins from the package's entry points
-
-        Raises:
-            PluginError: Raised if no plugins can be found
-
-        Returns:
-            The list of provider plugin types
-        """
-        group_name = 'provider'
-        plugin_types: list[type[Provider]] = []
-
-        entries = entry_points(group=f'cppython.{group_name}')
-
-        # Filter entries by type
-        for entry_point in list(entries):
-            loaded_type = entry_point.load()
-            if not issubclass(loaded_type, Provider):
-                self._logger.warning(
-                    f"Found incompatible plugin. The '{loaded_type.name()}' plugin must be an instance of"
-                    f" '{group_name}'"
-                )
-            else:
-                self._logger.info(f'{group_name} plugin found: {loaded_type.name()} from {getmodule(loaded_type)}')
-                plugin_types.append(loaded_type)
-
-        if not plugin_types:
-            raise PluginError(f'No {group_name} plugin was found')
-
-        return plugin_types
-
-    def find_source_managers(self) -> list[type[SCM]]:
-        """Extracts the source control manager plugins from the package's entry points
-
-        Raises:
-            PluginError: Raised if no plugins can be found
-
-        Returns:
-            The list of source control manager plugin types
-        """
-        group_name = 'scm'
-        plugin_types: list[type[SCM]] = []
-
-        entries = entry_points(group=f'cppython.{group_name}')
-
-        # Filter entries by type
-        for entry_point in list(entries):
-            loaded_type = entry_point.load()
-            if not issubclass(loaded_type, SCM):
+            if not issubclass(loaded_type, base_type):
                 self._logger.warning(
                     f"Found incompatible plugin. The '{loaded_type.name()}' plugin must be an instance of"
                     f" '{group_name}'"
@@ -554,15 +457,15 @@ class Builder:
         pep621_data = self._resolver.generate_pep621_data(pep621_configuration, self._project_configuration, scm)
 
         # Create the chosen plugins
-        generator_config = self._resolver._get_effective_generator_config(
-            cppython_local_configuration, plugin_build_data.generator_type.name()
+        generator_config = Resolver.get_plugin_config(
+            cppython_local_configuration.generators, plugin_build_data.generator_type.name()
         )
         generator = self._resolver.create_generator(
             core_data, pep621_data, generator_config, plugin_build_data.generator_type
         )
 
-        provider_config = self._resolver._get_effective_provider_config(
-            cppython_local_configuration, plugin_build_data.provider_type.name()
+        provider_config = Resolver.get_plugin_config(
+            cppython_local_configuration.providers, plugin_build_data.provider_type.name()
         )
         provider = self._resolver.create_provider(
             core_data, pep621_data, provider_config, plugin_build_data.provider_type

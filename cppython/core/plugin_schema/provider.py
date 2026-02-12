@@ -80,6 +80,19 @@ class Provider(DataPlugin, SyncProducer, Protocol):
         raise NotImplementedError
 
     @abstractmethod
+    def verify_installed(self) -> None:
+        """Verify that provider artifacts exist on disk.
+
+        This is called by the build backend to confirm that C++ dependencies
+        have been installed (via a prior ``install()`` call) before delegating
+        to the downstream build backend.
+
+        Raises:
+            InstallationVerificationError: If required artifacts are missing
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def install(self, groups: list[str] | None = None) -> None:
         """Called when dependencies need to be installed from a lock file.
 
