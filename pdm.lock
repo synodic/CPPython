@@ -5,7 +5,7 @@
 groups = ["default", "cmake", "conan", "docs", "git", "lint", "pdm", "pytest", "test"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:04256dc1fcffcfbec4aae2558bb98931314f2615cfd98824a41b22e563c664c9"
+content_hash = "sha256:966bb4ad7e33aacaa420b36478ac13b078647b42591ff70d83d0102cd278b7cc"
 
 [[metadata.targets]]
 requires_python = ">=3.14"
