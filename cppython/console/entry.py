@@ -204,3 +204,68 @@ def publish(
     """
     project = get_enabled_project(context)
     project.publish()
+
+
+@app.command()
+def build(
+    context: typer.Context,
+) -> None:
+    """Build the project
+
+    Assumes dependencies have been installed via `install`.
+
+    Args:
+        context: The CLI configuration object
+    """
+    project = get_enabled_project(context)
+    project.build()
+
+
+@app.command()
+def test(
+    context: typer.Context,
+) -> None:
+    """Run project tests
+
+    Assumes dependencies have been installed via `install`.
+
+    Args:
+        context: The CLI configuration object
+    """
+    project = get_enabled_project(context)
+    project.test()
+
+
+@app.command()
+def bench(
+    context: typer.Context,
+) -> None:
+    """Run project benchmarks
+
+    Assumes dependencies have been installed via `install`.
+
+    Args:
+        context: The CLI configuration object
+    """
+    project = get_enabled_project(context)
+    project.bench()
+
+
+@app.command()
+def run(
+    context: typer.Context,
+    target: Annotated[
+        str,
+        typer.Argument(help='The name of the build target/executable to run'),
+    ],
+) -> None:
+    """Run a built executable
+
+    Assumes dependencies have been installed via `install`.
+
+    Args:
+        context: The CLI configuration object
+        target: The name of the build target to run
+    """
+    project = get_enabled_project(context)
+    project.run(target)

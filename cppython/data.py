@@ -103,3 +103,23 @@ class Data:
 
         self.logger.warning('Downloading the %s requirements to %s', self.plugins.provider.name(), path)
         await self.plugins.provider.download_tooling(path)
+
+    def build(self) -> None:
+        """Builds the project via the generator"""
+        self.plugins.generator.build()
+
+    def test(self) -> None:
+        """Runs tests via the generator"""
+        self.plugins.generator.test()
+
+    def bench(self) -> None:
+        """Runs benchmarks via the generator"""
+        self.plugins.generator.bench()
+
+    def run(self, target: str) -> None:
+        """Runs a built executable via the generator
+
+        Args:
+            target: The name of the build target to run
+        """
+        self.plugins.generator.run(target)

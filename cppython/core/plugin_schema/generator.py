@@ -69,3 +69,36 @@ class Generator(DataPlugin, SyncConsumer, Protocol):
             The supported features - `SupportedGeneratorFeatures`. Cast to this type to help us avoid generic typing
         """
         raise NotImplementedError
+
+    @abstractmethod
+    def build(self) -> None:
+        """Builds the project using the generator's build system.
+
+        Executes the build step (e.g. cmake --build --preset).
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def test(self) -> None:
+        """Runs tests using the generator's build system.
+
+        Executes the test step (e.g. ctest --preset).
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def bench(self) -> None:
+        """Runs benchmarks using the generator's build system.
+
+        Executes benchmarks, typically via test presets with a label filter.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def run(self, target: str) -> None:
+        """Runs a built executable by target name.
+
+        Args:
+            target: The name of the build target/executable to run.
+        """
+        raise NotImplementedError

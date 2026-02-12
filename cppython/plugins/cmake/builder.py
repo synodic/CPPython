@@ -8,6 +8,7 @@ from cppython.plugins.cmake.schema import (
     CMakePresets,
     CMakeSyncData,
     ConfigurePreset,
+    TestPreset,
 )
 
 
@@ -100,22 +101,25 @@ class Builder:
     @staticmethod
     def _create_presets(
         cmake_data: CMakeData, build_directory: Path
-    ) -> tuple[list[ConfigurePreset], list[BuildPreset]]:
-        """Create the default configure and build presets for the user.
+    ) -> tuple[list[ConfigurePreset], list[BuildPreset], list[TestPreset]]:
+        """Create the default configure, build, and test presets for the user.
 
         Args:
             cmake_data: The CMake data to use
             build_directory: The build directory to use
 
         Returns:
-            A tuple containing the configure preset and list of build presets
+            A tuple containing the configure presets, build presets, and test presets
         """
         user_configure_presets: list[ConfigurePreset] = []
         user_build_presets: list[BuildPreset] = []
+        user_test_presets: list[TestPreset] = []
 
         name = cmake_data.configuration_name
         release_name = name + '-release'
         debug_name = name + '-debug'
+        bench_release_name = name + '-bench-release'
+        bench_debug_name = name + '-bench-debug'
 
         user_configure_presets.append(
             ConfigurePreset(
@@ -161,7 +165,43 @@ class Builder:
             )
         )
 
-        return user_configure_presets, user_build_presets
+        # Test presets
+        user_test_presets.append(
+            TestPreset(
+                name=release_name,
+                description='Run tests for release configuration',
+                configurePreset=release_name,
+            )
+        )
+
+        user_test_presets.append(
+            TestPreset(
+                name=debug_name,
+                description='Run tests for debug configuration',
+                configurePreset=debug_name,
+            )
+        )
+
+        # Benchmark test presets with label filter
+        user_test_presets.append(
+            TestPreset(
+                name=bench_release_name,
+                description='Run benchmark tests for release configuration',
+                configurePreset=release_name,
+                filter={'include': {'label': 'benchmark'}},
+            )
+        )
+
+        user_test_presets.append(
+            TestPreset(
+                name=bench_debug_name,
+                description='Run benchmark tests for debug configuration',
+                configurePreset=debug_name,
+                filter={'include': {'label': 'benchmark'}},
+            )
+        )
+
+        return user_configure_presets, user_build_presets, user_test_presets
 
     @staticmethod
     def _load_existing_preset(preset_file: Path) -> CMakePresets | None:
@@ -201,10 +241,34 @@ class Builder:
             existing_preset.binaryDir = '${sourceDir}/' + build_directory.as_posix()  # type: ignore[misc]
 
     @staticmethod
+    def _merge_presets[T: (ConfigurePreset, BuildPreset, TestPreset)](
+        existing: list[T] | None,
+        new_presets: list[T],
+    ) -> list[T]:
+        """Merge new presets into an existing list, adding only those not already present.
+
+        Args:
+            existing: The existing preset list (may be None)
+            new_presets: The new presets to merge in
+
+        Returns:
+            The merged list of presets
+        """
+        if existing is None:
+            return new_presets.copy()
+
+        for preset in new_presets:
+            if not any(p.name == preset.name for p in existing):
+                existing.append(preset)
+
+        return existing
+
+    @staticmethod
     def _modify_presets(
         root_preset: CMakePresets,
         user_configure_presets: list[ConfigurePreset],
         user_build_presets: list[BuildPreset],
+        user_test_presets: list[TestPreset],
         build_directory: Path,
     ) -> None:
         """Handle presets in the root preset.
@@ -213,6 +277,7 @@ class Builder:
             root_preset: The root preset to modify
             user_configure_presets: The user's configure presets
             user_build_presets: The user's build presets
+            user_test_presets: The user's test presets
             build_directory: The build directory to use
         """
         if root_preset.configurePresets is None:
@@ -228,14 +293,8 @@ class Builder:
                 else:
                     root_preset.configurePresets.append(user_configure_preset)
 
-        if root_preset.buildPresets is None:
-            root_preset.buildPresets = user_build_presets.copy()  # type: ignore[misc]
-        else:
-            # Add build presets if they don't exist
-            for build_preset in user_build_presets:
-                existing = next((p for p in root_preset.buildPresets if p.name == build_preset.name), None)
-                if not existing:
-                    root_preset.buildPresets.append(build_preset)
+        root_preset.buildPresets = Builder._merge_presets(root_preset.buildPresets, user_build_presets)  # type: ignore[misc]
+        root_preset.testPresets = Builder._merge_presets(root_preset.testPresets, user_test_presets)  # type: ignore[misc]
 
     @staticmethod
     def _modify_includes(root_preset: CMakePresets, preset_file: Path, cppython_preset_file: Path) -> None:
@@ -273,7 +332,9 @@ class Builder:
             A CMakePresets object
         """
         # Create user presets
-        user_configure_presets, user_build_presets = Builder._create_presets(cmake_data, build_directory)
+        user_configure_presets, user_build_presets, user_test_presets = Builder._create_presets(
+            cmake_data, build_directory
+        )
 
         # Load existing preset or create new one
         root_preset = Builder._load_existing_preset(preset_file)
@@ -281,9 +342,12 @@ class Builder:
             root_preset = CMakePresets(
                 configurePresets=user_configure_presets,
                 buildPresets=user_build_presets,
+                testPresets=user_test_presets,
             )
         else:
-            Builder._modify_presets(root_preset, user_configure_presets, user_build_presets, build_directory)
+            Builder._modify_presets(
+                root_preset, user_configure_presets, user_build_presets, user_test_presets, build_directory
+            )
 
         Builder._modify_includes(root_preset, preset_file, cppython_preset_file)
 

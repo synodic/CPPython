@@ -141,3 +141,62 @@ class Project(API):
 
         # Let provider handle its own exceptions for better error context
         self._data.plugins.provider.publish()
+
+    def build(self) -> None:
+        """Builds the project
+
+        Assumes dependencies have been installed via `install`.
+        Syncs presets to ensure they are up-to-date, then executes the build.
+        """
+        if not self._enabled:
+            self.logger.info('Skipping build because the project is not enabled')
+            return
+
+        self.logger.info('Building project')
+        self._data.sync()
+        self._data.build()
+
+    def test(self) -> None:
+        """Runs project tests
+
+        Assumes dependencies have been installed via `install`.
+        Syncs presets to ensure they are up-to-date, then executes tests.
+        """
+        if not self._enabled:
+            self.logger.info('Skipping test because the project is not enabled')
+            return
+
+        self.logger.info('Running tests')
+        self._data.sync()
+        self._data.test()
+
+    def bench(self) -> None:
+        """Runs project benchmarks
+
+        Assumes dependencies have been installed via `install`.
+        Syncs presets to ensure they are up-to-date, then executes benchmarks.
+        """
+        if not self._enabled:
+            self.logger.info('Skipping bench because the project is not enabled')
+            return
+
+        self.logger.info('Running benchmarks')
+        self._data.sync()
+        self._data.bench()
+
+    def run(self, target: str) -> None:
+        """Runs a built executable
+
+        Assumes dependencies have been installed via `install`.
+        Syncs presets to ensure they are up-to-date, then executes the target.
+
+        Args:
+            target: The name of the build target to run
+        """
+        if not self._enabled:
+            self.logger.info('Skipping run because the project is not enabled')
+            return
+
+        self.logger.info('Running target: %s', target)
+        self._data.sync()
+        self._data.run(target)
