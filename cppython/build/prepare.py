@@ -1,18 +1,30 @@
 """Build preparation utilities for CPPython.
 
 This module handles the pre-build workflow: running CPPython's provider
-to install C++ dependencies and extract the toolchain file path for
-injection into scikit-build-core's CMake configuration.
+to install C++ dependencies and extract sync data for injection into
+the appropriate build backend (scikit-build-core or meson-python).
 """
 
 import logging
 import tomllib
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from cppython.core.schema import Interface, ProjectConfiguration
-from cppython.plugins.cmake.schema import CMakeSyncData
+from cppython.core.schema import Interface, ProjectConfiguration, SyncData
 from cppython.project import Project
+
+
+@dataclass
+class BuildPreparationResult:
+    """Result of the build preparation step.
+
+    Contains the sync data from the provider, which the build backend
+    uses to determine which underlying backend to delegate to and what
+    configuration to inject.
+    """
+
+    sync_data: SyncData | None = None
 
 
 class BuildInterface(Interface):
@@ -29,7 +41,7 @@ class BuildInterface(Interface):
 
 
 class BuildPreparation:
-    """Handles CPPython preparation before scikit-build-core runs."""
+    """Handles CPPython preparation before the build backend runs."""
 
     def __init__(self, source_dir: Path) -> None:
         """Initialize build preparation.
@@ -56,38 +68,32 @@ class BuildPreparation:
         with open(pyproject_path, 'rb') as f:
             return tomllib.load(f)
 
-    def _get_toolchain_file(self, project: Project) -> Path | None:
-        """Extract the toolchain file path from the project's sync data.
+    def _get_sync_data(self, project: Project) -> SyncData | None:
+        """Extract sync data from the project's provider for the active generator.
 
         Args:
             project: The initialized CPPython project
 
         Returns:
-            Path to the toolchain file, or None if not available
+            The sync data from the provider, or None if not available
         """
         if not project.enabled:
             return None
 
         # Access the internal data to get sync information
-        # The toolchain file is generated during the sync process
         data = project._data  # noqa: SLF001
 
         # Get sync data from provider for the generator
-        sync_data = data.plugins.provider.sync_data(data.plugins.generator)
+        return data.plugins.provider.sync_data(data.plugins.generator)
 
-        if isinstance(sync_data, CMakeSyncData):
-            return sync_data.toolchain_file
-
-        return None
-
-    def prepare(self) -> Path | None:
-        """Run CPPython preparation and return the toolchain file path.
+    def prepare(self) -> BuildPreparationResult:
+        """Run CPPython preparation and return the build preparation result.
 
         This runs the provider workflow (download tools, sync, install)
-        and extracts the generated toolchain file path.
+        and extracts the sync data for injection into the build backend.
 
         Returns:
-            Path to the generated toolchain file, or None if CPPython is not configured
+            BuildPreparationResult containing sync data for the active generator
         """
         self.logger.info('CPPython: Preparing build environment')
 
@@ -97,7 +103,7 @@ class BuildPreparation:
         tool_data = pyproject_data.get('tool', {})
         if 'cppython' not in tool_data:
             self.logger.info('CPPython: No [tool.cppython] configuration found, skipping preparation')
-            return None
+            return BuildPreparationResult()
 
         # Get version from pyproject if available
         project_data = pyproject_data.get('project', {})
@@ -116,31 +122,31 @@ class BuildPreparation:
 
         if not project.enabled:
             self.logger.info('CPPython: Project not enabled, skipping preparation')
-            return None
+            return BuildPreparationResult()
 
         # Run the install workflow to ensure dependencies are ready
         self.logger.info('CPPython: Installing C++ dependencies')
         project.install()
 
-        # Extract the toolchain file path
-        toolchain_file = self._get_toolchain_file(project)
+        # Extract sync data
+        sync_data = self._get_sync_data(project)
 
-        if toolchain_file:
-            self.logger.info('CPPython: Using toolchain file: %s', toolchain_file)
+        if sync_data:
+            self.logger.info('CPPython: Sync data obtained from provider: %s', type(sync_data).__name__)
         else:
-            self.logger.warning('CPPython: No toolchain file generated')
+            self.logger.warning('CPPython: No sync data generated')
 
-        return toolchain_file
+        return BuildPreparationResult(sync_data=sync_data)
 
 
-def prepare_build(source_dir: Path) -> Path | None:
+def prepare_build(source_dir: Path) -> BuildPreparationResult:
     """Convenience function to prepare the build environment.
 
     Args:
         source_dir: The source directory containing pyproject.toml
 
     Returns:
-        Path to the generated toolchain file, or None if not available
+        BuildPreparationResult containing sync data for the active generator
     """
     preparation = BuildPreparation(source_dir)
     return preparation.prepare()

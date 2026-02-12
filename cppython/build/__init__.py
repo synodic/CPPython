@@ -1,8 +1,9 @@
-"""CPPython build backend wrapping scikit-build-core.
+"""CPPython build backend wrapping scikit-build-core and meson-python.
 
-This module provides PEP 517/518 build backend hooks that wrap scikit-build-core,
-automatically running CPPython's provider workflow before building
-to inject the generated toolchain file into the CMake configuration.
+This module provides PEP 517/518 build backend hooks that wrap scikit-build-core
+or meson-python depending on the active generator, automatically running
+CPPython's provider workflow before building to inject the generated
+toolchain or native/cross files into the build configuration.
 
 Usage in pyproject.toml:
     [build-system]

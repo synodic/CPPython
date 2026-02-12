@@ -21,6 +21,8 @@ from cppython.plugins.cmake.schema import CMakeSyncData
 from cppython.plugins.conan.builder import Builder
 from cppython.plugins.conan.resolution import resolve_conan_data, resolve_conan_dependency
 from cppython.plugins.conan.schema import ConanData, ConanfileGenerationData
+from cppython.plugins.meson.plugin import MesonGenerator
+from cppython.plugins.meson.schema import MesonSyncData
 from cppython.utility.exception import NotSupportedError, ProviderInstallationError
 from cppython.utility.utility import TypeName
 
@@ -221,7 +223,7 @@ class ConanProvider(Provider):
         Returns:
             True if the sync type is supported, False otherwise.
         """
-        return sync_type in CMakeGenerator.sync_types()
+        return sync_type in CMakeGenerator.sync_types() or sync_type in MesonGenerator.sync_types()
 
     def sync_data(self, consumer: SyncConsumer) -> SyncData:
         """Generates synchronization data for the given consumer.
@@ -238,6 +240,8 @@ class ConanProvider(Provider):
         for sync_type in consumer.sync_types():
             if sync_type == CMakeSyncData:
                 return self._sync_with_cmake(consumer)
+            if sync_type == MesonSyncData:
+                return self._create_meson_sync_data()
 
         raise NotSupportedError(f'Unsupported sync types: {consumer.sync_types()}')
 
@@ -270,6 +274,26 @@ class ConanProvider(Provider):
         return CMakeSyncData(
             provider_name=TypeName('conan'),
             toolchain_file=conan_toolchain_path,
+        )
+
+    def _create_meson_sync_data(self) -> MesonSyncData:
+        """Creates Meson synchronization data with Conan toolchain configuration.
+
+        Conan's MesonToolchain generator produces ``conan_meson_native.ini``
+        and ``conan_meson_cross.ini`` files in the generators directory.
+
+        Returns:
+            MesonSyncData configured for Conan integration
+        """
+        generators_path = self.core_data.cppython_data.build_path / 'generators'
+
+        native_file = generators_path / 'conan_meson_native.ini'
+        cross_file = generators_path / 'conan_meson_cross.ini'
+
+        return MesonSyncData(
+            provider_name=TypeName('conan'),
+            native_file=native_file if native_file.exists() else None,
+            cross_file=cross_file if cross_file.exists() else None,
         )
 
     @classmethod
