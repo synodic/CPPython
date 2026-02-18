@@ -78,12 +78,6 @@ class BuildPreparation:
 
         pyproject_data = self._load_pyproject()
 
-        # Check if CPPython is configured
-        tool_data = pyproject_data.get('tool', {})
-        if 'cppython' not in tool_data:
-            self.logger.info('CPPython: No [tool.cppython] configuration found, skipping preparation')
-            return BuildPreparationResult()
-
         # Get version from pyproject if available
         project_data = pyproject_data.get('project', {})
         version = project_data.get('version')

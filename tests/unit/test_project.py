@@ -4,6 +4,7 @@ import logging
 import tomllib
 from importlib import metadata
 from pathlib import Path
+from typing import Any
 
 import pytest
 from pytest_mock import MockerFixture
@@ -44,6 +45,31 @@ class TestProject:
         project = Project(project_configuration, interface, pyproject_data)
 
         # Doesn't have the cppython table
+        assert not project.enabled
+
+    @staticmethod
+    def test_missing_tool_table_raw_dict(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
+        """Constructing Project with a raw dict lacking tool.cppython should produce zero log output.
+
+        This simulates input from a host tool like PDM that passes raw pyproject data
+        rather than a model_dump() result.
+
+        Args:
+            tmp_path: Temporary directory for dummy data
+            caplog: Pytest fixture for capturing logs
+        """
+        project_configuration = ProjectConfiguration(project_root=tmp_path, version=None)
+        interface = MockInterface()
+
+        # Raw dict as PDM would provide — no tool table at all
+        raw_data: dict[str, Any] = {'project': {'name': 'some-other-project', 'version': '1.0.0'}}
+
+        with caplog.at_level(logging.DEBUG):
+            project = Project(project_configuration, interface, raw_data)
+
+        # Absolutely no log output for projects without CPPython configuration
+        assert len(caplog.records) == 0
+
         assert not project.enabled
 
     @staticmethod

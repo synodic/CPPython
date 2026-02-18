@@ -50,6 +50,7 @@ class CPPythonPlugin(Interface):
             _kwargs: Sink for unknown arguments
         """
         root = project.root.absolute()
+        pdm_pyproject = project.pyproject.open_for_read()
 
         # Attach configuration for CPPythonPlugin callbacks
         version = project.pyproject.metadata.get('version')
@@ -57,16 +58,13 @@ class CPPythonPlugin(Interface):
 
         project_configuration = ProjectConfiguration(project_root=root, verbosity=verbosity, version=version)
 
-        self.logger.info("CPPython: Entered 'on_post_install'")
+        try:
+            cppython_project = CPPythonProject(project_configuration, self, pdm_pyproject)
 
-        if (pdm_pyproject := project.pyproject.open_for_read()) is None:
-            self.logger.info('CPPython: Project data was not available')
-            return
-
-        cppython_project = CPPythonProject(project_configuration, self, pdm_pyproject)
-
-        if not dry_run:
-            cppython_project.install()
+            if not dry_run:
+                cppython_project.install()
+        except Exception:
+            self.logger.debug('CPPython: Error during post-install hook', exc_info=True)
 
 
 class CPPythonCommand(BaseCommand):

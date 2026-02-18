@@ -28,6 +28,11 @@ class Project(API):
         self._interface = interface
         self.logger = logging.getLogger('cppython')
 
+        # Early exit: if no CPPython configuration table, do nothing silently
+        tool_data = pyproject_data.get('tool')
+        if not tool_data or not isinstance(tool_data, dict) or not tool_data.get('cppython'):
+            return
+
         builder = Builder(project_configuration, self.logger)
 
         self.logger.info('Initializing project')
