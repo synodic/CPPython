@@ -12,7 +12,7 @@ dynamic = ["version"]
 requires-python = ">=3.14"
 
 dependencies = [
-    "typer>=0.23.0",
+    "typer>=0.24.0",
     "pydantic>=2.12.5",
     "packaging>=26.0",
     "requests>=2.32.5",
@@ -22,12 +22,23 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-pytest = ["pytest>=9.0.2", "pytest-mock>=3.15.1"]
-git = ["dulwich>=1.0.0"]
-pdm = ["pdm>=2.26.6"]
-cmake = ["cmake>=4.2.1"]
+pytest = [
+    "pytest>=9.0.2",
+    "pytest-mock>=3.15.1",
+]
+git = [
+    "dulwich>=1.1.0",
+]
+pdm = [
+    "pdm>=2.26.6",
+]
+cmake = [
+    "cmake>=4.2.1",
+]
 meson = ["meson>=1.10.1"]
-conan = ["conan>=2.25.2"]
+conan = [
+    "conan>=2.25.2",
+]
 
 [project.urls]
 homepage = "https://github.com/Synodic-Software/CPPython"
@@ -51,14 +62,19 @@ cppython = "cppython.plugins.pdm.plugin:CPPythonPlugin"
 cppython = "cppython.test.pytest.fixtures"
 
 [dependency-groups]
-lint = ["ruff>=0.15.0", "pyrefly>=0.52.0"]
+lint = [
+    "ruff>=0.15.1",
+    "pyrefly>=0.53.0",
+]
 test = [
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
     "pytest-mock>=3.15.1",
     "nanobind>=2.11.0",
 ]
-docs = ["zensical>=0.0.23"]
+docs = [
+    "zensical>=0.0.23",
+]
 
 [project.scripts]
 cppython = "cppython.console.entry:app"
