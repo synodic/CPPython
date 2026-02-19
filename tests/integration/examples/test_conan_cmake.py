@@ -185,6 +185,10 @@ class TestConanCMake:
         # This test uses the cppython.build backend which wraps scikit-build-core
         # The build backend automatically runs CPPython's provider workflow
 
+        # Install C++ dependencies first (creates generators/ with conan_toolchain.cmake)
+        project = TestConanCMake._create_project()
+        project.install()
+
         # Create dist directory for the wheel
         dist_path = Path('dist')
         dist_path.mkdir(exist_ok=True)

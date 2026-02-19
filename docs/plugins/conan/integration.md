@@ -27,7 +27,7 @@ You can customize this file for package metadata like name, version, and setting
 If you have an existing `conanfile.py`, back it up and run `cppython install` to generate both files. Then update your conanfile to inherit from `CPPythonBase`.
 
 ```python
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeConfigDeps, CMakeToolchain, cmake_layout
 from conanfile_base import CPPythonBase  # Import the base class
 
 

@@ -46,10 +46,6 @@ install(
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mathutils
 )
 
-# Create empty include directory to satisfy CMake's exported target requirements
-# (module-only library with no headers, but CMake expects the directory to exist)
-install(DIRECTORY DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
 # Export and package configuration
 install(
     EXPORT mathutilsTargets

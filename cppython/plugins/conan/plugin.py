@@ -176,6 +176,20 @@ class ConanProvider(Provider):
         # Add build type setting if specified
         if build_type:
             command_args.extend(['-s', f'build_type={build_type}'])
+        # Enable CMakeConfigDeps (the modern CMake config-mode generator)
+        command_args.extend(['-c', 'tools.cmake.cmakedeps:new=will_break_next'])
+
+        # Enable 'import std;' support by providing the experimental UUID in the toolchain
+        # The UUID must be in the toolchain file (before try_compile block) so compiler
+        # detection can create __CMAKE::CXX23 for projects using 'import std;'
+        command_args.extend(
+            [
+                '-c',
+                'tools.cmake.cmaketoolchain:extra_variables={'
+                "'CMAKE_EXPERIMENTAL_CXX_IMPORT_STD': 'd0edc3af-4c50-42ea-a356-e2862fe7a444'"
+                '}',
+            ]
+        )
 
         # Add cmake binary configuration if specified
         if self._cmake_binary:
@@ -379,6 +393,30 @@ class ConanProvider(Provider):
         # Skip test dependencies during publishing
         command_args.extend(['-c', 'tools.graph:skip_test=True'])
         command_args.extend(['-c', 'tools.build:skip_test=True'])
+
+        # Enable CMakeConfigDeps (the modern CMake config-mode generator)
+        command_args.extend(['-c', 'tools.cmake.cmakedeps:new=will_break_next'])
+
+        # Force Ninja Multi-Config generator for C++ module support
+        # The Visual Studio generator does not support BMI-only compilation
+        # needed for consuming C++ modules across package boundaries
+        command_args.extend(['-c', 'tools.cmake.cmaketoolchain:generator=Ninja Multi-Config'])
+
+        # Enable 'import std;' support in the CMake toolchain
+        # CMAKE_EXPERIMENTAL_CXX_IMPORT_STD must be in the toolchain file (before
+        # the try_compile block) so compiler detection can create __CMAKE::CXX23.
+        # Note: CMAKE_CXX_MODULE_STD must NOT be in the toolchain because it would
+        # cause ABI detection try_compile to fail (chicken-and-egg with __CMAKE::CXX23).
+        # The UUID is specific to the CMake version and will need updating
+        # when the CMake version changes until import std graduates from experimental.
+        command_args.extend(
+            [
+                '-c',
+                'tools.cmake.cmaketoolchain:extra_variables={'
+                "'CMAKE_EXPERIMENTAL_CXX_IMPORT_STD': 'd0edc3af-4c50-42ea-a356-e2862fe7a444'"
+                '}',
+            ]
+        )
 
         # Add build type setting
         command_args.extend(['-s', f'build_type={build_type}'])

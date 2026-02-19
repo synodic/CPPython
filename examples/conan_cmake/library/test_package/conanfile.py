@@ -4,7 +4,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeConfigDeps, CMakeToolchain, cmake_layout
 
 
 class MathUtilsTestConan(ConanFile):
@@ -22,7 +22,7 @@ class MathUtilsTestConan(ConanFile):
 
     def generate(self):
         """Generate CMake dependencies and toolchain."""
-        deps = CMakeDeps(self)
+        deps = CMakeConfigDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
         tc.generate()

@@ -83,9 +83,10 @@ class CPPythonBase(ConanFile):
     ) -> None:
         """Creates a conanfile.py file that inherits from CPPython base."""
         class_name = name.replace('-', '_').title().replace('_', '')
-        content = f'''import os
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
+        content = f'''from conan.tools.cmake import CMake, CMakeConfigDeps, CMakeToolchain
 from conan.tools.files import copy
+
+import os
 
 from conanfile_base import CPPythonBase
 
@@ -125,7 +126,7 @@ class {class_name}Package(CPPythonBase):
         super().layout()  # Get CPPython managed layout
 
     def generate(self):
-        deps = CMakeDeps(self)
+        deps = CMakeConfigDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
         tc.user_presets_path = None
@@ -142,9 +143,11 @@ class {class_name}Package(CPPythonBase):
 
     def package_info(self):
         # Use native CMake config files to preserve FILE_SET information for C++ modules
-        # This tells CMakeDeps to skip generating files and use the package's native config
+        # This tells CMakeConfigDeps to skip generating files and use the package's native config
         self.cpp_info.set_property("cmake_find_mode", "none")
-        self.cpp_info.builddirs = ["."]
+        # Point CMakeConfigDeps to the directory containing the native config files
+        # so conan_cmakedeps_paths.cmake populates the search paths for find_package()
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake", self.name))
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)

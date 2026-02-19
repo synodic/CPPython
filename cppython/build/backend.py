@@ -162,9 +162,9 @@ def _prepare_and_get_result(
 
     if result.sync_data is not None:
         if isinstance(result.sync_data, CMakeSyncData):
-            settings = _inject_cmake_toolchain(config_settings, result.sync_data.toolchain_file)
+            settings = _inject_cmake_toolchain(settings, result.sync_data.toolchain_file)
         elif isinstance(result.sync_data, MesonSyncData):
-            settings = _inject_meson_files(config_settings, result.sync_data.native_file, result.sync_data.cross_file)
+            settings = _inject_meson_files(settings, result.sync_data.native_file, result.sync_data.cross_file)
 
     return result, settings
 
