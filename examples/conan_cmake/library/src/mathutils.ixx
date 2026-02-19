@@ -52,7 +52,7 @@ namespace mathutils
     void print_result(const char *operation, double a, double b, double result)
     {
         fmt::print(fg(fmt::terminal_color::green),
-                   "MathUtils {}: {} + {} = {}\n",
+                   "MathUtils {}: ({}, {}) = {}\n",
                    operation, a, b, result);
     }
 }
