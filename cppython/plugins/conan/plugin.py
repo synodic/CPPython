@@ -15,7 +15,7 @@ from conan.cli.cli import Cli
 
 from cppython.core.plugin_schema.generator import SyncConsumer
 from cppython.core.plugin_schema.provider import Provider, ProviderPluginGroupData, SupportedProviderFeatures
-from cppython.core.schema import CorePluginData, Information, SupportedFeatures, SyncData
+from cppython.core.schema import CorePluginData, Information, PluginReport, SupportedFeatures, SyncData
 from cppython.plugins.cmake.plugin import CMakeGenerator
 from cppython.plugins.cmake.schema import CMakeSyncData
 from cppython.plugins.conan.builder import Builder
@@ -467,3 +467,27 @@ class ConanProvider(Provider):
             error_msg = str(e)
             logger.error('Conan upload failed: %s', error_msg, exc_info=True)
             raise ProviderInstallationError('conan', error_msg, e) from e
+
+    def plugin_info(self) -> PluginReport:
+        """Return a report describing the Conan provider's configuration, managed files, and templates.
+
+        Returns:
+            A :class:`PluginReport` with Conan-specific details.
+        """
+        project_root = self.core_data.project_data.project_root
+
+        template_content = Builder._conanfile_content(
+            self.core_data.pep621_data.name,
+            self.core_data.pep621_data.version,
+        )
+
+        return PluginReport(
+            configuration={
+                'build_types': self.data.build_types,
+                'remotes': self.data.remotes,
+                'profile_dir': str(self.data.profile_dir),
+                'skip_upload': self.data.skip_upload,
+            },
+            managed_files=[project_root / 'conanfile_base.py'],
+            template_files={'conanfile.py': template_content},
+        )

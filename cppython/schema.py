@@ -1,11 +1,20 @@
 """Project schema specifications"""
 
 from abc import abstractmethod
-from typing import Protocol
+from typing import Any, Protocol
 
 
 class API(Protocol):
     """Project API specification"""
+
+    @abstractmethod
+    def info(self) -> dict[str, Any]:
+        """Return project and template information.
+
+        Returns:
+            A dictionary with project metadata and template status.
+        """
+        raise NotImplementedError()
 
     @abstractmethod
     def install(self, groups: list[str] | None = None) -> None:

@@ -5,10 +5,11 @@ from typing import Annotated
 
 import typer
 from rich import print
+from rich.syntax import Syntax
 
 from cppython.configuration import ConfigurationLoader
 from cppython.console.schema import ConsoleConfiguration, ConsoleInterface
-from cppython.core.schema import ProjectConfiguration
+from cppython.core.schema import PluginReport, ProjectConfiguration
 from cppython.project import Project
 
 app = typer.Typer(no_args_is_help=True)
@@ -124,9 +125,41 @@ def main(
 
 @app.command()
 def info(
-    _: typer.Context,
+    context: typer.Context,
 ) -> None:
-    """Prints project information"""
+    """Prints project information including plugin configuration, managed files, and templates."""
+    project = get_enabled_project(context)
+    project_info = project.info()
+
+    if not project_info:
+        return
+
+    for role in ('provider', 'generator'):
+        entry = project_info.get(role)
+        if entry is None:
+            continue
+
+        name: str = entry['name']
+        report: PluginReport = entry['report']
+
+        print(f'\n[bold]{role.title()}:[/bold] {name}')
+
+        if report.configuration:
+            print('  [bold]Configuration:[/bold]')
+            for key, value in report.configuration.items():
+                print(f'    {key}: {value}')
+
+        if report.managed_files:
+            print('  [bold]Managed files:[/bold]')
+            for path in report.managed_files:
+                print(f'    {path}')
+
+        if report.template_files:
+            print('  [bold]Templates:[/bold]')
+            for filename, content in report.template_files.items():
+                print(f'    [cyan]{filename}[/cyan]')
+                print()
+                print(Syntax(content, 'python', theme='monokai', line_numbers=True))
 
 
 @app.command()

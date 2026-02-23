@@ -145,6 +145,27 @@ class CPPythonData(CPPythonModel, extra='forbid'):
 CPPythonPluginData = NewType('CPPythonPluginData', CPPythonData)
 
 
+class PluginReport(CPPythonModel):
+    """Report returned by a data plugin's ``plugin_info()`` method.
+
+    Contains the plugin's current configuration, any managed files it writes,
+    and the content of user-facing template files it can generate.
+    """
+
+    configuration: Annotated[
+        dict[str, Any],
+        Field(description='Key-value pairs of the resolved plugin configuration'),
+    ] = {}
+    managed_files: Annotated[
+        list[Path],
+        Field(description='Paths to files that are fully managed (auto-generated) by the plugin'),
+    ] = []
+    template_files: Annotated[
+        dict[str, str],
+        Field(description='Mapping of template file names to their current content'),
+    ] = {}
+
+
 class SyncData(CPPythonModel):
     """Data that passes in a plugin sync"""
 
@@ -248,6 +269,17 @@ class DataPlugin(Plugin, Protocol):
             The supported features - `SupportedDataFeatures`. Cast to this type to help us avoid generic typing
         """
         raise NotImplementedError
+
+    def plugin_info(self) -> PluginReport:
+        """Return a report describing this plugin's configuration, managed files, and templates.
+
+        Plugins should override this method to provide meaningful information.
+        The default implementation returns an empty report.
+
+        Returns:
+            A :class:`PluginReport` with plugin-specific details.
+        """
+        return PluginReport()
 
     @classmethod
     async def download_tooling(cls, directory: DirectoryPath) -> None:

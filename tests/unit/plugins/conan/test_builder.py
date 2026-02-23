@@ -171,3 +171,19 @@ class TestBuilder:
         assert 'class TestProjectPackage(CPPythonBase):' in user_content
         assert 'super().requirements()' in user_content
         assert 'super().build_requirements()' in user_content
+
+
+class TestConanfileContent:
+    """Tests for conanfile.py template content generation."""
+
+    @pytest.fixture
+    def builder(self) -> Builder:
+        """Create a Builder instance for testing."""
+        return Builder()
+
+    def test_conanfile_content_is_valid_python(self, builder: Builder, tmp_path: Path) -> None:
+        """_conanfile_content returns valid Python without version markers."""
+        content = Builder._conanfile_content('my-project', '0.1.0')
+        assert 'cppython-template-version' not in content
+        assert 'from conanfile_base import CPPythonBase' in content
+        assert 'class MyProjectPackage(CPPythonBase):' in content

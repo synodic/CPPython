@@ -9,7 +9,7 @@ from cppython.core.plugin_schema.generator import (
     GeneratorPluginGroupData,
     SupportedGeneratorFeatures,
 )
-from cppython.core.schema import CorePluginData, Information, SupportedFeatures, SyncData
+from cppython.core.schema import CorePluginData, Information, PluginReport, SupportedFeatures, SyncData
 from cppython.plugins.cmake.builder import Builder
 from cppython.plugins.cmake.resolution import resolve_cmake_data
 from cppython.plugins.cmake.schema import CMakeSyncData
@@ -181,3 +181,25 @@ class CMakeGenerator(Generator):
 
         executable = executables[0]
         subprocess.run([str(executable)], check=True, cwd=self.data.preset_file.parent)
+
+    def plugin_info(self) -> PluginReport:
+        """Return a report describing the CMake generator's configuration and managed files.
+
+        Returns:
+            A :class:`PluginReport` with CMake-specific details.
+        """
+        managed = [self._cppython_preset_directory / 'CPPython.json']
+
+        config: dict[str, object] = {
+            'preset_file': str(self.data.preset_file),
+            'configuration_name': self.data.configuration_name,
+        }
+        if self.data.cmake_binary is not None:
+            config['cmake_binary'] = str(self.data.cmake_binary)
+        if self.data.default_configuration is not None:
+            config['default_configuration'] = self.data.default_configuration
+
+        return PluginReport(
+            configuration=config,
+            managed_files=managed,
+        )

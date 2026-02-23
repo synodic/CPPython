@@ -76,12 +76,19 @@ class CPPythonBase(ConanFile):
         base_file.write_text(content, encoding='utf-8')
 
     @staticmethod
-    def _create_conanfile(
-        conan_file: Path,
+    def _conanfile_content(
         name: str,
         version: str,
-    ) -> None:
-        """Creates a conanfile.py file that inherits from CPPython base."""
+    ) -> str:
+        """Return the conanfile.py template content as a string without writing to disk.
+
+        Args:
+            name: The project name
+            version: The project version
+
+        Returns:
+            The full conanfile.py template string
+        """
         class_name = name.replace('-', '_').title().replace('_', '')
         content = f'''from conan.tools.cmake import CMake, CMakeConfigDeps, CMakeToolchain
 from conan.tools.files import copy
@@ -154,6 +161,16 @@ class {class_name}Package(CPPythonBase):
         copy(self, "src/*", src=self.recipe_folder, dst=self.export_sources_folder)
         copy(self, "cmake/*", src=self.recipe_folder, dst=self.export_sources_folder)
 '''
+        return content
+
+    @staticmethod
+    def _create_conanfile(
+        conan_file: Path,
+        name: str,
+        version: str,
+    ) -> None:
+        """Creates a conanfile.py file that inherits from CPPython base."""
+        content = Builder._conanfile_content(name, version)
         conan_file.write_text(content, encoding='utf-8')
 
     def generate_conanfile(

@@ -63,6 +63,29 @@ class Project(API):
         """
         return self._enabled
 
+    def info(self) -> dict[str, Any]:
+        """Return project and plugin information.
+
+        Returns:
+            A dictionary containing:
+            - ``provider``: name and :class:`PluginReport` for the active provider plugin
+            - ``generator``: name and :class:`PluginReport` for the active generator plugin
+        """
+        if not self._enabled:
+            self.logger.info('Skipping info because the project is not enabled')
+            return {}
+
+        return {
+            'provider': {
+                'name': self._data.plugins.provider.name(),
+                'report': self._data.plugins.provider.plugin_info(),
+            },
+            'generator': {
+                'name': self._data.plugins.generator.name(),
+                'report': self._data.plugins.generator.plugin_info(),
+            },
+        }
+
     def install(self, groups: list[str] | None = None) -> None:
         """Installs project dependencies
 
