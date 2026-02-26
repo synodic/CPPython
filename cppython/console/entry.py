@@ -15,7 +15,10 @@ from cppython.project import Project
 
 app = typer.Typer(no_args_is_help=True)
 
-info_app = typer.Typer(no_args_is_help=True, help='Prints project information including plugin configuration, managed files, and templates.')
+info_app = typer.Typer(
+    no_args_is_help=True,
+    help='Prints project information including plugin configuration, managed files, and templates.',
+)
 app.add_typer(info_app, name='info')
 
 list_app = typer.Typer(no_args_is_help=True, help='List project entities.')
