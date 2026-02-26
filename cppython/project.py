@@ -268,3 +268,16 @@ class Project(API):
         self.logger.info('Running target: %s', target)
         self._data.sync()
         self._data.plugins.generator.run(target, configuration=configuration)
+
+    def list_targets(self) -> list[str]:
+        """Lists discovered build targets/executables.
+
+        Returns:
+            A list of target names found in the build directory, or an empty list
+            if the project is not enabled.
+        """
+        if not self._enabled:
+            self.logger.info('Skipping list_targets because the project is not enabled')
+            return []
+
+        return self._data.plugins.generator.list_targets()

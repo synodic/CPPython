@@ -71,3 +71,12 @@ class API(Protocol):
             configuration: Optional named configuration to use. Interpretation is generator-specific.
         """
         raise NotImplementedError()
+
+    @abstractmethod
+    def list_targets(self) -> list[str]:
+        """Lists discovered build targets/executables.
+
+        Returns:
+            A list of target names found in the build directory.
+        """
+        raise NotImplementedError()

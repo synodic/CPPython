@@ -1,5 +1,6 @@
 """A Typer CLI for CPPython interfacing"""
 
+from importlib.metadata import entry_points
 from pathlib import Path
 from typing import Annotated
 
@@ -13,6 +14,12 @@ from cppython.core.schema import PluginReport, ProjectConfiguration
 from cppython.project import Project
 
 app = typer.Typer(no_args_is_help=True)
+
+info_app = typer.Typer(no_args_is_help=True, help='Prints project information including plugin configuration, managed files, and templates.')
+app.add_typer(info_app, name='info')
+
+list_app = typer.Typer(no_args_is_help=True, help='List project entities.')
+app.add_typer(list_app, name='list')
 
 
 def get_enabled_project(context: typer.Context) -> Project:
@@ -123,43 +130,62 @@ def main(
     context.obj = ConsoleConfiguration(project_configuration=project_configuration, interface=interface)
 
 
-@app.command()
-def info(
+def _print_plugin_report(role: str, name: str, report: PluginReport) -> None:
+    """Print a single plugin's report to the console.
+
+    Args:
+        role: The plugin role label (e.g. 'Provider', 'Generator')
+        name: The plugin name
+        report: The plugin report to display
+    """
+    print(f'\n[bold]{role}:[/bold] {name}')
+
+    if report.configuration:
+        print('  [bold]Configuration:[/bold]')
+        for key, value in report.configuration.items():
+            print(f'    {key}: {value}')
+
+    if report.managed_files:
+        print('  [bold]Managed files:[/bold]')
+        for file_path in report.managed_files:
+            print(f'    {file_path}')
+
+    if report.template_files:
+        print('  [bold]Templates:[/bold]')
+        for filename, content in report.template_files.items():
+            print(f'    [cyan]{filename}[/cyan]')
+            print()
+            print(Syntax(content, 'python', theme='monokai', line_numbers=True))
+
+
+@info_app.command()
+def info_provider(
     context: typer.Context,
 ) -> None:
-    """Prints project information including plugin configuration, managed files, and templates."""
+    """Show provider plugin information."""
     project = get_enabled_project(context)
     project_info = project.info()
 
-    if not project_info:
+    entry = project_info.get('provider')
+    if entry is None:
         return
 
-    for role in ('provider', 'generator'):
-        entry = project_info.get(role)
-        if entry is None:
-            continue
+    _print_plugin_report('Provider', entry['name'], entry['report'])
 
-        name: str = entry['name']
-        report: PluginReport = entry['report']
 
-        print(f'\n[bold]{role.title()}:[/bold] {name}')
+@info_app.command()
+def info_generator(
+    context: typer.Context,
+) -> None:
+    """Show generator plugin information."""
+    project = get_enabled_project(context)
+    project_info = project.info()
 
-        if report.configuration:
-            print('  [bold]Configuration:[/bold]')
-            for key, value in report.configuration.items():
-                print(f'    {key}: {value}')
+    entry = project_info.get('generator')
+    if entry is None:
+        return
 
-        if report.managed_files:
-            print('  [bold]Managed files:[/bold]')
-            for path in report.managed_files:
-                print(f'    {path}')
-
-        if report.template_files:
-            print('  [bold]Templates:[/bold]')
-            for filename, content in report.template_files.items():
-                print(f'    [cyan]{filename}[/cyan]')
-                print()
-                print(Syntax(content, 'python', theme='monokai', line_numbers=True))
+    _print_plugin_report('Generator', entry['name'], entry['report'])
 
 
 @app.command()
@@ -218,11 +244,40 @@ def update(
     project.update(groups=group_list)
 
 
-@app.command(name='list')
-def list_command(
-    _: typer.Context,
+@list_app.command()
+def plugins() -> None:
+    """List all installed CPPython plugins."""
+    groups = {
+        'Generators': 'cppython.generator',
+        'Providers': 'cppython.provider',
+        'SCM': 'cppython.scm',
+    }
+
+    for label, group in groups.items():
+        entries = entry_points(group=group)
+        print(f'\n[bold]{label}:[/bold]')
+        if not entries:
+            print('  (none installed)')
+        else:
+            for ep in sorted(entries, key=lambda e: e.name):
+                print(f'  {ep.name}')
+
+
+@list_app.command()
+def targets(
+    context: typer.Context,
 ) -> None:
-    """Prints project information"""
+    """List discovered build targets."""
+    project = get_enabled_project(context)
+    target_list = project.list_targets()
+
+    if not target_list:
+        print('[dim]No targets found. Have you run install and build?[/dim]')
+        return
+
+    print('\n[bold]Targets:[/bold]')
+    for target_name in sorted(target_list):
+        print(f'  {target_name}')
 
 
 @app.command()

@@ -194,3 +194,23 @@ class MesonGenerator(Generator):
 
         executable = executables[0]
         subprocess.run([str(executable)], check=True, cwd=self.data.build_file.parent)
+
+    def list_targets(self) -> list[str]:
+        """Lists discovered build targets/executables in the Meson build directory.
+
+        Searches the build directory for executable files.
+
+        Returns:
+            A sorted list of unique target names found.
+        """
+        build_dir = self._build_dir()
+
+        if not build_dir.exists():
+            return []
+
+        targets: set[str] = set()
+        for candidate in build_dir.rglob('*'):
+            if candidate.is_file() and (candidate.stat().st_mode & 0o111 or candidate.suffix == '.exe'):
+                targets.add(candidate.stem)
+
+        return sorted(targets)

@@ -109,3 +109,12 @@ class Generator(DataPlugin, SyncConsumer, Protocol):
             configuration: Optional named configuration override.
         """
         raise NotImplementedError
+
+    @abstractmethod
+    def list_targets(self) -> list[str]:
+        """Lists discovered build targets/executables.
+
+        Returns:
+            A list of target names found in the build directory.
+        """
+        raise NotImplementedError

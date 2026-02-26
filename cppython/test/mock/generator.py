@@ -72,3 +72,7 @@ class MockGenerator(Generator):
 
     def run(self, target: str, configuration: str | None = None) -> None:
         """No-op run for testing"""
+
+    def list_targets(self) -> list[str]:
+        """No-op list_targets for testing"""
+        return []
