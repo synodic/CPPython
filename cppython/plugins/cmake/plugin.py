@@ -208,6 +208,29 @@ class CMakeGenerator(Generator):
 
         return sorted(targets)
 
+    def list_targets(self) -> list[str]:
+        """Lists discovered build targets/executables in the CMake build directory.
+
+        Searches the build directory for executable files, excluding common
+        non-target files.
+
+        Returns:
+            A sorted list of unique target names found.
+        """
+        build_path = self.core_data.cppython_data.build_path
+
+        if not build_path.exists():
+            return []
+
+        # Collect executable files from the build directory
+        targets: set[str] = set()
+        for candidate in build_path.rglob('*'):
+            if candidate.is_file() and (candidate.stat().st_mode & 0o111 or candidate.suffix == '.exe'):
+                # Use the stem (name without extension) as the target name
+                targets.add(candidate.stem)
+
+        return sorted(targets)
+
     def plugin_info(self) -> PluginReport:
         """Return a report describing the CMake generator's configuration and managed files.
 
