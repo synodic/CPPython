@@ -395,7 +395,7 @@ class Builder:
         # Informal standard to check for color
         force_color = os.getenv('FORCE_COLOR', '1') != '0'
 
-        console = Console(
+        self._console = Console(
             force_terminal=force_color,
             color_system='auto',
             width=120,
@@ -404,7 +404,7 @@ class Builder:
         )
 
         rich_handler = RichHandler(
-            console=console,
+            console=self._console,
             rich_tracebacks=True,
             show_time=False,
             show_path=False,
@@ -419,6 +419,11 @@ class Builder:
         self._logger.info('Logging setup complete')
 
         self._resolver = Resolver(self._project_configuration, self._logger)
+
+    @property
+    def console(self) -> Console:
+        """The Rich console instance used for terminal output."""
+        return self._console
 
     def build(
         self,

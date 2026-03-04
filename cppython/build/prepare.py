@@ -11,10 +11,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from rich.console import Console
+
 from cppython.core.interface import NoOpInterface
 from cppython.core.schema import ProjectConfiguration, SyncData
 from cppython.project import Project
 from cppython.utility.exception import InstallationVerificationError
+from cppython.utility.output import OutputSession
 
 
 @dataclass
@@ -89,31 +92,35 @@ class BuildPreparation:
             verbosity=1,
         )
 
-        # Create the CPPython project
-        interface = BuildInterface()
-        project = Project(project_config, interface, pyproject_data)
+        # Use a headless console on stderr — no spinner in build backend context
+        console = Console(stderr=True, width=120)
 
-        if not project.enabled:
-            self.logger.info('CPPython: Project not enabled, skipping preparation')
-            return BuildPreparationResult()
+        with OutputSession(console, verbose=False) as session:
+            # Create the CPPython project
+            interface = BuildInterface()
+            project = Project(project_config, interface, pyproject_data, session=session)
 
-        # Sync and verify — does NOT install dependencies
-        self.logger.info('CPPython: Verifying C++ dependencies are installed')
+            if not project.enabled:
+                self.logger.info('CPPython: Project not enabled, skipping preparation')
+                return BuildPreparationResult()
 
-        try:
-            sync_data = project.prepare_build()
-        except InstallationVerificationError:
-            self.logger.error(
-                "CPPython: C++ dependencies not installed. Run 'cppython install' or 'pdm install' before building."
-            )
-            raise
+            # Sync and verify — does NOT install dependencies
+            self.logger.info('CPPython: Verifying C++ dependencies are installed')
 
-        if sync_data:
-            self.logger.info('CPPython: Sync data obtained from provider: %s', type(sync_data).__name__)
-        else:
-            self.logger.warning('CPPython: No sync data generated')
+            try:
+                sync_data = project.prepare_build()
+            except InstallationVerificationError:
+                self.logger.error(
+                    "CPPython: C++ dependencies not installed. Run 'cppython install' or 'pdm install' before building."
+                )
+                raise
 
-        return BuildPreparationResult(sync_data=sync_data)
+            if sync_data:
+                self.logger.info('CPPython: Sync data obtained from provider: %s', type(sync_data).__name__)
+            else:
+                self.logger.warning('CPPython: No sync data generated')
+
+            return BuildPreparationResult(sync_data=sync_data)
 
 
 def prepare_build(source_dir: Path) -> BuildPreparationResult:

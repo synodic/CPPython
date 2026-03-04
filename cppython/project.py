@@ -9,13 +9,19 @@ from cppython.core.exception import ConfigException
 from cppython.core.resolution import resolve_model
 from cppython.core.schema import Interface, ProjectConfiguration, PyProject, SyncData
 from cppython.schema import API
+from cppython.utility.output import NULL_SESSION, SessionProtocol
 
 
 class Project(API):
     """The object that should be constructed at each entry_point"""
 
     def __init__(
-        self, project_configuration: ProjectConfiguration, interface: Interface, pyproject_data: dict[str, Any]
+        self,
+        project_configuration: ProjectConfiguration,
+        interface: Interface,
+        pyproject_data: dict[str, Any],
+        *,
+        session: SessionProtocol | None = None,
     ) -> None:
         """Initializes the project
 
@@ -23,9 +29,11 @@ class Project(API):
             project_configuration: Project-wide configuration
             interface: Interface for callbacks to write configuration changes
             pyproject_data: Merged configuration data from all sources
+            session: Output session for spinner / log file management (defaults to no-op)
         """
         self._enabled = False
         self._interface = interface
+        self._session: SessionProtocol = session or NULL_SESSION
         self.logger = logging.getLogger('cppython')
 
         # Early exit: if no CPPython configuration table, do nothing silently
@@ -62,6 +70,15 @@ class Project(API):
             The query result
         """
         return self._enabled
+
+    @property
+    def session(self) -> SessionProtocol:
+        """The output session for spinner / log file management."""
+        return self._session
+
+    @session.setter
+    def session(self, value: SessionProtocol) -> None:
+        self._session = value
 
     def info(self) -> dict[str, Any]:
         """Return project and plugin information.
@@ -100,7 +117,9 @@ class Project(API):
             return
 
         self.logger.info('Installing tools')
-        asyncio.run(self._data.download_provider_tools())
+
+        with self._session.spinner('Downloading provider tools...'):
+            asyncio.run(self._data.download_provider_tools())
 
         self.logger.info('Installing project')
 
@@ -114,10 +133,11 @@ class Project(API):
         self._data.apply_dependency_groups(groups)
 
         # Sync before install to allow provider to access generator's resolved configuration
-        self._data.sync()
+        with self._session.spinner('Syncing project data...'):
+            self._data.sync()
 
-        # Let provider handle its own exceptions for better error context
-        self._data.plugins.provider.install(groups=groups)
+        with self._session.spinner('Installing dependencies...'):
+            self._data.plugins.provider.install(groups=groups)
 
     def update(self, groups: list[str] | None = None) -> None:
         """Updates project dependencies
@@ -133,7 +153,9 @@ class Project(API):
             return
 
         self.logger.info('Updating tools')
-        asyncio.run(self._data.download_provider_tools())
+
+        with self._session.spinner('Downloading provider tools...'):
+            asyncio.run(self._data.download_provider_tools())
 
         self.logger.info('Updating project')
 
@@ -146,11 +168,11 @@ class Project(API):
         # Validate and log active groups
         self._data.apply_dependency_groups(groups)
 
-        # Sync before update to allow provider to access generator's resolved configuration
-        self._data.sync()
+        with self._session.spinner('Syncing project data...'):
+            self._data.sync()
 
-        # Let provider handle its own exceptions for better error context
-        self._data.plugins.provider.update(groups=groups)
+        with self._session.spinner('Updating dependencies...'):
+            self._data.plugins.provider.update(groups=groups)
 
     def publish(self) -> None:
         """Publishes the project
@@ -164,11 +186,11 @@ class Project(API):
 
         self.logger.info('Publishing project')
 
-        # Ensure sync is performed before publishing to generate necessary files
-        self._data.sync()
+        with self._session.spinner('Syncing project data...'):
+            self._data.sync()
 
-        # Let provider handle its own exceptions for better error context
-        self._data.plugins.provider.publish()
+        with self._session.spinner('Publishing package...'):
+            self._data.plugins.provider.publish()
 
     def prepare_build(self) -> SyncData | None:
         """Prepare for a PEP 517 build without installing C++ dependencies.
@@ -214,8 +236,12 @@ class Project(API):
             return
 
         self.logger.info('Building project')
-        self._data.sync()
-        self._data.plugins.generator.build(configuration=configuration)
+
+        with self._session.spinner('Syncing project data...'):
+            self._data.sync()
+
+        with self._session.spinner('Building project...'):
+            self._data.plugins.generator.build(configuration=configuration)
 
     def test(self, configuration: str | None = None) -> None:
         """Runs project tests
@@ -231,8 +257,12 @@ class Project(API):
             return
 
         self.logger.info('Running tests')
-        self._data.sync()
-        self._data.plugins.generator.test(configuration=configuration)
+
+        with self._session.spinner('Syncing project data...'):
+            self._data.sync()
+
+        with self._session.spinner('Running tests...'):
+            self._data.plugins.generator.test(configuration=configuration)
 
     def bench(self, configuration: str | None = None) -> None:
         """Runs project benchmarks
@@ -248,8 +278,12 @@ class Project(API):
             return
 
         self.logger.info('Running benchmarks')
-        self._data.sync()
-        self._data.plugins.generator.bench(configuration=configuration)
+
+        with self._session.spinner('Syncing project data...'):
+            self._data.sync()
+
+        with self._session.spinner('Running benchmarks...'):
+            self._data.plugins.generator.bench(configuration=configuration)
 
     def run(self, target: str, configuration: str | None = None) -> None:
         """Runs a built executable
@@ -266,8 +300,12 @@ class Project(API):
             return
 
         self.logger.info('Running target: %s', target)
-        self._data.sync()
-        self._data.plugins.generator.run(target, configuration=configuration)
+
+        with self._session.spinner('Syncing project data...'):
+            self._data.sync()
+
+        with self._session.spinner(f'Running {target}...'):
+            self._data.plugins.generator.run(target, configuration=configuration)
 
     def list_targets(self) -> list[str]:
         """Lists discovered build targets/executables.

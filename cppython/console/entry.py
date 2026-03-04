@@ -1,17 +1,21 @@
 """A Typer CLI for CPPython interfacing"""
 
+import contextlib
+from collections.abc import Generator
 from importlib.metadata import entry_points
 from pathlib import Path
 from typing import Annotated
 
 import typer
 from rich import print
+from rich.console import Console
 from rich.syntax import Syntax
 
 from cppython.configuration import ConfigurationLoader
 from cppython.console.schema import ConsoleConfiguration, ConsoleInterface
 from cppython.core.schema import PluginReport, ProjectConfiguration
 from cppython.project import Project
+from cppython.utility.output import OutputSession
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -25,11 +29,21 @@ list_app = typer.Typer(no_args_is_help=True, help='List project entities.')
 app.add_typer(list_app, name='list')
 
 
-def get_enabled_project(context: typer.Context) -> Project:
-    """Helper to load and validate an enabled Project from CLI context."""
+def _get_configuration(context: typer.Context) -> ConsoleConfiguration:
+    """Extract the ConsoleConfiguration object from the CLI context.
+
+    Raises:
+        ValueError: If the configuration object is missing
+    """
     configuration = context.find_object(ConsoleConfiguration)
     if configuration is None:
         raise ValueError('The configuration object is missing')
+    return configuration
+
+
+def get_enabled_project(context: typer.Context) -> Project:
+    """Helper to load and validate an enabled Project from CLI context."""
+    configuration = _get_configuration(context)
 
     # Use ConfigurationLoader to load and merge all configuration sources
     loader = ConfigurationLoader(configuration.project_configuration.project_root)
@@ -45,6 +59,23 @@ def get_enabled_project(context: typer.Context) -> Project:
             print(f'  {status} {config_file}')
         raise typer.Exit(code=1)
     return project
+
+
+@contextlib.contextmanager
+def _session_project(context: typer.Context) -> Generator[Project]:
+    """Create an enabled Project wrapped in an OutputSession.
+
+    Yields the project with its session already attached. The session
+    (spinner + log file) is torn down when the ``with`` block exits.
+    """
+    project = get_enabled_project(context)
+    configuration = _get_configuration(context)
+    verbose = configuration.project_configuration.verbosity > 0
+    console = Console(width=120)
+
+    with OutputSession(console, verbose=verbose) as session:
+        project.session = session
+        yield project
 
 
 def _parse_groups_argument(groups: str | None) -> list[str] | None:
@@ -211,12 +242,10 @@ def install(
     Raises:
         ValueError: If the configuration object is missing
     """
-    project = get_enabled_project(context)
-
-    # Parse groups from pip-style syntax
     group_list = _parse_groups_argument(groups)
 
-    project.install(groups=group_list)
+    with _session_project(context) as project:
+        project.install(groups=group_list)
 
 
 @app.command()
@@ -239,12 +268,10 @@ def update(
     Raises:
         ValueError: If the configuration object is missing
     """
-    project = get_enabled_project(context)
-
-    # Parse groups from pip-style syntax
     group_list = _parse_groups_argument(groups)
 
-    project.update(groups=group_list)
+    with _session_project(context) as project:
+        project.update(groups=group_list)
 
 
 @list_app.command()
@@ -295,8 +322,8 @@ def publish(
     Raises:
         ValueError: If the configuration object is missing
     """
-    project = get_enabled_project(context)
-    project.publish()
+    with _session_project(context) as project:
+        project.publish()
 
 
 @app.command()
@@ -315,8 +342,8 @@ def build(
         context: The CLI configuration object
         configuration: Optional named configuration
     """
-    project = get_enabled_project(context)
-    project.build(configuration=configuration)
+    with _session_project(context) as project:
+        project.build(configuration=configuration)
 
 
 @app.command()
@@ -335,8 +362,8 @@ def test(
         context: The CLI configuration object
         configuration: Optional named configuration
     """
-    project = get_enabled_project(context)
-    project.test(configuration=configuration)
+    with _session_project(context) as project:
+        project.test(configuration=configuration)
 
 
 @app.command()
@@ -355,8 +382,8 @@ def bench(
         context: The CLI configuration object
         configuration: Optional named configuration
     """
-    project = get_enabled_project(context)
-    project.bench(configuration=configuration)
+    with _session_project(context) as project:
+        project.bench(configuration=configuration)
 
 
 @app.command()
@@ -380,5 +407,5 @@ def run(
         target: The name of the build target to run
         configuration: Optional named configuration
     """
-    project = get_enabled_project(context)
-    project.run(target, configuration=configuration)
+    with _session_project(context) as project:
+        project.run(target, configuration=configuration)

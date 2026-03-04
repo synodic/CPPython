@@ -1,6 +1,6 @@
 """The Meson generator implementation"""
 
-import subprocess
+from logging import getLogger
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +13,9 @@ from cppython.core.schema import CorePluginData, Information, SupportedFeatures,
 from cppython.plugins.meson.builder import Builder
 from cppython.plugins.meson.resolution import resolve_meson_data
 from cppython.plugins.meson.schema import MesonSyncData
+from cppython.utility.subprocess import run_subprocess
+
+logger = getLogger('cppython.meson')
 
 
 class MesonGenerator(Generator):
@@ -125,7 +128,7 @@ class MesonGenerator(Generator):
 
         cmd.extend([str(build_dir), str(source_dir)])
 
-        subprocess.run(cmd, check=True, cwd=source_dir)
+        run_subprocess(cmd, cwd=source_dir, logger=logger)
 
     def _effective_build_dir(self, configuration: str | None) -> Path:
         """Returns the build directory, optionally overridden by a configuration name.
@@ -149,7 +152,7 @@ class MesonGenerator(Generator):
         self._ensure_setup()
         build_dir = self._effective_build_dir(configuration)
         cmd = [self._meson_command(), 'compile', '-C', str(build_dir)]
-        subprocess.run(cmd, check=True, cwd=self.data.build_file.parent)
+        run_subprocess(cmd, cwd=self.data.build_file.parent, logger=logger)
 
     def test(self, configuration: str | None = None) -> None:
         """Runs tests using meson test.
@@ -159,7 +162,7 @@ class MesonGenerator(Generator):
         """
         build_dir = self._effective_build_dir(configuration)
         cmd = [self._meson_command(), 'test', '-C', str(build_dir)]
-        subprocess.run(cmd, check=True, cwd=self.data.build_file.parent)
+        run_subprocess(cmd, cwd=self.data.build_file.parent, logger=logger)
 
     def bench(self, configuration: str | None = None) -> None:
         """Runs benchmarks using meson test --benchmark.
@@ -169,7 +172,7 @@ class MesonGenerator(Generator):
         """
         build_dir = self._effective_build_dir(configuration)
         cmd = [self._meson_command(), 'test', '--benchmark', '-C', str(build_dir)]
-        subprocess.run(cmd, check=True, cwd=self.data.build_file.parent)
+        run_subprocess(cmd, cwd=self.data.build_file.parent, logger=logger)
 
     def run(self, target: str, configuration: str | None = None) -> None:
         """Runs a built executable by target name.
@@ -193,7 +196,7 @@ class MesonGenerator(Generator):
             raise FileNotFoundError(f"Could not find executable '{target}' in build directory: {build_dir}")
 
         executable = executables[0]
-        subprocess.run([str(executable)], check=True, cwd=self.data.build_file.parent)
+        run_subprocess([str(executable)], cwd=self.data.build_file.parent, logger=logger)
 
     def list_targets(self) -> list[str]:
         """Lists discovered build targets/executables in the Meson build directory.

@@ -1,6 +1,6 @@
 """The CMake generator implementation"""
 
-import subprocess
+from logging import getLogger
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +13,9 @@ from cppython.core.schema import CorePluginData, Information, PluginReport, Supp
 from cppython.plugins.cmake.builder import Builder
 from cppython.plugins.cmake.resolution import resolve_cmake_data
 from cppython.plugins.cmake.schema import CMakeSyncData
+from cppython.utility.subprocess import run_subprocess
+
+logger = getLogger('cppython.cmake')
 
 
 class CMakeGenerator(Generator):
@@ -136,7 +139,7 @@ class CMakeGenerator(Generator):
         """
         preset = self._resolve_configuration(configuration)
         cmd = [self._cmake_command(), '--build', '--preset', preset]
-        subprocess.run(cmd, check=True, cwd=self.data.preset_file.parent)
+        run_subprocess(cmd, cwd=self.data.preset_file.parent, logger=logger)
 
     def test(self, configuration: str | None = None) -> None:
         """Runs tests using ctest with the resolved preset.
@@ -146,7 +149,7 @@ class CMakeGenerator(Generator):
         """
         preset = self._resolve_configuration(configuration)
         cmd = [self._ctest_command(), '--preset', preset]
-        subprocess.run(cmd, check=True, cwd=self.data.preset_file.parent)
+        run_subprocess(cmd, cwd=self.data.preset_file.parent, logger=logger)
 
     def bench(self, configuration: str | None = None) -> None:
         """Runs benchmarks using ctest with the resolved preset.
@@ -156,7 +159,7 @@ class CMakeGenerator(Generator):
         """
         preset = self._resolve_configuration(configuration)
         cmd = [self._ctest_command(), '--preset', preset]
-        subprocess.run(cmd, check=True, cwd=self.data.preset_file.parent)
+        run_subprocess(cmd, cwd=self.data.preset_file.parent, logger=logger)
 
     def run(self, target: str, configuration: str | None = None) -> None:
         """Runs a built executable by target name.
@@ -180,7 +183,7 @@ class CMakeGenerator(Generator):
             raise FileNotFoundError(f"Could not find executable '{target}' in build directory: {build_path}")
 
         executable = executables[0]
-        subprocess.run([str(executable)], check=True, cwd=self.data.preset_file.parent)
+        run_subprocess([str(executable)], cwd=self.data.preset_file.parent, logger=logger)
 
     def list_targets(self) -> list[str]:
         """Lists discovered build targets/executables in the CMake build directory.

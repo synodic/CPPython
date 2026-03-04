@@ -5,6 +5,8 @@ integration with the Conan package manager, including dependency resolution,
 installation, and synchronization with other tools.
 """
 
+import contextlib
+import io
 import os
 from logging import Logger, getLogger
 from pathlib import Path
@@ -48,6 +50,43 @@ class ConanProvider(Provider):
         self._ensure_default_profiles()
 
         self._cmake_binary: str | None = None
+        self._logger = getLogger('cppython.conan')
+
+    def _capture_conan_call(self, args: list[str]) -> None:
+        """Run a Conan CLI command while capturing stdout/stderr to the logger.
+
+        Args:
+            args: Command arguments to pass to ``conan_api.command.run``.
+
+        Raises:
+            Exception: Re-raises any exception from the Conan API after logging.
+        """
+        stdout_capture = io.StringIO()
+        stderr_capture = io.StringIO()
+
+        try:
+            with contextlib.redirect_stdout(stdout_capture), contextlib.redirect_stderr(stderr_capture):
+                self._conan_api.command.run(args)
+        except Exception:
+            # Log captured output before re-raising
+            captured_out = stdout_capture.getvalue()
+            captured_err = stderr_capture.getvalue()
+            if captured_out:
+                for line in captured_out.splitlines():
+                    self._logger.error('%s', line)
+            if captured_err:
+                for line in captured_err.splitlines():
+                    self._logger.error('%s', line)
+            raise
+        else:
+            captured_out = stdout_capture.getvalue()
+            captured_err = stderr_capture.getvalue()
+            if captured_out:
+                for line in captured_out.splitlines():
+                    self._logger.debug('%s', line)
+            if captured_err:
+                for line in captured_err.splitlines():
+                    self._logger.debug('%s', line)
 
     @staticmethod
     def features(directory: Path) -> SupportedFeatures:
@@ -203,7 +242,7 @@ class ConanProvider(Provider):
             original_cwd = os.getcwd()
             try:
                 os.chdir(str(self.core_data.project_data.project_root))
-                self._conan_api.command.run(command_args)
+                self._capture_conan_call(command_args)
             finally:
                 os.chdir(original_cwd)
         except Exception as e:
@@ -432,7 +471,7 @@ class ConanProvider(Provider):
         original_cwd = os.getcwd()
         try:
             os.chdir(str(self.core_data.project_data.project_root))
-            self._conan_api.command.run(command_args)
+            self._capture_conan_call(command_args)
         finally:
             os.chdir(original_cwd)
 
@@ -451,7 +490,7 @@ class ConanProvider(Provider):
                 logger.info('Executing conan upload command: conan %s', ' '.join(command_args))
 
                 try:
-                    self._conan_api.command.run(command_args)
+                    self._capture_conan_call(command_args)
                 except Exception as e:
                     error_msg = str(e)
                     logger.error('Conan upload failed for remote %s: %s', remote, error_msg, exc_info=True)
@@ -462,7 +501,7 @@ class ConanProvider(Provider):
         logger.info('Executing conan upload command: conan %s', ' '.join(command_args))
 
         try:
-            self._conan_api.command.run(command_args)
+            self._capture_conan_call(command_args)
         except Exception as e:
             error_msg = str(e)
             logger.error('Conan upload failed: %s', error_msg, exc_info=True)

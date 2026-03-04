@@ -25,7 +25,10 @@ from cppython.utility.exception import (
     ProviderInstallationError,
     ProviderToolingError,
 )
+from cppython.utility.subprocess import run_subprocess
 from cppython.utility.utility import TypeName
+
+logger = getLogger('cppython.vcpkg')
 
 
 class VcpkgProvider(Provider):
@@ -38,39 +41,6 @@ class VcpkgProvider(Provider):
         self.group_data: ProviderPluginGroupData = group_data
         self.core_data: CorePluginData = core_data
         self.data: VcpkgData = resolve_vcpkg_data(configuration_data, core_data)
-
-    @staticmethod
-    def _handle_subprocess_error(
-        logger_instance, operation: str, error: subprocess.CalledProcessError, exception_class: type
-    ) -> None:
-        """Handles subprocess errors with comprehensive error message formatting.
-
-        Args:
-            logger_instance: The logger instance to use for error logging
-            operation: Description of the operation that failed (e.g., 'install', 'clone')
-            error: The CalledProcessError exception
-            exception_class: The exception class to raise
-
-        Raises:
-            The specified exception_class with the formatted error message
-        """
-        # Capture both stdout and stderr for better error reporting
-        stdout_msg = error.stdout.strip() if error.stdout else ''
-        stderr_msg = error.stderr.strip() if error.stderr else ''
-
-        # Combine both outputs for comprehensive error message
-        error_parts = []
-        if stderr_msg:
-            error_parts.append(f'stderr: {stderr_msg}')
-        if stdout_msg:
-            error_parts.append(f'stdout: {stdout_msg}')
-
-        if not error_parts:
-            error_parts.append(f'Command failed with exit code {error.returncode}')
-
-        error_msg = ' | '.join(error_parts)
-        logger_instance.error('Unable to %s: %s', operation, error_msg, exc_info=True)
-        raise exception_class('vcpkg', operation, error_msg, error) from error
 
     @staticmethod
     def features(directory: Path) -> SupportedFeatures:
@@ -112,29 +82,23 @@ class VcpkgProvider(Provider):
         Args:
             path: The path where the script is located
         """
-        logger = getLogger('cppython.vcpkg')
-
         try:
             if system_name == 'nt':
-                subprocess.run(
+                run_subprocess(
                     [str(WindowsPath('bootstrap-vcpkg.bat')), '-disableMetrics'],
                     cwd=path,
+                    logger=logger,
                     shell=True,
-                    check=True,
-                    capture_output=True,
-                    text=True,
                 )
             elif system_name == 'posix':
-                subprocess.run(
+                run_subprocess(
                     ['./' + str(PosixPath('bootstrap-vcpkg.sh')), '-disableMetrics'],
                     cwd=path,
+                    logger=logger,
                     shell=True,
-                    check=True,
-                    capture_output=True,
-                    text=True,
                 )
         except subprocess.CalledProcessError as e:
-            cls._handle_subprocess_error(logger, 'bootstrap the vcpkg repository', e, ProviderToolingError)
+            raise ProviderToolingError('vcpkg', 'bootstrap the vcpkg repository', str(e), e) from e
 
     def sync_data(self, consumer: SyncConsumer) -> SyncData:
         """Gathers a data object for the given generator.
@@ -226,44 +190,36 @@ class VcpkgProvider(Provider):
         Args:
             directory: The directory to download any extra tooling to
         """
-        logger = getLogger('cppython.vcpkg')
-
         if cls.tooling_downloaded(directory):
             try:
                 logger.debug("Updating the vcpkg repository at '%s'", directory.absolute())
 
                 # The entire history is need for vcpkg 'baseline' information
-                subprocess.run(
+                run_subprocess(
                     ['git', 'fetch', 'origin'],
                     cwd=directory,
-                    check=True,
-                    capture_output=True,
-                    text=True,
+                    logger=logger,
                 )
-                subprocess.run(
+                run_subprocess(
                     ['git', 'pull'],
                     cwd=directory,
-                    check=True,
-                    capture_output=True,
-                    text=True,
+                    logger=logger,
                 )
             except subprocess.CalledProcessError as e:
-                cls._handle_subprocess_error(logger, 'update the vcpkg repository', e, ProviderToolingError)
+                raise ProviderToolingError('vcpkg', 'update the vcpkg repository', str(e), e) from e
         else:
             try:
                 logger.debug("Cloning the vcpkg repository to '%s'", directory.absolute())
 
                 # The entire history is need for vcpkg 'baseline' information
-                subprocess.run(
+                run_subprocess(
                     ['git', 'clone', 'https://github.com/microsoft/vcpkg', '.'],
                     cwd=directory,
-                    check=True,
-                    capture_output=True,
-                    text=True,
+                    logger=logger,
                 )
 
             except subprocess.CalledProcessError as e:
-                cls._handle_subprocess_error(logger, 'clone the vcpkg repository', e, ProviderToolingError)
+                raise ProviderToolingError('vcpkg', 'clone the vcpkg repository', str(e), e) from e
 
         cls._update_provider(directory)
 
@@ -309,17 +265,14 @@ class VcpkgProvider(Provider):
         install_directory = self.data.install_directory
         build_path = self.core_data.cppython_data.build_path
 
-        logger = getLogger('cppython.vcpkg')
         try:
-            subprocess.run(
+            run_subprocess(
                 [str(executable), 'install', f'--x-install-root={str(install_directory)}'],
                 cwd=str(build_path),
-                check=True,
-                capture_output=True,
-                text=True,
+                logger=logger,
             )
         except subprocess.CalledProcessError as e:
-            self._handle_subprocess_error(logger, 'install project dependencies', e, ProviderInstallationError)
+            raise ProviderInstallationError('vcpkg', f'install project dependencies: {e}', e) from e
 
     def update(self, groups: list[str] | None = None) -> None:
         """Called when dependencies need to be updated and written to the lock file.
@@ -340,17 +293,14 @@ class VcpkgProvider(Provider):
         install_directory = self.data.install_directory
         build_path = self.core_data.cppython_data.build_path
 
-        logger = getLogger('cppython.vcpkg')
         try:
-            subprocess.run(
+            run_subprocess(
                 [str(executable), 'install', f'--x-install-root={str(install_directory)}'],
                 cwd=str(build_path),
-                check=True,
-                capture_output=True,
-                text=True,
+                logger=logger,
             )
         except subprocess.CalledProcessError as e:
-            self._handle_subprocess_error(logger, 'update project dependencies', e, ProviderInstallationError)
+            raise ProviderInstallationError('vcpkg', f'update project dependencies: {e}', e) from e
 
     def publish(self) -> None:
         """Called when the project needs to be published.
